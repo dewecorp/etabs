@@ -1,0 +1,45 @@
+# Vendor/Composer
+/vendor/
+composer.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# Database (jika ada file database lokal)
+*.sqlite
+*.db
+
+# Environment files
+.env
+.env.local
+
+# Upload files (sesuaikan dengan kebutuhan)
+# uploads/
+# files/
+
+# Node modules (jika ada)
+node_modules/
+
+# Cache
+cache/
+tmp/
+
