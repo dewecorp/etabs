@@ -1,19 +1,7 @@
 <?php
-// Enable error reporting untuk debugging (hapus di production)
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-
 session_start();
 
-// Log request
-error_log('Upload request received: ' . date('Y-m-d H:i:s'));
-error_log('Request method: ' . $_SERVER['REQUEST_METHOD']);
-error_log('POST data: ' . print_r($_POST, true));
-error_log('FILES data: ' . print_r($_FILES, true));
-
 if (!isset($_SESSION["ses_username"])) {
-    error_log('Session expired');
     echo json_encode(['success' => false, 'message' => 'Session expired']);
     exit;
 }
@@ -201,26 +189,13 @@ try {
         ]
     ];
     
-    error_log('Upload completed successfully');
-    error_log('Success: ' . $success_count . ', Error: ' . $error_count . ', Duplicate: ' . $duplicate_count);
-    
     echo json_encode($response);
     
 } catch (Exception $e) {
-    error_log('Upload Error: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
-    
     $errorResponse = [
         'success' => false, 
-        'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine()
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
     ];
-    
-    // Hanya tambahkan trace di development
-    if (isset($_GET['debug'])) {
-        $errorResponse['trace'] = $e->getTraceAsString();
-    }
     
     echo json_encode($errorResponse);
 }

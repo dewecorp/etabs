@@ -46,6 +46,93 @@ $jam = date( 'H:i:s', strtotime($waktu));
 return "$hari, $tanggal $bulan $tahun";
 }
 
+// Fungsi untuk mendapatkan page title dinamis
+function getPageTitle($page = '') {
+    // Mapping title untuk setiap halaman
+    $pageTitles = array(
+        // Dashboard
+        'admin' => 'Dashboard Administrator',
+        'petugas' => 'Dashboard Petugas',
+        
+        // Master Data - Pengguna
+        'MyApp/data_pengguna' => 'Data Pengguna',
+        'MyApp/add_pengguna' => 'Tambah Pengguna',
+        'MyApp/edit_pengguna' => 'Edit Pengguna',
+        'MyApp/del_pengguna' => 'Hapus Pengguna',
+        
+        // Master Data - Profil
+        'MyApp/data_profil' => 'Profil Sekolah',
+        'MyApp/edit_profil' => 'Edit Profil Sekolah',
+        
+        // Master Data - Kelas
+        'MyApp/data_kelas' => 'Data Kelas',
+        'MyApp/add_kelas' => 'Tambah Kelas',
+        'MyApp/edit_kelas' => 'Edit Kelas',
+        'MyApp/del_kelas' => 'Hapus Kelas',
+        
+        // Master Data - Siswa
+        'MyApp/data_siswa' => 'Data Siswa',
+        'MyApp/add_siswa' => 'Tambah Siswa',
+        'MyApp/edit_siswa' => 'Edit Siswa',
+        'MyApp/edit_siswa_multiple' => 'Edit Multiple Siswa',
+        'MyApp/del_siswa' => 'Hapus Siswa',
+        'MyApp/del_siswa_multiple' => 'Hapus Multiple Siswa',
+        
+        // Backup & Restore
+        'MyApp/backup_restore' => 'Backup & Restore',
+        
+        // Aktivitas
+        'MyApp/view_activity' => 'Activity Log',
+        'MyApp/activity_log' => 'Activity Log',
+        
+        // Transaksi - Setoran
+        'data_setor' => 'Data Setoran',
+        'add_setor' => 'Tambah Setoran',
+        'edit_setor' => 'Edit Setoran',
+        'edit_setor_multiple' => 'Edit Multiple Setoran',
+        'del_setor' => 'Hapus Setoran',
+        'del_setor_multiple' => 'Hapus Multiple Setoran',
+        
+        // Transaksi - Tarikan
+        'data_tarik' => 'Data Tarikan',
+        'add_tarik' => 'Tambah Tarikan',
+        'edit_tarik' => 'Edit Tarikan',
+        'edit_tarik_multiple' => 'Edit Multiple Tarikan',
+        'del_tarik' => 'Hapus Tarikan',
+        'del_tarik_multiple' => 'Hapus Multiple Tarikan',
+        
+        // Riwayat
+        'data_riwayat' => 'Data Riwayat',
+        'del_riwayat' => 'Hapus Riwayat',
+        
+        // Tabungan
+        'data_tabungan' => 'Data Tabungan',
+        'view_tabungan' => 'View Tabungan',
+        
+        // Kas
+        'kas_tabungan' => 'Kas Tabungan',
+        'kas_full' => 'Kas Full',
+        'view_kas' => 'Info Kas',
+        
+        // Laporan
+        'laporan' => 'Laporan',
+    );
+    
+    // Jika halaman ada di mapping, gunakan title tersebut
+    if (!empty($page) && isset($pageTitles[$page])) {
+        return $pageTitles[$page];
+    }
+    
+    // Jika halaman kosong atau tidak ditemukan, kembalikan default berdasarkan konteks
+    if (empty($page)) {
+        // Default akan ditentukan di index.php berdasarkan level user
+        return 'Dashboard';
+    }
+    
+    // Jika halaman tidak ditemukan di mapping
+    return 'Halaman Tidak Ditemukan';
+}
+
 
 
 

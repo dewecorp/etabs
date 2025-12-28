@@ -23,6 +23,16 @@ $sql = $koneksi->query("SELECT * from tb_profil");
 while ($data = $sql->fetch_assoc()) {
 	$nama = $data['nama_sekolah'];
 }
+
+// Ambil page title dinamis
+$current_page = isset($_GET['page']) ? $_GET['page'] : '';
+if (empty($current_page)) {
+    // Jika tidak ada page, tentukan berdasarkan level user
+    if (isset($data_level)) {
+        $current_page = ($data_level == "Administrator") ? 'admin' : 'petugas';
+    }
+}
+$page_title = getPageTitle($current_page);
 ?>
 
 <!DOCTYPE html>
@@ -31,7 +41,7 @@ while ($data = $sql->fetch_assoc()) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>e-TABS | <?=$nama?></title>
+    <title><?= htmlspecialchars($page_title) ?> | e-TABS | <?= htmlspecialchars($nama) ?></title>
     <link rel="icon" href="dist/img/logo.png">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">

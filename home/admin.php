@@ -705,11 +705,8 @@ $saldo = $setor - $tarik;
 			try {
 				var timeElements = document.querySelectorAll('.time[data-timestamp]');
 				if (timeElements.length === 0) {
-					console.log('Time update: No elements found');
 					return; // Tidak ada elemen yang ditemukan
 				}
-				
-				console.log('Time update: Found ' + timeElements.length + ' elements');
 				
 				timeElements.forEach(function(element) {
 					var timestampStr = element.getAttribute('data-timestamp');
@@ -719,29 +716,17 @@ $saldo = $setor - $tarik;
 							var timeText = element.querySelector('.time-text');
 							if (timeText) {
 								var newTime = getTimeAgo(timestamp);
-								var oldTime = timeText.textContent;
-								
-								// Debug log
-								var now = Math.floor(Date.now() / 1000);
-								var diff = now - timestamp;
-								console.log('Time update: timestamp=' + timestamp + ', now=' + now + ', diff=' + diff + 's, old=' + oldTime + ', new=' + newTime);
 								
 								// Selalu update, tidak peduli apakah berbeda atau tidak
 								if (newTime) {
 									timeText.textContent = newTime;
 								}
-							} else {
-								console.log('Time update: time-text element not found');
 							}
-						} else {
-							console.log('Time update: Invalid timestamp: ' + timestampStr);
 						}
-					} else {
-						console.log('Time update: No timestamp attribute');
 					}
 				});
 			} catch (e) {
-				console.error('Time update error:', e);
+				// Silent error handling
 			}
 		}
 		
@@ -750,12 +735,9 @@ $saldo = $setor - $tarik;
 		
 		function initTimeUpdate() {
 			if (initialized) {
-				console.log('Time update: Already initialized');
 				return;
 			}
 			initialized = true;
-			
-			console.log('Time update: Initializing...');
 			
 			// Update segera
 			updateTimeAgo();
@@ -767,7 +749,6 @@ $saldo = $setor - $tarik;
 			
 			// Set interval baru - update setiap 5 detik untuk responsif
 			updateInterval = setInterval(updateTimeAgo, 5000);
-			console.log('Time update: Interval set to 5 seconds');
 		}
 		
 		// Tunggu sampai semua script dimuat

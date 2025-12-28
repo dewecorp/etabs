@@ -654,8 +654,6 @@ if (isset($_POST['restore'])) {
 <script>
 // Fungsi global untuk hapus backup (fallback jika jQuery tidak bekerja)
 function hapusBackupFile(filename, filesize, filedate, deleteUrl) {
-    console.log('hapusBackupFile dipanggil:', {filename: filename, deleteUrl: deleteUrl});
-    
     if (typeof Swal !== 'undefined') {
         Swal.fire({
             title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
@@ -732,12 +730,7 @@ function hapusBackupFile(filename, filesize, filedate, deleteUrl) {
 }
 
 // Pastikan jQuery dan SweetAlert tersedia
-if (typeof jQuery === 'undefined') {
-    console.error('jQuery tidak ditemukan!');
-}
-if (typeof Swal === 'undefined') {
-    console.error('SweetAlert2 tidak ditemukan!');
-}
+// (Silent check - tidak ada logging)
 
 // Semua script dalam satu document.ready
 $(document).ready(function() {
@@ -800,11 +793,8 @@ $(document).ready(function() {
         var filedate = $btn.data('date') || 'N/A';
         var deleteUrl = $btn.data('url');
         
-        console.log('Tombol hapus diklik:', {filename: filename, deleteUrl: deleteUrl});
-        
         // Validasi data
         if (!filename || !deleteUrl) {
-            console.error('Data tidak lengkap:', {filename: filename, deleteUrl: deleteUrl});
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'Error',
@@ -903,11 +893,6 @@ $(document).ready(function() {
         
         return false;
     });
-    
-    // Debug: Pastikan button terdeteksi
-    console.log('Button hapus ditemukan:', $('.btn-hapus-backup').length);
-    console.log('jQuery version:', $.fn.jquery);
-    console.log('SweetAlert2 tersedia:', typeof Swal !== 'undefined');
 });
 </script>
 

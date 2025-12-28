@@ -123,9 +123,10 @@ $data_nama = $_SESSION["ses_nama"];
 									<i class="glyphicon glyphicon-edit"></i>
 								</a>
 								<a href="?page=del_tarik&kode=<?php echo $data['id_tabungan']; ?>" 
-									onclick="return confirmHapus(event, 'Yakin hapus penarikan untuk NIS <?php echo htmlspecialchars($data['nis']); ?>?')"
+									onclick="return confirmHapusTarik(event, '<?php echo htmlspecialchars($data['nis']); ?>', '<?php echo htmlspecialchars($data['nama_siswa']); ?>', '<?php echo rupiah($data['tarik']); ?>')"
 									title="Hapus" class="btn btn-danger btn-sm">
 									<i class="glyphicon glyphicon-trash"></i>
+								</a>
 							</td>
 						</tr>
 						<?php
@@ -415,86 +416,90 @@ function hapusTerpilih() {
 	});
 }
 
-// Pastikan fungsi confirmHapus didefinisikan setelah semua library dimuat
-(function() {
-    function confirmHapus(event, message) {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        
-        var url = event.currentTarget.getAttribute('href');
-        if (!url) {
-            url = event.currentTarget.closest('a').getAttribute('href');
-        }
-        
-        // Tunggu SweetAlert dimuat
-        function showConfirm() {
-            if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
-                Swal.fire({
-                    title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
-                    html: '<div style="text-align: center; padding: 10px;">' +
-                          '<h3 style="color: #d33; margin-bottom: 20px; font-weight: bold;">Konfirmasi Hapus</h3>' +
-                          '<p style="font-size: 16px; margin-bottom: 20px; color: #495057;">' + message + '</p>' +
-                          '<div style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
-                          '<p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">' +
-                          '<i class="fa fa-warning" style="margin-right: 8px;"></i>' +
-                          'PERINGATAN: Data yang dihapus tidak dapat dikembalikan!</p>' +
-                          '</div>' +
-                          '</div>',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: '<i class="fa fa-trash"></i> Ya, Hapus!',
-                    cancelButtonText: '<i class="fa fa-times"></i> Batal',
-                    reverseButtons: true,
-                    focusCancel: true,
-                    allowOutsideClick: false,
-                    allowEscapeKey: true,
-                    width: '500px'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = url;
-                    }
-                });
-                return true;
-            }
-            return false;
-        }
-        
-        // Coba langsung
-        if (showConfirm()) {
-            return false;
-        }
-        
-        // Jika belum, tunggu dengan interval
-        var attempts = 0;
-        var maxAttempts = 100;
-        var checkInterval = setInterval(function() {
-            attempts++;
-            if (showConfirm()) {
-                clearInterval(checkInterval);
-            } else if (attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                // Fallback ke confirm biasa
-                if (confirm(message + '\n\nPERINGATAN: Data yang dihapus tidak dapat dikembalikan!')) {
+// Fungsi konfirmasi hapus tarikan single
+function confirmHapusTarik(event, nis, nama, tarik) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    
+    var url = event.currentTarget.getAttribute('href');
+    if (!url) {
+        url = event.currentTarget.closest('a').getAttribute('href');
+    }
+    
+    // Tunggu SweetAlert dimuat
+    function showConfirm() {
+        if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+            Swal.fire({
+                title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
+                html: '<div style="text-align: center; padding: 10px;">' +
+                      '<h3 style="color: #d33; margin-bottom: 20px; font-weight: bold;">Konfirmasi Hapus Tarikan</h3>' +
+                      '<p style="font-size: 16px; margin-bottom: 15px; color: #495057;">Yakin hapus tarikan berikut?</p>' +
+                      '<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">' +
+                      '<p style="margin: 5px 0;"><strong>NIS:</strong> ' + nis + '</p>' +
+                      '<p style="margin: 5px 0;"><strong>Nama:</strong> ' + nama + '</p>' +
+                      '<p style="margin: 5px 0;"><strong>Tarikan:</strong> ' + tarik + '</p>' +
+                      '</div>' +
+                      '<div style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
+                      '<p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">' +
+                      '<i class="fa fa-warning" style="margin-right: 8px;"></i>' +
+                      'PERINGATAN: Data yang dihapus tidak dapat dikembalikan!</p>' +
+                      '</div>' +
+                      '</div>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fa fa-trash"></i> Ya, Hapus!',
+                cancelButtonText: '<i class="fa fa-times"></i> Batal',
+                reverseButtons: true,
+                focusCancel: true,
+                allowOutsideClick: false,
+                allowEscapeKey: true,
+                width: '500px'
+            }).then((result) => {
+                if (result.isConfirmed) {
                     window.location.href = url;
                 }
-            }
-        }, 50);
-        
+            });
+            return true;
+        }
         return false;
     }
     
-    // Ekspos fungsi ke global scope
-    window.confirmHapus = confirmHapus;
-    
-    // Jika jQuery tersedia, juga attach setelah ready
-    if (typeof jQuery !== 'undefined') {
-        jQuery(document).ready(function($) {
-            window.confirmHapus = confirmHapus;
-        });
+    // Coba langsung
+    if (showConfirm()) {
+        return false;
     }
-})();
+    
+    // Jika belum, tunggu dengan interval
+    var attempts = 0;
+    var maxAttempts = 100;
+    var checkInterval = setInterval(function() {
+        attempts++;
+        if (showConfirm()) {
+            clearInterval(checkInterval);
+        } else if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            // Fallback ke confirm biasa
+            var message = 'Yakin hapus tarikan untuk NIS ' + nis + '?\n\nPERINGATAN: Data yang dihapus tidak dapat dikembalikan!';
+            if (confirm(message)) {
+                window.location.href = url;
+            }
+        }
+    }, 50);
+    
+    return false;
+}
+
+// Ekspos fungsi ke global scope
+window.confirmHapusTarik = confirmHapusTarik;
+
+// Pastikan fungsi tersedia saat document ready
+if (typeof jQuery !== 'undefined') {
+    jQuery(document).ready(function($) {
+        window.confirmHapusTarik = confirmHapusTarik;
+    });
+}
 </script>
 
