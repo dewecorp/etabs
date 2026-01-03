@@ -183,6 +183,19 @@ if (isset($_POST['simpan'])) {
 <section class="content">
     <div class="box box-primary">
         <div class="box-header with-border">
+            <h3 class="box-title" style="margin-right: 15px;">
+                <i class="fa fa-users"></i> 
+                <span id="infoJumlahSiswa">
+                    <?php
+                    // Hitung total siswa
+                    $query_total = "SELECT COUNT(*) as total FROM tb_siswa";
+                    $result_total = mysqli_query($koneksi, $query_total);
+                    $data_total = mysqli_fetch_assoc($result_total);
+                    $total_siswa = $data_total['total'];
+                    echo "Total: <strong>" . $total_siswa . "</strong> Siswa";
+                    ?>
+                </span>
+            </h3>
             <a href="?page=MyApp/add_siswa" title="Tambah Data" class="btn btn-primary">
                 <i class="glyphicon glyphicon-plus"></i> Tambah Data</a>
             <button type="button" id="btnEditTerpilih" class="btn btn-success" onclick="editTerpilih()" disabled>
@@ -451,6 +464,11 @@ window.executeFilterSiswa = function() {
         
         // Draw tabel dengan filter yang sudah diterapkan
         table.draw();
+        
+        // Update info jumlah siswa setelah filter
+        setTimeout(function() {
+            updateInfoJumlahSiswa();
+        }, 100);
     } else {
         // Fallback: filter manual dengan jQuery jika DataTable belum tersedia
         var visibleCount = 0;
@@ -495,6 +513,9 @@ window.executeFilterSiswa = function() {
                 $row.hide();
             }
         });
+        
+        // Update info jumlah siswa
+        updateInfoJumlahSiswaManual(visibleCount);
     }
     
     // Update tombol setelah filter
@@ -504,6 +525,33 @@ window.executeFilterSiswa = function() {
         }, 100);
     }
 };
+
+// Fungsi untuk update info jumlah siswa (DataTable)
+function updateInfoJumlahSiswa() {
+    if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1')) {
+        var table = $('#example1').DataTable();
+        var info = table.page.info();
+        var totalRecords = info.recordsTotal;
+        var filteredRecords = info.recordsDisplay;
+        
+        if (filteredRecords < totalRecords) {
+            $('#infoJumlahSiswa').html('<i class="fa fa-filter"></i> Menampilkan: <strong>' + filteredRecords + '</strong> dari <strong>' + totalRecords + '</strong> Siswa');
+        } else {
+            $('#infoJumlahSiswa').html('<i class="fa fa-users"></i> Total: <strong>' + totalRecords + '</strong> Siswa');
+        }
+    }
+}
+
+// Fungsi untuk update info jumlah siswa (Manual)
+function updateInfoJumlahSiswaManual(visibleCount) {
+    var totalRows = $('#example1 tbody tr').length;
+    
+    if (visibleCount < totalRows) {
+        $('#infoJumlahSiswa').html('<i class="fa fa-filter"></i> Menampilkan: <strong>' + visibleCount + '</strong> dari <strong>' + totalRows + '</strong> Siswa');
+    } else {
+        $('#infoJumlahSiswa').html('<i class="fa fa-users"></i> Total: <strong>' + totalRows + '</strong> Siswa');
+    }
+}
 
 // Fungsi untuk reset filter
 window.resetFilterSiswa = function() {
@@ -523,7 +571,10 @@ window.resetFilterSiswa = function() {
         // Pastikan semua baris ditampilkan setelah draw
         setTimeout(function() {
             $('#example1 tbody tr').show();
+            updateInfoJumlahSiswa();
         }, 100);
+    } else {
+        updateInfoJumlahSiswaManual($('#example1 tbody tr').length);
     }
     
     if (typeof toggleButtonsSiswa === 'function') {
@@ -669,6 +720,19 @@ $(document).ready(function() {
     $(document).on('change', '#filterThMasuk', function(e) {
         executeFilterSiswa();
     });
+    
+    // Update info jumlah siswa saat DataTable draw
+    if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1')) {
+        var table = $('#example1').DataTable();
+        table.on('draw', function() {
+            updateInfoJumlahSiswa();
+        });
+        
+        // Update info saat pertama kali load
+        setTimeout(function() {
+            updateInfoJumlahSiswa();
+        }, 500);
+    }
 });
 
 function formatNumber(num) {
