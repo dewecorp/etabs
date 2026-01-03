@@ -413,6 +413,126 @@ if (isset($_POST['simpan'])) {
 </div>
 
 <script>
+// Definisikan fungsi filter di awal agar bisa diakses dari onclick
+// Fungsi untuk eksekusi filter - dibuat global, menggunakan filter manual jQuery
+window.executeFilterSiswa = function() {
+    // Tunggu jQuery ready
+    if (typeof jQuery === 'undefined') {
+        alert('jQuery belum dimuat. Silakan refresh halaman.');
+        return;
+    }
+    
+    // Ambil nilai dari setiap filter (independen)
+    var filterNIS = $('#filterNIS').val() ? $('#filterNIS').val().trim().toLowerCase() : '';
+    var filterNama = $('#filterNama').val() ? $('#filterNama').val().trim().toLowerCase() : '';
+    var filterThMasuk = $('#filterThMasuk').val() ? $('#filterThMasuk').val().trim() : '';
+    
+    // Jika menggunakan DataTable, gunakan DataTable API untuk filter
+    if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1')) {
+        var table = $('#example1').DataTable();
+        
+        // Apply filter ke setiap kolom menggunakan DataTable API
+        // Kolom index: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
+        
+        // Filter NIS dan Nama menggunakan search biasa (partial match)
+        table.column(2).search(filterNIS);
+        table.column(3).search(filterNama);
+        
+        // Filter Tahun Masuk - gunakan exact match dengan regex
+        // Escape special characters dan gunakan ^ dan $ untuk exact match
+        if (filterThMasuk !== '') {
+            // Gunakan regex untuk exact match: ^2024$ akan match hanya "2024"
+            var regexPattern = '^' + filterThMasuk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$';
+            table.column(8).search(regexPattern, true, false);
+        } else {
+            // Jika tidak ada filter tahun, clear search
+            table.column(8).search('');
+        }
+        
+        // Draw tabel dengan filter yang sudah diterapkan
+        table.draw();
+    } else {
+        // Fallback: filter manual dengan jQuery jika DataTable belum tersedia
+        var visibleCount = 0;
+        
+        $('#example1 tbody tr').each(function() {
+            var $row = $(this);
+            
+            // Ambil nilai dari setiap kolom
+            // Kolom: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
+            var nis = $row.find('td').eq(2).text().trim().toLowerCase();
+            var nama = $row.find('td').eq(3).text().trim().toLowerCase();
+            var thMasuk = $row.find('td').eq(8).text().trim();
+            
+            var showRow = true;
+            
+            // Filter NIS - hanya aktif jika ada nilai dan cocok
+            if (filterNIS !== '' && nis.indexOf(filterNIS) === -1) {
+                showRow = false;
+            }
+            
+            // Filter Nama - hanya aktif jika ada nilai dan cocok
+            if (filterNama !== '' && nama.indexOf(filterNama) === -1) {
+                showRow = false;
+            }
+            
+            // Filter Tahun Masuk - hanya aktif jika ada nilai dan cocok (exact match)
+            if (filterThMasuk !== '') {
+                // Normalisasi tahun untuk perbandingan (hapus whitespace, convert ke string)
+                var thMasukNormalized = String(thMasuk).trim();
+                var filterThMasukNormalized = String(filterThMasuk).trim();
+                
+                if (thMasukNormalized !== filterThMasukNormalized) {
+                    showRow = false;
+                }
+            }
+            
+            // Tampilkan atau sembunyikan baris
+            if (showRow) {
+                $row.show();
+                visibleCount++;
+            } else {
+                $row.hide();
+            }
+        });
+    }
+    
+    // Update tombol setelah filter
+    if (typeof toggleButtonsSiswa === 'function') {
+        setTimeout(function() {
+            toggleButtonsSiswa();
+        }, 100);
+    }
+};
+
+// Fungsi untuk reset filter
+window.resetFilterSiswa = function() {
+    // Reset semua input filter
+    $('#filterNIS').val('');
+    $('#filterNama').val('');
+    $('#filterThMasuk').val('');
+    
+    // Tampilkan semua baris
+    $('#example1 tbody tr').show();
+    
+    // Reset filter di DataTable jika tersedia
+    if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1')) {
+        var table = $('#example1').DataTable();
+        table.search('').columns().search('').draw();
+        
+        // Pastikan semua baris ditampilkan setelah draw
+        setTimeout(function() {
+            $('#example1 tbody tr').show();
+        }, 100);
+    }
+    
+    if (typeof toggleButtonsSiswa === 'function') {
+        setTimeout(function() {
+            toggleButtonsSiswa();
+        }, 100);
+    }
+};
+
 // Fungsi global untuk toggle tombol
 function toggleButtonsSiswa() {
     var checkedCount = $('.checkItem:checked').length;
@@ -534,126 +654,6 @@ $(document).ready(function() {
     toggleButtonsSiswa();
 });
 
-// Fungsi untuk eksekusi filter - dibuat global
-window.executeFilterSiswa = function() {
-    console.log('executeFilterSiswa dipanggil');
-    
-    try {
-        // Pastikan jQuery sudah dimuat
-        if (typeof jQuery === 'undefined') {
-            console.log('jQuery belum dimuat');
-            return;
-        }
-        
-        // Ambil nilai dari setiap filter (independen)
-        var filterNIS = $('#filterNIS').val() ? $('#filterNIS').val().trim().toLowerCase() : '';
-        var filterNama = $('#filterNama').val() ? $('#filterNama').val().trim().toLowerCase() : '';
-        var filterThMasuk = $('#filterThMasuk').val() ? $('#filterThMasuk').val().trim() : '';
-        
-        console.log('Filter values:', {filterNIS: filterNIS, filterNama: filterNama, filterThMasuk: filterThMasuk});
-        
-        // Cek apakah DataTable sudah terinisialisasi
-        var isDataTable = typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1');
-        console.log('DataTable initialized:', isDataTable);
-        
-        if (isDataTable) {
-            // Gunakan DataTable API untuk filter
-            var table = $('#example1').DataTable();
-            
-            // Apply filter ke setiap kolom secara independen
-            // Kolom index: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
-            table.column(2).search(filterNIS);
-            table.column(3).search(filterNama);
-            table.column(8).search(filterThMasuk);
-            
-            // Draw tabel dengan filter yang sudah diterapkan
-            table.draw();
-            console.log('Filter diterapkan menggunakan DataTable API');
-        } else {
-            // Fallback: filter manual dengan jQuery jika DataTable belum tersedia
-            console.log('Menggunakan filter manual jQuery');
-            var visibleCount = 0;
-            
-            $('#example1 tbody tr').each(function() {
-                var $row = $(this);
-                var nis = $row.find('td:eq(2)').text().toLowerCase();
-                var nama = $row.find('td:eq(3)').text().toLowerCase();
-                var thMasuk = $row.find('td:eq(8)').text().trim();
-                
-                var showRow = true;
-                
-                // Filter NIS - hanya aktif jika ada nilai
-                if (filterNIS && nis.indexOf(filterNIS) === -1) {
-                    showRow = false;
-                }
-                
-                // Filter Nama - hanya aktif jika ada nilai
-                if (filterNama && nama.indexOf(filterNama) === -1) {
-                    showRow = false;
-                }
-                
-                // Filter Tahun Masuk - hanya aktif jika ada nilai
-                if (filterThMasuk && thMasuk !== filterThMasuk) {
-                    showRow = false;
-                }
-                
-                // Tampilkan atau sembunyikan baris
-                if (showRow) {
-                    $row.show();
-                    visibleCount++;
-                } else {
-                    $row.hide();
-                }
-            });
-            
-            console.log('Baris yang ditampilkan:', visibleCount);
-        }
-        
-        // Update tombol setelah filter
-        if (typeof toggleButtonsSiswa === 'function') {
-            setTimeout(function() {
-                toggleButtonsSiswa();
-            }, 100);
-        }
-    } catch (e) {
-        console.error('Error saat eksekusi filter:', e);
-        alert('Terjadi kesalahan saat memfilter data: ' + e.message);
-    }
-};
-
-// Fungsi untuk reset filter
-window.resetFilterSiswa = function() {
-    try {
-        // Reset semua input filter
-        $('#filterNIS').val('');
-        $('#filterNama').val('');
-        $('#filterThMasuk').val('');
-        
-        // Reset filter di DataTable jika tersedia
-        if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1')) {
-            var table = $('#example1').DataTable();
-            
-            // Reset semua kolom filter
-            table.column(2).search('');
-            table.column(3).search('');
-            table.column(8).search('');
-            
-            // Draw tabel tanpa filter
-            table.draw();
-        } else {
-            // Fallback: tampilkan semua baris
-            $('#example1 tbody tr').show();
-        }
-        
-        if (typeof toggleButtonsSiswa === 'function') {
-            setTimeout(function() {
-                toggleButtonsSiswa();
-            }, 100);
-        }
-    } catch (e) {
-        console.error('Error saat reset filter:', e);
-    }
-};
 
 // Setup event handler untuk Enter key dan change event
 $(document).ready(function() {
