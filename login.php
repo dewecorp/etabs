@@ -123,12 +123,25 @@ if (isset($_POST['btnLogin'])) {
 		}
 		
 		echo "<script>
-		Swal.fire({title: 'Selamat Login Berhasil',text: '',icon: 'success',confirmButtonText: 'OK'
+		Swal.fire({
+			title: 'Selamat Datang!',
+			html: '<h3>Selamat Datang, <strong>" . htmlspecialchars($data_login["nama_pengguna"]) . "</strong>!</h3><p>Login berhasil. Anda akan diarahkan ke halaman utama.</p>',
+			icon: 'success',
+			showConfirmButton: true,
+			confirmButtonText: 'OK',
+			timer: 3000,
+			timerProgressBar: true,
+			allowOutsideClick: false,
+			allowEscapeKey: false
 		}).then((result) => {
-			if (result.value) {
-				window.location = 'index.php';
-			}
-		})</script>";
+			window.location = 'index.php';
+		});
+		
+		// Redirect otomatis setelah 3 detik jika user tidak klik OK
+		setTimeout(function() {
+			window.location = 'index.php';
+		}, 3000);
+		</script>";
 	}else{
 		echo "<script>
 		Swal.fire({title: 'Maaf Login Gagal',text: '',icon: 'error',confirmButtonText: 'OK'

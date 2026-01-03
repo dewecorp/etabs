@@ -68,6 +68,172 @@ $page_title = getPageTitle($current_page);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha512-6S2HWzVFxruDlZxI3FeXOspiGkXH0pYqltg8Ai8a3gHmumZX8fiT5O8Mc0C05lHZ6f8YgOI5q1gJd0wQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGv2WhlBxpbK7pSUJytVqef6MxXU7pS4gFyR2b0j1z5f0PwHD3r4n8Ef3hC+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <!-- Custom CSS untuk Sticky Navbar -->
+    <style>
+        /* Sticky Navbar - hanya navbar, bukan seluruh header */
+        .main-header .navbar {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Pastikan main-header tidak fixed, hanya navbar */
+        .main-header {
+            position: relative;
+            margin-bottom: 0;
+            height: 50px;
+        }
+        
+        /* Logo tetap di tempat dan tidak ikut sticky */
+        .main-header .logo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1031;
+            width: 230px;
+            height: 50px;
+        }
+        
+        /* Adjust body untuk mengakomodasi fixed navbar */
+        body {
+            padding-top: 50px;
+        }
+        
+        /* Fix untuk sidebar - sidebar tidak ikut sticky dan tidak bergerak saat scroll */
+        .main-sidebar {
+            position: fixed !important;
+            top: 50px;
+            left: 0;
+            padding-top: 0;
+            z-index: 1000;
+            height: calc(100vh - 50px) !important;
+            max-height: calc(100vh - 50px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Pastikan sidebar tidak bergerak dan bisa di-scroll */
+        .sidebar {
+            position: relative;
+            min-height: calc(100vh - 50px);
+            height: auto;
+            padding-bottom: 60px !important;
+            margin-bottom: 20px;
+        }
+        
+        /* Pastikan sidebar-menu bisa di-scroll */
+        .sidebar-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 20px;
+        }
+        
+        /* Pastikan menu logout terlihat */
+        .sidebar-menu li:last-child {
+            margin-bottom: 20px;
+        }
+        
+        /* Style scrollbar untuk sidebar */
+        .main-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .main-sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .main-sidebar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .main-sidebar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Pastikan user panel tidak menghalangi scroll */
+        .user-panel {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        /* Pastikan semua elemen sidebar bisa diakses */
+        .sidebar .form-control,
+        .sidebar .btn {
+            position: relative;
+        }
+        
+        /* Content wrapper adjust untuk navbar fixed */
+        .content-wrapper {
+            margin-top: 0;
+            margin-left: 0;
+        }
+        
+        /* Pastikan content tidak tertutup oleh navbar */
+        @media (min-width: 768px) {
+            .sidebar-mini.sidebar-collapse .content-wrapper {
+                margin-left: 50px;
+            }
+            
+            body:not(.sidebar-collapse) .content-wrapper {
+                margin-left: 230px;
+            }
+        }
+        
+        /* Fix untuk sidebar collapsed */
+        @media (min-width: 768px) {
+            .sidebar-mini.sidebar-collapse .main-header .navbar {
+                left: 50px;
+                width: calc(100% - 50px) !important;
+            }
+            
+            .sidebar-mini.sidebar-collapse .main-header .logo {
+                width: 50px;
+            }
+            
+            .sidebar-mini.sidebar-collapse .main-sidebar {
+                width: 50px;
+            }
+            
+            body:not(.sidebar-collapse) .main-header .navbar {
+                left: 230px;
+                width: calc(100% - 230px) !important;
+            }
+            
+            body:not(.sidebar-collapse) .main-header .logo {
+                width: 230px;
+            }
+            
+            body:not(.sidebar-collapse) .main-sidebar {
+                width: 230px;
+            }
+        }
+        
+        /* Fix untuk mobile */
+        @media (max-width: 767px) {
+            .main-header .navbar {
+                left: 0 !important;
+                width: 100% !important;
+            }
+            
+            .main-sidebar {
+                top: 50px;
+            }
+        }
+        
+        /* Shadow saat scroll untuk efek visual */
+        .main-header .navbar.navbar-sticky-active {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+    </style>
+
 </head>
 
 <body class="hold-transition skin-green sidebar-mini">
@@ -603,6 +769,87 @@ $page_title = getPageTitle($current_page);
                 "ordering": true,
                 "info": true,
                 "autoWidth": false
+            });
+            
+            // Pastikan navbar sticky bekerja
+            $(window).on('scroll', function() {
+                var scrollTop = $(window).scrollTop();
+                if (scrollTop > 0) {
+                    $('.main-header .navbar').addClass('navbar-sticky-active');
+                } else {
+                    $('.main-header .navbar').removeClass('navbar-sticky-active');
+                }
+            });
+            
+            // Update navbar position saat sidebar toggle
+            $(document).on('click', '.sidebar-toggle', function() {
+                setTimeout(function() {
+                    updateNavbarPosition();
+                }, 350);
+            });
+            
+            // Fungsi untuk update posisi navbar dan logo
+            function updateNavbarPosition() {
+                var navbar = $('.main-header .navbar');
+                var logo = $('.main-header .logo');
+                
+                if ($('body').hasClass('sidebar-collapse')) {
+                    navbar.css({
+                        'left': '50px',
+                        'width': 'calc(100% - 50px)'
+                    });
+                    logo.css({
+                        'width': '50px'
+                    });
+                } else {
+                    navbar.css({
+                        'left': '230px',
+                        'width': 'calc(100% - 230px)'
+                    });
+                    logo.css({
+                        'width': '230px'
+                    });
+                }
+            }
+            
+            // Update posisi saat pertama kali load
+            setTimeout(function() {
+                updateNavbarPosition();
+            }, 100);
+            
+            // Pastikan sidebar bisa di-scroll dan menu logout terlihat
+            function ensureSidebarScroll() {
+                var sidebar = $('.main-sidebar');
+                var sidebarContent = $('.sidebar');
+                
+                if (sidebar.length > 0 && sidebarContent.length > 0) {
+                    // Pastikan overflow-y aktif
+                    sidebar.css({
+                        'overflow-y': 'auto',
+                        'overflow-x': 'hidden'
+                    });
+                    
+                    // Scroll ke bawah sedikit untuk memastikan scrollbar aktif
+                    setTimeout(function() {
+                        var scrollHeight = sidebarContent[0].scrollHeight;
+                        var clientHeight = sidebar[0].clientHeight;
+                        
+                        if (scrollHeight > clientHeight) {
+                            // Sidebar bisa di-scroll, pastikan scrollbar terlihat
+                            sidebar.css('overflow-y', 'auto');
+                        }
+                    }, 200);
+                }
+            }
+            
+            // Pastikan sidebar scroll saat pertama kali load
+            setTimeout(function() {
+                ensureSidebarScroll();
+            }, 300);
+            
+            // Pastikan sidebar scroll saat window resize
+            $(window).on('resize', function() {
+                ensureSidebarScroll();
             });
         });
         </script>
