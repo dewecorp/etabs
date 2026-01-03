@@ -24,15 +24,23 @@ if (isset($_POST['simpan'])) {
             try {
                 // Load file Excel
                 $spreadsheet = IOFactory::load($file_tmp);
-                $worksheet = $spreadsheet->getActiveSheet();
-                $rows = $worksheet->toArray();
                 
                 // Skip header row (baris pertama)
                 $success_count = 0;
                 $error_count = 0;
                 $error_messages = [];
                 
-                for ($i = 1; $i < count($rows); $i++) {
+                // Proses semua sheet (multi-tab support)
+                $sheet_count = $spreadsheet->getSheetCount();
+                $current_row_offset = 0;
+                
+                for ($sheet_index = 0; $sheet_index < $sheet_count; $sheet_index++) {
+                    $worksheet = $spreadsheet->getSheet($sheet_index);
+                    $rows = $worksheet->toArray();
+                    $sheet_name = $worksheet->getTitle();
+                    
+                    // Skip header row (baris pertama) untuk setiap sheet
+                    for ($i = 1; $i < count($rows); $i++) {
                     $row = $rows[$i];
                     
                     // Skip baris kosong
@@ -42,22 +50,26 @@ if (isset($_POST['simpan'])) {
                     
                     $nis = mysqli_real_escape_string($koneksi, trim($row[0]));
                     $nama_siswa = mysqli_real_escape_string($koneksi, trim($row[1]));
-                    $jekel = mysqli_real_escape_string($koneksi, strtoupper(trim($row[2])));
+                    $jekel_input = mysqli_real_escape_string($koneksi, strtoupper(trim($row[2])));
                     $kelas = mysqli_real_escape_string($koneksi, trim($row[3]));
                     $th_masuk = mysqli_real_escape_string($koneksi, trim($row[4]));
                     $status = isset($row[5]) ? mysqli_real_escape_string($koneksi, trim($row[5])) : 'Aktif';
                     
                     // Validasi data
-                    if (empty($nis) || empty($nama_siswa) || empty($jekel) || empty($kelas)) {
+                    if (empty($nis) || empty($nama_siswa) || empty($jekel_input) || empty($kelas)) {
                         $error_count++;
-                        $error_messages[] = "Baris " . ($i + 1) . ": Data tidak lengkap";
+                        $error_messages[] = "Sheet '$sheet_name' Baris " . ($i + 1) . ": Data tidak lengkap";
                         continue;
                     }
                     
-                    // Validasi jekel
-                    if (!in_array($jekel, ['LK', 'PR'])) {
+                    // Validasi dan konversi jekel (support L/P dan LK/PR)
+                    if (in_array($jekel_input, ['L', 'LK', 'LAKI-LAKI'])) {
+                        $jekel = 'LK';
+                    } elseif (in_array($jekel_input, ['P', 'PR', 'PEREMPUAN'])) {
+                        $jekel = 'PR';
+                    } else {
                         $error_count++;
-                        $error_messages[] = "Baris " . ($i + 1) . ": Jenis kelamin harus LK atau PR";
+                        $error_messages[] = "Sheet '$sheet_name' Baris " . ($i + 1) . ": Jenis kelamin harus L/LK (Laki-laki) atau P/PR (Perempuan)";
                         continue;
                     }
                     
@@ -67,7 +79,7 @@ if (isset($_POST['simpan'])) {
                     
                     if (mysqli_num_rows($result_kelas) == 0) {
                         $error_count++;
-                        $error_messages[] = "Baris " . ($i + 1) . ": Kelas '$kelas' tidak ditemukan";
+                        $error_messages[] = "Sheet '$sheet_name' Baris " . ($i + 1) . ": Kelas '$kelas' tidak ditemukan";
                         continue;
                     }
                     
@@ -93,7 +105,7 @@ if (isset($_POST['simpan'])) {
                             $success_count++;
                         } else {
                             $error_count++;
-                            $error_messages[] = "Baris " . ($i + 1) . ": Gagal update data NIS $nis";
+                            $error_messages[] = "Sheet '$sheet_name' Baris " . ($i + 1) . ": Gagal update data NIS $nis";
                         }
                     } else {
                         // Insert data baru
@@ -105,8 +117,9 @@ if (isset($_POST['simpan'])) {
                             $success_count++;
                         } else {
                             $error_count++;
-                            $error_messages[] = "Baris " . ($i + 1) . ": Gagal insert data NIS $nis - " . mysqli_error($koneksi);
+                            $error_messages[] = "Sheet '$sheet_name' Baris " . ($i + 1) . ": Gagal insert data NIS $nis - " . mysqli_error($koneksi);
                         }
+                    }
                     }
                 }
                 
@@ -200,6 +213,60 @@ if (isset($_POST['simpan'])) {
         </div>
         <!-- /.box-header -->
         <div class="box-body">
+            <!-- Filter Form -->
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" style="background-color: #f4f4f4; padding: 10px;">
+                            <h4 class="panel-title" style="margin: 0;">
+                                <i class="fa fa-filter"></i> Filter Data
+                            </h4>
+                        </div>
+                        <div class="panel-body" style="padding: 15px;">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filter NIS:</label>
+                                        <input type="text" id="filterNIS" class="form-control" placeholder="Cari berdasarkan NIS...">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filter Nama:</label>
+                                        <input type="text" id="filterNama" class="form-control" placeholder="Cari berdasarkan Nama...">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filter Tahun Masuk:</label>
+                                        <select id="filterThMasuk" class="form-control">
+                                            <option value="">-- Semua Tahun --</option>
+                                            <?php
+                                            // Ambil daftar tahun masuk yang unik dari database
+                                            $query_tahun = "SELECT DISTINCT th_masuk FROM tb_siswa ORDER BY th_masuk DESC";
+                                            $result_tahun = mysqli_query($koneksi, $query_tahun);
+                                            while ($row_tahun = mysqli_fetch_assoc($result_tahun)) {
+                                                echo '<option value="' . $row_tahun['th_masuk'] . '">' . $row_tahun['th_masuk'] . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" id="btnCariFilter" class="btn btn-primary" onclick="executeFilterSiswa(); return false;">
+                                        <i class="fa fa-search"></i> Cari
+                                    </button>
+                                    <button type="button" id="btnResetFilter" class="btn btn-warning" onclick="resetFilterSiswa(); return false;">
+                                        <i class="fa fa-refresh"></i> Reset Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive">
                 <form id="formSiswa" method="post" action="">
                     <table id="example1" class="table table-bordered table-striped">
@@ -211,7 +278,8 @@ if (isset($_POST['simpan'])) {
                                 <th>No</th>
                                 <th>NIS</th>
                                 <th>Nama</th>
-                                <th>JK</th>
+                                <th>Laki-laki</th>
+                                <th>Perempuan</th>
                                 <th>Kelas</th>
                                 <th>Status</th>
                                 <th>Th Masuk</th>
@@ -241,8 +309,19 @@ if (isset($_POST['simpan'])) {
                             <td>
                                 <?php echo $data['nama_siswa']; ?>
                             </td>
-                            <td>
-                                <?php echo $data['jekel']; ?>
+                            <td class="text-center">
+                                <?php if ($data['jekel'] == 'LK') { ?>
+                                    <i class="fa fa-check text-success"></i>
+                                <?php } else { ?>
+                                    <span class="text-muted">-</span>
+                                <?php } ?>
+                            </td>
+                            <td class="text-center">
+                                <?php if ($data['jekel'] == 'PR') { ?>
+                                    <i class="fa fa-check text-success"></i>
+                                <?php } else { ?>
+                                    <span class="text-muted">-</span>
+                                <?php } ?>
                             </td>
                             <td>
                                 <?php echo $data['kelas']; ?>
@@ -453,6 +532,143 @@ $(document).ready(function() {
     
     // Inisialisasi: disable tombol di awal
     toggleButtonsSiswa();
+});
+
+// Fungsi untuk eksekusi filter - dibuat global
+window.executeFilterSiswa = function() {
+    console.log('executeFilterSiswa dipanggil');
+    
+    try {
+        // Pastikan jQuery sudah dimuat
+        if (typeof jQuery === 'undefined') {
+            console.log('jQuery belum dimuat');
+            return;
+        }
+        
+        // Ambil nilai dari setiap filter (independen)
+        var filterNIS = $('#filterNIS').val() ? $('#filterNIS').val().trim().toLowerCase() : '';
+        var filterNama = $('#filterNama').val() ? $('#filterNama').val().trim().toLowerCase() : '';
+        var filterThMasuk = $('#filterThMasuk').val() ? $('#filterThMasuk').val().trim() : '';
+        
+        console.log('Filter values:', {filterNIS: filterNIS, filterNama: filterNama, filterThMasuk: filterThMasuk});
+        
+        // Cek apakah DataTable sudah terinisialisasi
+        var isDataTable = typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1');
+        console.log('DataTable initialized:', isDataTable);
+        
+        if (isDataTable) {
+            // Gunakan DataTable API untuk filter
+            var table = $('#example1').DataTable();
+            
+            // Apply filter ke setiap kolom secara independen
+            // Kolom index: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
+            table.column(2).search(filterNIS);
+            table.column(3).search(filterNama);
+            table.column(8).search(filterThMasuk);
+            
+            // Draw tabel dengan filter yang sudah diterapkan
+            table.draw();
+            console.log('Filter diterapkan menggunakan DataTable API');
+        } else {
+            // Fallback: filter manual dengan jQuery jika DataTable belum tersedia
+            console.log('Menggunakan filter manual jQuery');
+            var visibleCount = 0;
+            
+            $('#example1 tbody tr').each(function() {
+                var $row = $(this);
+                var nis = $row.find('td:eq(2)').text().toLowerCase();
+                var nama = $row.find('td:eq(3)').text().toLowerCase();
+                var thMasuk = $row.find('td:eq(8)').text().trim();
+                
+                var showRow = true;
+                
+                // Filter NIS - hanya aktif jika ada nilai
+                if (filterNIS && nis.indexOf(filterNIS) === -1) {
+                    showRow = false;
+                }
+                
+                // Filter Nama - hanya aktif jika ada nilai
+                if (filterNama && nama.indexOf(filterNama) === -1) {
+                    showRow = false;
+                }
+                
+                // Filter Tahun Masuk - hanya aktif jika ada nilai
+                if (filterThMasuk && thMasuk !== filterThMasuk) {
+                    showRow = false;
+                }
+                
+                // Tampilkan atau sembunyikan baris
+                if (showRow) {
+                    $row.show();
+                    visibleCount++;
+                } else {
+                    $row.hide();
+                }
+            });
+            
+            console.log('Baris yang ditampilkan:', visibleCount);
+        }
+        
+        // Update tombol setelah filter
+        if (typeof toggleButtonsSiswa === 'function') {
+            setTimeout(function() {
+                toggleButtonsSiswa();
+            }, 100);
+        }
+    } catch (e) {
+        console.error('Error saat eksekusi filter:', e);
+        alert('Terjadi kesalahan saat memfilter data: ' + e.message);
+    }
+};
+
+// Fungsi untuk reset filter
+window.resetFilterSiswa = function() {
+    try {
+        // Reset semua input filter
+        $('#filterNIS').val('');
+        $('#filterNama').val('');
+        $('#filterThMasuk').val('');
+        
+        // Reset filter di DataTable jika tersedia
+        if (typeof $.fn.DataTable !== 'undefined' && $.fn.DataTable.isDataTable('#example1')) {
+            var table = $('#example1').DataTable();
+            
+            // Reset semua kolom filter
+            table.column(2).search('');
+            table.column(3).search('');
+            table.column(8).search('');
+            
+            // Draw tabel tanpa filter
+            table.draw();
+        } else {
+            // Fallback: tampilkan semua baris
+            $('#example1 tbody tr').show();
+        }
+        
+        if (typeof toggleButtonsSiswa === 'function') {
+            setTimeout(function() {
+                toggleButtonsSiswa();
+            }, 100);
+        }
+    } catch (e) {
+        console.error('Error saat reset filter:', e);
+    }
+};
+
+// Setup event handler untuk Enter key dan change event
+$(document).ready(function() {
+    // Enter key pada input field
+    $(document).on('keypress', '#filterNIS, #filterNama', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            executeFilterSiswa();
+        }
+    });
+    
+    // Change event untuk dropdown tahun masuk
+    $(document).on('change', '#filterThMasuk', function(e) {
+        executeFilterSiswa();
+    });
 });
 
 function formatNumber(num) {
