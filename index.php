@@ -13,15 +13,35 @@ if (isset($_SESSION["ses_username"])==""){
 
     //KONEKSI DB
 include "inc/koneksi.php";
+
+// Cek koneksi database
+if (!isset($koneksi) || !$koneksi) {
+    die("Koneksi database gagal. Silakan periksa konfigurasi database di inc/koneksi.php atau inc/config_db.php");
+}
+
+// Cek apakah koneksi masih aktif
+if (is_object($koneksi) && $koneksi->connect_error) {
+    die("Koneksi database error: " . $koneksi->connect_error);
+}
+
     //FUNGSI RUPIAH
 include "inc/rupiah.php";
 include "inc/config.php";
 include_once "inc/activity_log.php";
+
 	//Profil Sekolah
 $nama = "e-TABS";
-$sql = $koneksi->query("SELECT * from tb_profil");
-while ($data = $sql->fetch_assoc()) {
-	$nama = $data['nama_sekolah'];
+try {
+    $sql = @$koneksi->query("SELECT * from tb_profil LIMIT 1");
+    if ($sql && $sql->num_rows > 0) {
+        while ($data = $sql->fetch_assoc()) {
+            $nama = $data['nama_sekolah'];
+        }
+    }
+} catch (Exception $e) {
+    // Jika error, gunakan default
+    error_log("Error loading profil: " . $e->getMessage());
+    $nama = "e-TABS";
 }
 
 // Ambil page title dinamis
@@ -858,6 +878,41 @@ $page_title = getPageTitle($current_page);
         $(function() {
             //Initialize Select2 Elements
             $(".select2").select2();
+            
+            // Pastikan treeview menu ter-inisialisasi dengan benar
+            // Re-inisialisasi treeview jika belum ter-load
+            if (typeof $.AdminLTE !== 'undefined' && typeof $.AdminLTE.tree === 'function') {
+                // Pastikan treeview sudah aktif
+                setTimeout(function() {
+                    $.AdminLTE.tree('.sidebar');
+                }, 100);
+            }
+            
+            // Fallback: jika AdminLTE belum ter-load, inisialisasi manual
+            setTimeout(function() {
+                $('.sidebar-menu .treeview > a').on('click', function(e) {
+                    var $this = $(this);
+                    var checkElement = $this.next();
+                    
+                    // Jika ada submenu
+                    if (checkElement.is('.treeview-menu')) {
+                        // Jika submenu sudah terbuka, tutup
+                        if (checkElement.is(':visible')) {
+                            checkElement.slideUp(300);
+                            $this.parent('li').removeClass('active');
+                        } else {
+                            // Tutup semua submenu lain
+                            $('.sidebar-menu .treeview-menu:visible').slideUp(300);
+                            $('.sidebar-menu .treeview.active').removeClass('active');
+                            
+                            // Buka submenu ini
+                            checkElement.slideDown(300);
+                            $this.parent('li').addClass('active');
+                        }
+                        e.preventDefault();
+                    }
+                });
+            }, 500);
         });
         
         

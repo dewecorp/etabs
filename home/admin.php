@@ -1,7 +1,14 @@
 <?php
 // Pastikan activity_log.php sudah di-include
+// Gunakan path absolut untuk menghindari masalah di hosting
 if (!function_exists('createActivityTable')) {
-    include_once "../inc/activity_log.php";
+    $activity_log_path = __DIR__ . '/../inc/activity_log.php';
+    if (file_exists($activity_log_path)) {
+        include_once $activity_log_path;
+    } else {
+        // Fallback ke path relatif
+        include_once "../inc/activity_log.php";
+    }
 }
 
 // Buat tabel activity log jika belum ada
@@ -140,11 +147,29 @@ $saldo = $setor - $tarik;
 		@mysqli_query($koneksi, "ALTER TABLE tb_profil ADD COLUMN nama_bendahara VARCHAR(100) NULL AFTER logo_sekolah");
 	}
 	
-	$sql_profil = @$koneksi->query("SELECT * FROM tb_profil LIMIT 1");
-	$profil_data = $sql_profil ? $sql_profil->fetch_assoc() : null;
-	$logo_path = (!empty($profil_data['logo_sekolah']) && file_exists('../uploads/logo/' . $profil_data['logo_sekolah'])) 
-		? '../uploads/logo/' . $profil_data['logo_sekolah'] 
-		: '../images/logo.png';
+	// Pastikan koneksi tersedia
+	if (!isset($koneksi) || !$koneksi) {
+		$profil_data = null;
+		$logo_path = '../images/logo.png';
+	} else {
+		$sql_profil = @$koneksi->query("SELECT * FROM tb_profil LIMIT 1");
+		if ($sql_profil === false) {
+			// Error query
+			error_log("Error query profil: " . $koneksi->error);
+			$profil_data = null;
+		} else {
+			$profil_data = $sql_profil ? $sql_profil->fetch_assoc() : null;
+		}
+		
+		// Cek logo dengan path yang benar (relatif dari home/admin.php)
+		$logo_path = '../images/logo.png';
+		if (!empty($profil_data['logo_sekolah'])) {
+			$logo_file = '../uploads/logo/' . $profil_data['logo_sekolah'];
+			if (file_exists($logo_file)) {
+				$logo_path = $logo_file;
+			}
+		}
+	}
 	?>
 	<div class="row">
 		<div class="col-md-12">
@@ -332,37 +357,53 @@ $saldo = $setor - $tarik;
 					}
 					
 					$recent_activities = [];
-					if (function_exists('getRecentActivities') && isset($koneksi)) {
+					// Pastikan koneksi tersedia
+					if (!isset($koneksi) || !$koneksi) {
+						$recent_activities = [];
+					} else {
 						try {
 							// Pastikan tabel sudah dibuat
 							if (function_exists('createActivityTable')) {
 								@createActivityTable($koneksi);
 							}
+							
 							// Ambil aktivitas terbaru langsung dari database dengan format yang jelas
 							if (is_object($koneksi) && method_exists($koneksi, 'query')) {
-								$sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
-								$result = $koneksi->query($sql);
-								if ($result) {
-									while ($row = $result->fetch_assoc()) {
-										$recent_activities[] = $row;
+								// Cek apakah tabel ada
+								$check_table = @$koneksi->query("SHOW TABLES LIKE 'tb_activity_log'");
+								if ($check_table && $check_table->num_rows > 0) {
+									$sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
+									$result = @$koneksi->query($sql);
+									if ($result && $result->num_rows > 0) {
+										while ($row = $result->fetch_assoc()) {
+											$recent_activities[] = $row;
+										}
 									}
 								}
 							} elseif (is_resource($koneksi)) {
-								$sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
-								$result = mysqli_query($koneksi, $sql);
-								if ($result) {
-									while ($row = mysqli_fetch_assoc($result)) {
-										$recent_activities[] = $row;
+								$check_table = @mysqli_query($koneksi, "SHOW TABLES LIKE 'tb_activity_log'");
+								if ($check_table && mysqli_num_rows($check_table) > 0) {
+									$sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
+									$result = @mysqli_query($koneksi, $sql);
+									if ($result && mysqli_num_rows($result) > 0) {
+										while ($row = mysqli_fetch_assoc($result)) {
+											$recent_activities[] = $row;
+										}
 									}
 								}
 							} else {
-								// Fallback ke fungsi getRecentActivities
-								$recent_activities = @getRecentActivities($koneksi, 10);
+								// Fallback ke fungsi getRecentActivities jika ada
+								if (function_exists('getRecentActivities')) {
+									$recent_activities = @getRecentActivities($koneksi, 10);
+								}
 							}
+							
 							if (!is_array($recent_activities)) {
 								$recent_activities = [];
 							}
 						} catch (Exception $e) {
+							// Log error untuk debugging
+							error_log("Error loading activities: " . $e->getMessage());
 							$recent_activities = [];
 						}
 					}

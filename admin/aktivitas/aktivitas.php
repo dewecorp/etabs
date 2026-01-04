@@ -1,6 +1,20 @@
 <?php
-include "../../inc/koneksi.php";
-include "../../inc/activity_log.php";
+// Gunakan path absolut untuk menghindari masalah di hosting
+$base_path = dirname(dirname(__DIR__));
+$koneksi_path = $base_path . '/inc/koneksi.php';
+$activity_log_path = $base_path . '/inc/activity_log.php';
+
+if (file_exists($koneksi_path)) {
+    include $koneksi_path;
+} else {
+    include "../../inc/koneksi.php";
+}
+
+if (file_exists($activity_log_path)) {
+    include $activity_log_path;
+} else {
+    include "../../inc/activity_log.php";
+}
 
 // Hapus aktivitas lama saat halaman dimuat
 deleteOldActivities($koneksi);

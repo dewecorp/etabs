@@ -303,10 +303,34 @@ if (isset($_POST['simpan'])) {
 
                             <?php
                       $no = 1;
-                      $sql = $koneksi->query("SELECT s.nis, s.nama_siswa, s.jekel, s.status, s.th_masuk, s.id_kelas, k.kelas 
-                      from tb_siswa s inner join tb_kelas k on s.id_kelas=k.id_kelas 
-                      order by kelas asc, nis asc");
-                      while ($data= $sql->fetch_assoc()) {
+                      // Cek koneksi dan query dengan error handling
+                      if (!isset($koneksi) || !$koneksi) {
+                          echo '<tr><td colspan="10" class="text-center text-danger">Error: Koneksi database tidak tersedia</td></tr>';
+                      } else {
+                          // Debug: Hitung total siswa di database
+                          $count_all = @$koneksi->query("SELECT COUNT(*) as total FROM tb_siswa");
+                          $total_siswa = 0;
+                          if ($count_all) {
+                              $row_count = $count_all->fetch_assoc();
+                              $total_siswa = $row_count['total'];
+                          }
+                          
+                          // Gunakan LEFT JOIN untuk menampilkan semua siswa meskipun kelas tidak ada
+                          $sql = @$koneksi->query("SELECT s.nis, s.nama_siswa, s.jekel, s.status, s.th_masuk, s.id_kelas, 
+                          COALESCE(k.kelas, 'Tidak Ada Kelas') as kelas 
+                          from tb_siswa s 
+                          LEFT JOIN tb_kelas k on s.id_kelas=k.id_kelas 
+                          order by COALESCE(k.kelas, 'ZZZ') asc, s.nis asc");
+                          
+                          // Debug: Tampilkan error jika ada
+                          if ($sql === false) {
+                              echo '<tr><td colspan="10" class="text-center text-danger">Error Query: ' . htmlspecialchars($koneksi->error) . '</td></tr>';
+                          } elseif ($sql && $sql->num_rows > 0) {
+                              // Debug info (akan dihapus setelah fix)
+                              if ($total_siswa > $sql->num_rows) {
+                                  echo '<tr><td colspan="10" class="text-center text-warning"><small>Total siswa di database: ' . $total_siswa . ', yang ditampilkan: ' . $sql->num_rows . '</small></td></tr>';
+                              }
+                              while ($data= $sql->fetch_assoc()) {
                       ?>
 
                             <tr data-nis="<?php echo $data['nis']; ?>" data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>" data-jekel="<?php echo $data['jekel']; ?>" data-id_kelas="<?php echo $data['id_kelas']; ?>" data-kelas="<?php echo htmlspecialchars($data['kelas']); ?>" data-status="<?php echo $data['status']; ?>" data-th_masuk="<?php echo $data['th_masuk']; ?>">
@@ -368,7 +392,18 @@ if (isset($_POST['simpan'])) {
                             </td>
                         </tr>
                         <?php
-                  }
+                              }
+                          } else {
+                              // Tampilkan pesan jika tidak ada data
+                              echo '<tr><td colspan="10" class="text-center">';
+                              if ($sql === false) {
+                                  echo '<span class="text-danger">Error: ' . htmlspecialchars($koneksi->error) . '</span>';
+                              } else {
+                                  echo '<span class="text-muted">Tidak ada data siswa. Silakan tambah data siswa terlebih dahulu.</span>';
+                              }
+                              echo '</td></tr>';
+                          }
+                      }
                 ?>
                         </tbody>
 
