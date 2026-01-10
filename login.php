@@ -125,7 +125,7 @@ if (isset($_POST['btnLogin'])) {
 		echo "<script>
 		Swal.fire({
 			title: 'Selamat Datang!',
-			html: '<h3>Selamat Datang, <strong>" . htmlspecialchars($data_login["nama_pengguna"]) . "</strong>!</h3><p>Login berhasil. Anda akan diarahkan ke halaman utama.</p>',
+			html: '<h3><strong>" . htmlspecialchars($data_login["nama_pengguna"]) . "</strong></h3><p>Login berhasil. Anda akan diarahkan ke halaman utama.</p>',
 			icon: 'success',
 			showConfirmButton: true,
 			confirmButtonText: 'OK',
