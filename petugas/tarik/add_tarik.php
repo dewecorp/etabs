@@ -159,10 +159,17 @@ $tanggal = date("Y-m-d");
 						confirmButtonText:'OK',
 						confirmButtonColor:'#28a745',
 						allowOutsideClick:false,
-						allowEscapeKey:false
+						allowEscapeKey:false,
+						timer:2500,
+						timerProgressBar:true
 					}).then(function(){
 						window.location.href='index.php?page=data_tarik';
 					});
+					
+					// Auto redirect setelah 2.5 detik jika tidak diklik
+					setTimeout(function(){
+						window.location.href='index.php?page=data_tarik';
+					}, 2500);
 				}else{
 					alert('Penarikan berhasil ditambahkan');
 					window.location.href='index.php?page=data_tarik';

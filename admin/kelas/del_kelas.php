@@ -41,10 +41,17 @@ if(isset($_GET['kode'])){
                         confirmButtonText:'OK',
                         confirmButtonColor:'#28a745',
                         allowOutsideClick:false,
-                        allowEscapeKey:false
+                        allowEscapeKey:false,
+                        timer:2500,
+                        timerProgressBar:true
                     }).then(function(){
                         window.location.href='index.php?page=MyApp/data_kelas';
                     });
+                    
+                    // Auto redirect setelah 2.5 detik jika tidak diklik
+                    setTimeout(function(){
+                        window.location.href='index.php?page=MyApp/data_kelas';
+                    }, 2500);
                 }else{
                     alert('Data kelas berhasil dihapus');
                     window.location.href='index.php?page=MyApp/data_kelas';

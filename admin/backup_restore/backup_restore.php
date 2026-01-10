@@ -65,7 +65,10 @@ if (isset($_POST['backup'])) {
                 title: 'Backup Berhasil!',
                 html: 'Database berhasil di-backup.<br><br><strong>File:</strong> $filename<br><strong>Ukuran:</strong> $file_size_mb MB<br><strong>Lokasi:</strong> backup/$filename',
                 icon: 'success',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true,
+                width: '500px'
             });
             </script>";
     } else {
@@ -205,6 +208,8 @@ if (isset($_POST['backup'])) {
                 html: 'Database berhasil di-backup.<br><br><strong>File:</strong> $filename<br><strong>Ukuran:</strong> $size_display<br><strong>Total Tabel:</strong> " . count($tables) . "<br><strong>Total Data:</strong> $total_rows baris<br><strong>Detail per Tabel:</strong>$stats_detail<br><br><strong>Lokasi:</strong> backup/$filename',
                 icon: 'success',
                 confirmButtonText: 'OK',
+                timer: 4000,
+                timerProgressBar: true,
                 width: '600px'
             });
             </script>";
@@ -440,12 +445,17 @@ if (isset($_POST['restore'])) {
                         html: 'Database berhasil di-restore.<br><br><strong>Query berhasil:</strong> $success_count<br><strong>Total Data:</strong> $affected_rows baris<br><strong>Detail per Tabel:</strong>$tables_detail',
                         icon: 'success',
                         confirmButtonText: 'OK',
+                        timer: 4000,
+                        timerProgressBar: true,
                         width: '600px'
                     }).then((result) => {
-                        if (result.value) {
-                            window.location = 'index.php?page=MyApp/backup_restore';
-                        }
+                        window.location = 'index.php?page=MyApp/backup_restore';
                     });
+                    
+                    // Auto redirect setelah 4 detik jika tidak diklik
+                    setTimeout(function(){
+                        window.location = 'index.php?page=MyApp/backup_restore';
+                    }, 4000);
                     </script>";
                 } else {
                     $error_msg = implode('<br>', array_slice($errors, 0, 10));

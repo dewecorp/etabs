@@ -144,12 +144,21 @@ $tanggal = date("Y-m-d");
 
 		if ($query_simpan) {
 			echo "<script>
-			Swal.fire({title: 'Tarikan Berhasil',text: '',icon: 'success',confirmButtonText: 'OK'
+			Swal.fire({
+				title: 'Tarikan Berhasil',
+				text: '',
+				icon: 'success',
+				confirmButtonText: 'OK',
+				timer: 2500,
+				timerProgressBar: true
 			}).then((result) => {
-				if (result.value) {
-					window.location = 'index.php?page=data_tarik';
-				}
-			})</script>";
+				window.location = 'index.php?page=data_tarik';
+			});
+			
+			// Auto redirect setelah 2.5 detik jika tidak diklik
+			setTimeout(function(){
+				window.location = 'index.php?page=data_tarik';
+			}, 2500)</script>";
 			}else{
 			echo "<script>
 			Swal.fire({title: 'Tarikan Gagal',text: '',icon: 'error',confirmButtonText: 'OK'

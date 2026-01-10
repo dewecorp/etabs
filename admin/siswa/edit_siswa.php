@@ -173,10 +173,17 @@ if (isset ($_POST['Ubah'])){
                     confirmButtonText:'OK',
                     confirmButtonColor:'#28a745',
                     allowOutsideClick:false,
-                    allowEscapeKey:false
+                    allowEscapeKey:false,
+                    timer:2500,
+                    timerProgressBar:true
                 }).then(function(){
                     window.location.href='index.php?page=MyApp/data_siswa';
                 });
+                
+                // Auto redirect setelah 2.5 detik jika tidak diklik
+                setTimeout(function(){
+                    window.location.href='index.php?page=MyApp/data_siswa';
+                }, 2500);
             }else{
                 alert('Data siswa berhasil diubah');
                 window.location.href='index.php?page=MyApp/data_siswa';
