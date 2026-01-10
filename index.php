@@ -145,6 +145,8 @@ $page_title = getPageTitle($current_page);
             height: auto;
             padding-bottom: 60px !important;
             margin-bottom: 20px;
+            /* Pastikan pointer events bekerja dengan baik */
+            pointer-events: auto;
         }
         
         /* Pastikan sidebar-menu bisa di-scroll */
@@ -153,6 +155,49 @@ $page_title = getPageTitle($current_page);
             margin: 0;
             padding: 0;
             padding-bottom: 20px;
+            /* Pastikan pointer events bekerja */
+            pointer-events: auto;
+        }
+        
+        /* Pastikan semua item menu bisa diklik */
+        .sidebar-menu > li {
+            position: relative;
+            pointer-events: auto;
+        }
+        
+        .sidebar-menu > li > a {
+            pointer-events: auto;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Pastikan treeview menu (dropdown) bisa ditampilkan dengan benar */
+        .sidebar-menu .treeview-menu {
+            position: relative !important;
+            z-index: 10 !important;
+            pointer-events: auto !important;
+            /* Pastikan dropdown tidak dipotong */
+            overflow: visible !important;
+            max-height: none !important;
+        }
+        
+        /* Pastikan treeview menu item bisa diklik */
+        .sidebar-menu .treeview-menu > li > a {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Pastikan sidebar container tidak memotong dropdown menu */
+        .sidebar {
+            overflow: visible !important;
+        }
+        
+        /* Pastikan sidebar menu tidak memotong dropdown */
+        .sidebar-menu {
+            overflow: visible !important;
         }
         
         /* Pastikan menu logout terlihat */
@@ -879,40 +924,104 @@ $page_title = getPageTitle($current_page);
             //Initialize Select2 Elements
             $(".select2").select2();
             
-            // Pastikan treeview menu ter-inisialisasi dengan benar
-            // Re-inisialisasi treeview jika belum ter-load
-            if (typeof $.AdminLTE !== 'undefined' && typeof $.AdminLTE.tree === 'function') {
-                // Pastikan treeview sudah aktif
-                setTimeout(function() {
-                    $.AdminLTE.tree('.sidebar');
-                }, 100);
-            }
-            
-            // Fallback: jika AdminLTE belum ter-load, inisialisasi manual
-            setTimeout(function() {
-                $('.sidebar-menu .treeview > a').on('click', function(e) {
+            // Fungsi untuk inisialisasi treeview menu
+            function initTreeviewMenu() {
+                // Hapus event handler sebelumnya untuk menghindari duplikasi
+                $(document).off('click.treeview', '.sidebar-menu .treeview > a');
+                
+                // Gunakan event delegation dengan namespace untuk memastikan click bekerja bahkan setelah scroll
+                $(document).on('click.treeview', '.sidebar-menu .treeview > a', function(e) {
                     var $this = $(this);
-                    var checkElement = $this.next();
+                    var $parent = $this.parent('li');
+                    var checkElement = $this.next('.treeview-menu');
                     
-                    // Jika ada submenu
-                    if (checkElement.is('.treeview-menu')) {
+                    // Hanya proses jika ini adalah menu dengan submenu
+                    if (checkElement.length > 0 && checkElement.hasClass('treeview-menu')) {
+                        // Hentikan event default dan propagation
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        
                         // Jika submenu sudah terbuka, tutup
-                        if (checkElement.is(':visible')) {
-                            checkElement.slideUp(300);
-                            $this.parent('li').removeClass('active');
+                        if ($parent.hasClass('active') && checkElement.is(':visible')) {
+                            checkElement.slideUp(300, function() {
+                                $parent.removeClass('active');
+                            });
+                            // Rotate icon kembali
+                            $this.find('.fa-angle-left, .fa-angle-down').removeClass('fa-angle-down').addClass('fa-angle-left').css('transform', 'rotate(0deg)');
                         } else {
                             // Tutup semua submenu lain
-                            $('.sidebar-menu .treeview-menu:visible').slideUp(300);
-                            $('.sidebar-menu .treeview.active').removeClass('active');
+                            $('.sidebar-menu .treeview-menu:visible').not(checkElement).slideUp(300);
+                            $('.sidebar-menu .treeview.active').not($parent).removeClass('active');
+                            
+                            // Reset icon semua treeview
+                            $('.sidebar-menu .treeview > a .fa-angle-left').css('transform', 'rotate(0deg)');
                             
                             // Buka submenu ini
+                            $parent.addClass('active');
                             checkElement.slideDown(300);
-                            $this.parent('li').addClass('active');
+                            // Rotate icon
+                            $this.find('.fa-angle-left').css('transform', 'rotate(-90deg)');
                         }
-                        e.preventDefault();
+                        
+                        return false;
                     }
                 });
-            }, 500);
+                
+                // Pastikan submenu item juga bisa diklik dengan benar
+                $(document).off('click.treeviewmenu', '.sidebar-menu .treeview-menu > li > a');
+                $(document).on('click.treeviewmenu', '.sidebar-menu .treeview-menu > li > a', function(e) {
+                    // Biarkan link bekerja normal, hanya pastikan event tidak terhenti oleh parent
+                    e.stopPropagation();
+                    $(this).css('pointer-events', 'auto');
+                });
+            }
+            
+            // Inisialisasi treeview menu dengan delay untuk memastikan DOM siap
+            setTimeout(function() {
+                // Pastikan treeview menu ter-inisialisasi dengan benar
+                // Coba gunakan AdminLTE jika tersedia
+                if (typeof $.AdminLTE !== 'undefined' && typeof $.AdminLTE.tree === 'function') {
+                    try {
+                        // Inisialisasi AdminLTE tree
+                        $.AdminLTE.tree('.sidebar');
+                    } catch(e) {
+                        console.log('AdminLTE tree initialization error, using fallback:', e);
+                    }
+                }
+                
+                // Selalu gunakan inisialisasi manual sebagai backup dan untuk memastikan bekerja dengan scroll
+                initTreeviewMenu();
+                
+                // Pastikan semua element menu bisa diklik
+                $('.sidebar-menu .treeview > a').css({
+                    'pointer-events': 'auto',
+                    'cursor': 'pointer',
+                    'user-select': 'none'
+                });
+                $('.sidebar-menu .treeview-menu > li > a').css({
+                    'pointer-events': 'auto',
+                    'cursor': 'pointer'
+                });
+            }, 200);
+            
+            // Pastikan inisialisasi ulang saat sidebar di-scroll (jika diperlukan)
+            var scrollTimeout;
+            $('.main-sidebar').off('scroll.treeview').on('scroll.treeview', function() {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(function() {
+                    // Pastikan pointer events tetap aktif setelah scroll
+                    $('.sidebar-menu .treeview > a').css('pointer-events', 'auto');
+                    $('.sidebar-menu .treeview-menu > li > a').css('pointer-events', 'auto');
+                }, 50);
+            });
+            
+            // Pastikan inisialisasi ulang saat window resize
+            $(window).off('resize.treeview').on('resize.treeview', function() {
+                setTimeout(function() {
+                    initTreeviewMenu();
+                }, 300);
+            });
         });
         
         
