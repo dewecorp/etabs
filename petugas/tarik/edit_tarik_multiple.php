@@ -15,6 +15,26 @@ if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_PO
             $tarik_baru = preg_replace("/[^0-9]/", "", $tariks[$i]);
             $tgl_baru = mysqli_real_escape_string($koneksi, $tgls[$i]);
             
+            // Validasi Saldo
+            $sql_cek = "SELECT * FROM tb_tabungan WHERE id_tabungan='$id'";
+            $query_cek = mysqli_query($koneksi, $sql_cek);
+            $data_cek = mysqli_fetch_array($query_cek);
+            $nis = $data_cek['nis'];
+            $tarik_lama = $data_cek['tarik'];
+            
+            $sql_saldo = "SELECT sum(setor)-sum(tarik) as total FROM tb_tabungan WHERE nis='$nis'";
+            $q_saldo = mysqli_query($koneksi, $sql_saldo);
+            $d_saldo = mysqli_fetch_array($q_saldo);
+            $saldo_saat_ini = $d_saldo['total'];
+            
+            // Batas penarikan adalah saldo saat ini ditambah tarikan lama (karena akan di-update)
+            $batas = $saldo_saat_ini + $tarik_lama;
+            
+            if ($batas < $tarik_baru) {
+                $jumlah_error++;
+                continue;
+            }
+
             $sql_update = "UPDATE tb_tabungan 
                            SET tarik = '".mysqli_real_escape_string($koneksi, $tarik_baru)."',
                                tgl = '".$tgl_baru."'

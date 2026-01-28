@@ -1,6 +1,258 @@
 <!-- Content Header (Page header) -->
 <?php 
 $data_nama = $_SESSION["ses_nama"];
+
+date_default_timezone_set("Asia/Jakarta"); 
+$tanggal = date("Y-m-d");
+
+if (isset($_POST['Simpan'])) {
+    //menangkap post
+    $tarik = $_POST['tarik'];
+    //membuang Rp dan Titik
+    $tarik_hasil = preg_replace("/[^0-9]/", "", $tarik);
+    
+    // Calculate saldo from DB directly for security
+    $sql_saldo_db = "SELECT sum(setor)-sum(tarik) as total FROM tb_tabungan WHERE nis='".$_POST['nis']."'";
+    $q_saldo_db = mysqli_query($koneksi, $sql_saldo_db);
+    $d_saldo_db = mysqli_fetch_array($q_saldo_db);
+    $saldo_db = $d_saldo_db['total'];
+
+    if ($saldo_db >= $tarik_hasil) {
+        $sql_simpan = "INSERT INTO tb_tabungan (nis,setor,tarik,tgl,jenis,petugas) VALUES (
+            '".$_POST['nis']."',
+            '0',
+            '".$tarik_hasil."',
+            '".$tanggal."',
+            'TR',
+            '".$data_nama."')";
+        $query_simpan = mysqli_query($koneksi, $sql_simpan);
+        
+        // Ambil ID yang baru saja diinsert
+        $id_tabungan_baru = mysqli_insert_id($koneksi);
+    
+        if ($query_simpan && $id_tabungan_baru) {
+            // Simpan ke riwayat saat transaksi dibuat
+            $sql_riwayat = "INSERT INTO tb_riwayat (id_tabungan_asli, nis, setor, tarik, tgl, jenis, petugas, status) 
+                            VALUES (
+                                '".$id_tabungan_baru."',
+                                '".mysqli_real_escape_string($koneksi, $_POST['nis'])."',
+                                '0',
+                                '".$tarik_hasil."',
+                                '".$tanggal."',
+                                'TR',
+                                '".mysqli_real_escape_string($koneksi, $data_nama)."',
+                                'Aktif'
+                            )";
+            mysqli_query($koneksi, $sql_riwayat);
+            
+            if (!function_exists('logActivity')) {
+                $paths = [
+                    __DIR__ . '/../../inc/activity_log.php',
+                    dirname(dirname(__DIR__)) . '/inc/activity_log.php',
+                    'inc/activity_log.php',
+                    '../../inc/activity_log.php'
+                ];
+                foreach ($paths as $path) {
+                    if (file_exists($path)) {
+                        include_once $path;
+                        break;
+                    }
+                }
+            }
+            if (function_exists('logActivity')) {
+                $sql_siswa = "SELECT nama_siswa FROM tb_siswa WHERE nis='".$_POST['nis']."'";
+                $query_siswa = mysqli_query($koneksi, $sql_siswa);
+                $data_siswa = mysqli_fetch_assoc($query_siswa);
+                $nama_siswa = $data_siswa ? $data_siswa['nama_siswa'] : 'NIS: ' . $_POST['nis'];
+                logActivity($koneksi, 'CREATE', 'tb_tabungan', 'Menambah penarikan untuk ' . $nama_siswa . ' sebesar Rp ' . number_format($tarik_hasil, 0, ',', '.'), $_POST['nis']);
+            }
+
+            echo "<script>
+            (function(){
+                if(typeof Swal!=='undefined'){
+                    Swal.fire({
+                        title:'Berhasil!',
+                        text:'Penarikan berhasil ditambahkan',
+                        icon:'success',
+                        confirmButtonText:'OK',
+                        confirmButtonColor:'#28a745',
+                        allowOutsideClick:false,
+                        allowEscapeKey:false,
+                        timer:2500,
+                        timerProgressBar:true
+                    }).then(function(){
+                        window.location.href='index.php?page=data_tarik';
+                    });
+                    
+                    setTimeout(function(){
+                        window.location.href='index.php?page=data_tarik';
+                    }, 2500);
+                } else {
+                    alert('Penarikan berhasil ditambahkan');
+                    window.location.href='index.php?page=data_tarik';
+                }
+            })();
+            </script>";
+        } else {
+            echo "<script>
+            (function(){
+                if(typeof Swal!=='undefined'){
+                    Swal.fire({
+                        title:'Gagal!',
+                        text:'Penarikan gagal ditambahkan',
+                        icon:'error',
+                        confirmButtonText:'OK',
+                        confirmButtonColor:'#d33'
+                    });
+                } else {
+                    alert('Penarikan gagal ditambahkan');
+                }
+            })();
+            </script>";
+        }
+    } else {
+        echo "<script>
+        (function(){
+            if(typeof Swal!=='undefined'){
+                Swal.fire({
+                    title:'Gagal!',
+                    text:'Saldo tidak mencukupi',
+                    icon:'error',
+                    confirmButtonText:'OK',
+                    confirmButtonColor:'#d33'
+                });
+            } else {
+                alert('Saldo tidak mencukupi');
+            }
+        })();
+        </script>";
+    }
+}
+
+if (isset($_POST['Ubah'])) {
+    //menangkap post tarik
+    $tarik = $_POST['tarik'];
+    //membuang Rp dan Titik
+    $tarik_hasil = preg_replace("/[^0-9]/", "", $tarik);
+
+    $id_tabungan = $_POST['id_tabungan'];
+    $nis_baru = $_POST['nis'];
+    
+    // Get existing data to know the old amount and old NIS
+    $sql_cek = "SELECT * FROM tb_tabungan WHERE id_tabungan='$id_tabungan'";
+    $query_cek = mysqli_query($koneksi, $sql_cek);
+    $data_cek = mysqli_fetch_array($query_cek);
+    $nis_lama = $data_cek['nis'];
+    $tarik_lama = $data_cek['tarik'];
+    
+    // Calculate max withdrawable
+    if ($nis_baru == $nis_lama) {
+        // Same student: Current Balance + Old Amount
+        $sql_saldo = "SELECT sum(setor)-sum(tarik) as total FROM tb_tabungan WHERE nis='$nis_baru'";
+        $q_saldo = mysqli_query($koneksi, $sql_saldo);
+        $d_saldo = mysqli_fetch_array($q_saldo);
+        $saldo_saat_ini = $d_saldo['total'];
+        $batas = $saldo_saat_ini + $tarik_lama;
+    } else {
+        // Different student: Just Current Balance of new student
+        $sql_saldo = "SELECT sum(setor)-sum(tarik) as total FROM tb_tabungan WHERE nis='$nis_baru'";
+        $q_saldo = mysqli_query($koneksi, $sql_saldo);
+        $d_saldo = mysqli_fetch_array($q_saldo);
+        $batas = $d_saldo['total'];
+    }
+
+    if ($batas >= $tarik_hasil) {
+        $sql_ubah = "UPDATE tb_tabungan SET
+            nis='".$_POST['nis']."',
+            tarik='".$tarik_hasil."',
+            tgl='".$tanggal."'
+            WHERE id_tabungan='".$_POST['id_tabungan']."'";
+        $query_ubah = mysqli_query($koneksi, $sql_ubah);
+
+        if ($query_ubah) {
+            if (!function_exists('logActivity')) {
+                $paths = [
+                    __DIR__ . '/../../inc/activity_log.php',
+                    dirname(dirname(__DIR__)) . '/inc/activity_log.php',
+                    'inc/activity_log.php',
+                    '../../inc/activity_log.php'
+                ];
+                foreach ($paths as $path) {
+                    if (file_exists($path)) {
+                        include_once $path;
+                        break;
+                    }
+                }
+            }
+            if (function_exists('logActivity')) {
+                $sql_siswa = "SELECT nama_siswa FROM tb_siswa WHERE nis='".$_POST['nis']."'";
+                $query_siswa = mysqli_query($koneksi, $sql_siswa);
+                $data_siswa = mysqli_fetch_assoc($query_siswa);
+                $nama_siswa = $data_siswa ? $data_siswa['nama_siswa'] : 'NIS: ' . $_POST['nis'];
+                logActivity($koneksi, 'UPDATE', 'tb_tabungan', 'Mengubah penarikan untuk ' . $nama_siswa . ' menjadi Rp ' . number_format($tarik_hasil, 0, ',', '.'), $_POST['nis']);
+            }
+            
+            echo "<script>
+            (function(){
+                if(typeof Swal!=='undefined'){
+                    Swal.fire({
+                        title:'Berhasil!',
+                        text:'Penarikan berhasil diubah',
+                        icon:'success',
+                        confirmButtonText:'OK',
+                        confirmButtonColor:'#28a745',
+                        allowOutsideClick:false,
+                        allowEscapeKey:false,
+                        timer:2500,
+                        timerProgressBar:true
+                    }).then(function(){
+                        window.location.href='index.php?page=data_tarik';
+                    });
+                    
+                    setTimeout(function(){
+                        window.location.href='index.php?page=data_tarik';
+                    }, 2500);
+                } else {
+                    alert('Penarikan berhasil diubah');
+                    window.location.href='index.php?page=data_tarik';
+                }
+            })();
+            </script>";
+        } else {
+            echo "<script>
+            (function(){
+                if(typeof Swal!=='undefined'){
+                    Swal.fire({
+                        title:'Gagal!',
+                        text:'Penarikan gagal diubah',
+                        icon:'error',
+                        confirmButtonText:'OK',
+                        confirmButtonColor:'#d33'
+                    });
+                } else {
+                    alert('Penarikan gagal diubah');
+                }
+            })();
+            </script>";
+        }
+    } else {
+        echo "<script>
+        (function(){
+            if(typeof Swal!=='undefined'){
+                Swal.fire({
+                    title:'Gagal!',
+                    text:'Saldo tidak mencukupi untuk perubahan ini',
+                    icon:'error',
+                    confirmButtonText:'OK',
+                    confirmButtonColor:'#d33'
+                });
+            } else {
+                alert('Saldo tidak mencukupi untuk perubahan ini');
+            }
+        })();
+        </script>";
+    }
+}
 ?>
 
 <section class="content-header">
@@ -39,8 +291,9 @@ $data_nama = $_SESSION["ses_nama"];
 
 	<div class="box box-primary">
 		<div class="box-header">
-			<a href="?page=add_tarik" class="btn btn-primary">
-				<i class="glyphicon glyphicon-plus"></i> Tambah Data</a>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+				<i class="glyphicon glyphicon-plus"></i> Tambah Data
+			</button>
 			<button type="button" id="btnEditTerpilih" class="btn btn-success" onclick="editTerpilih()">
 				<i class="glyphicon glyphicon-edit"></i> Edit Terpilih
 			</button>
@@ -118,10 +371,14 @@ $data_nama = $_SESSION["ses_nama"];
 							</td>
 							<td>
 
-								<a href="?page=edit_tarik&kode=<?php echo $data['id_tabungan']; ?>" title="Ubah"
-								 class="btn btn-success btn-sm">
+								<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#editModal"
+								data-id="<?php echo $data['id_tabungan']; ?>"
+								data-nis="<?php echo $data['nis']; ?>"
+								data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>"
+								data-tarik="<?php echo $data['tarik']; ?>"
+								title="Ubah">
 									<i class="glyphicon glyphicon-edit"></i>
-								</a>
+								</button>
 								<a href="?page=del_tarik&kode=<?php echo $data['id_tabungan']; ?>" 
 									onclick="return confirmHapusTarik(event, '<?php echo htmlspecialchars($data['nis']); ?>', '<?php echo htmlspecialchars($data['nama_siswa']); ?>', '<?php echo rupiah($data['tarik']); ?>')"
 									title="Hapus" class="btn btn-danger btn-sm">
@@ -140,6 +397,93 @@ $data_nama = $_SESSION["ses_nama"];
 		</div>
 	</div>
 </section>
+
+<!-- Modal Tambah -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="addModalLabel">Tambah Penarikan</h4>
+            </div>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Siswa</label>
+                        <select name="nis" id="nis_add" class="form-control select2" style="width: 100%;" required>
+                            <option value="">-- Pilih --</option>
+                            <?php
+                            $query = "select * from tb_siswa where status='Aktif'";
+                            $hasil = mysqli_query($koneksi, $query);
+                            while ($row = mysqli_fetch_array($hasil)) {
+                            ?>
+                            <option value="<?php echo $row['nis'] ?>">
+                                <?php echo $row['nis'] ?> - <?php echo $row['nama_siswa'] ?>
+                            </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Saldo Tabungan</label>
+                        <input type="text" name="saldo" id="saldo_add" class="form-control" placeholder="Saldo" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Penarikan</label>
+                        <input type="text" name="tarik" id="tarik_add" class="form-control" placeholder="Jumlah penarikan" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <input type="submit" name="Simpan" value="Simpan" class="btn btn-primary">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="editModalLabel">Ubah Penarikan</h4>
+            </div>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="id_tabungan" id="id_tabungan_edit">
+                    <div class="form-group">
+                        <label>Siswa</label>
+                        <select name="nis" id="nis_edit" class="form-control select2" style="width: 100%;" required>
+                            <option value="">-- Pilih --</option>
+                            <?php
+                            $query = "select * from tb_siswa";
+                            $hasil = mysqli_query($koneksi, $query);
+                            while ($row = mysqli_fetch_array($hasil)) {
+                            ?>
+                            <option value="<?php echo $row['nis'] ?>">
+                                <?php echo $row['nis'] ?> - <?php echo $row['nama_siswa'] ?>
+                            </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Penarikan</label>
+                        <input type="text" name="tarik" id="tarik_edit" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <input type="submit" name="Ubah" value="Ubah" class="btn btn-success">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Edit Multiple -->
 <div class="modal fade" id="modalEditMultiple" tabindex="-1" role="dialog">
@@ -210,52 +554,125 @@ function handleCheckAllClick(checkbox) {
 }
 
 // Checkbox untuk pilih semua
-$(document).ready(function() {
-	// Fungsi untuk toggle tombol (local untuk kompatibilitas)
-	function toggleButtons() {
-		toggleButtonsTarik();
-	}
-	
-	// Pastikan checkbox all sync dengan checkbox individual (menggunakan event delegation)
-	$(document).on('change click', '.checkItem', function() {
-		var totalCheckbox = $('.checkItem').length;
-		var checkedCount = $('.checkItem:checked').length;
-		$('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
-		// Panggil fungsi global untuk toggle tombol
-		toggleButtonsTarik();
-	});
-	
-	// Setup handler langsung pada elemen setelah DOM ready sebagai backup
-	setTimeout(function() {
-		$('.checkItem').off('change click').on('change click', function() {
-			var totalCheckbox = $('.checkItem').length;
-			var checkedCount = $('.checkItem:checked').length;
-			$('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
-			toggleButtonsTarik();
-		});
-	}, 200);
-	
-	// Handle checkbox all di DataTable (jika menggunakan DataTable)
-	$('#example1').on('draw.dt', function() {
-		// Reset checkAll setelah draw
-		var totalCheckbox = $('.checkItem').length;
-		var checkedCount = $('.checkItem:checked').length;
-		$('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
-		// Re-attach onclick handler
-		$('#checkAll').attr('onclick', 'handleCheckAllClick(this)');
-		// Re-setup handler untuk checkbox individual
-		$('.checkItem').off('change click').on('change click', function() {
-			var totalCheckbox = $('.checkItem').length;
-			var checkedCount = $('.checkItem:checked').length;
-			$('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
-			toggleButtonsTarik();
-		});
-		toggleButtonsTarik();
-	});
-	
-	// Inisialisasi: disable tombol di awal
-	toggleButtonsTarik();
-});
+(function() {
+    var waitForJQuery = setInterval(function() {
+        if (typeof $ !== 'undefined') {
+            clearInterval(waitForJQuery);
+
+            $(document).ready(function() {
+                // Initialize Select2
+                $('.select2').select2();
+
+                // AJAX for Saldo in Add Modal
+                $('#nis_add').change(function(){
+                    var nis = $(this).val();
+                    $.ajax({
+                        url:"plugins/proses-ajax.php",
+                        method:"POST",
+                        data:{nis:nis},
+                        success:function(data){
+                            $('#saldo_add').val(data);
+                        }
+                    });
+                });
+
+                // Helper function for format
+                function formatRupiah(angka, prefix) {
+                    var number_string = angka.replace(/[^,\d]/g, '').toString(),
+                        split = number_string.split(','),
+                        sisa = split[0].length % 3,
+                        rupiah = split[0].substr(0, sisa),
+                        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                    if (ribuan) {
+                        separator = sisa ? '.' : '';
+                        rupiah += separator + ribuan.join('.');
+                    }
+
+                    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+                    return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+                }
+
+                // Format Rupiah for Add Modal
+                var tarik_add = document.getElementById('tarik_add');
+                if(tarik_add){
+                    tarik_add.addEventListener('keyup', function(e) {
+                        tarik_add.value = formatRupiah(this.value, 'Rp ');
+                    });
+                }
+
+                // Format Rupiah for Edit Modal
+                var tarik_edit = document.getElementById('tarik_edit');
+                if(tarik_edit){
+                    tarik_edit.addEventListener('keyup', function(e) {
+                        tarik_edit.value = formatRupiah(this.value, 'Rp ');
+                    });
+                }
+
+                // Handle Edit Modal Data
+                $('#editModal').on('show.bs.modal', function(event) {
+                    var button = $(event.relatedTarget);
+                    var id = button.data('id');
+                    var nis = button.data('nis');
+                    var tarik = button.data('tarik');
+
+                    var modal = $(this);
+                    modal.find('#id_tabungan_edit').val(id);
+                    modal.find('#nis_edit').val(nis).trigger('change');
+                    
+                    // Format tarik for display
+                    var tarik_formatted = formatRupiah(tarik.toString(), 'Rp ');
+                    modal.find('#tarik_edit').val(tarik_formatted);
+                });
+
+                // Fungsi untuk toggle tombol (local untuk kompatibilitas)
+                function toggleButtons() {
+                    toggleButtonsTarik();
+                }
+                
+                // Pastikan checkbox all sync dengan checkbox individual (menggunakan event delegation)
+                $(document).on('change click', '.checkItem', function() {
+                    var totalCheckbox = $('.checkItem').length;
+                    var checkedCount = $('.checkItem:checked').length;
+                    $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                    // Panggil fungsi global untuk toggle tombol
+                    toggleButtonsTarik();
+                });
+                
+                // Setup handler langsung pada elemen setelah DOM ready sebagai backup
+                setTimeout(function() {
+                    $('.checkItem').off('change click').on('change click', function() {
+                        var totalCheckbox = $('.checkItem').length;
+                        var checkedCount = $('.checkItem:checked').length;
+                        $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                        toggleButtonsTarik();
+                    });
+                }, 200);
+                
+                // Handle checkbox all di DataTable (jika menggunakan DataTable)
+                $('#example1').on('draw.dt', function() {
+                    // Reset checkAll setelah draw
+                    var totalCheckbox = $('.checkItem').length;
+                    var checkedCount = $('.checkItem:checked').length;
+                    $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                    // Re-attach onclick handler
+                    $('#checkAll').attr('onclick', 'handleCheckAllClick(this)');
+                    // Re-setup handler untuk checkbox individual
+                    $('.checkItem').off('change click').on('change click', function() {
+                        var totalCheckbox = $('.checkItem').length;
+                        var checkedCount = $('.checkItem:checked').length;
+                        $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                        toggleButtonsTarik();
+                    });
+                    toggleButtonsTarik();
+                });
+                
+                // Inisialisasi: disable tombol di awal
+                toggleButtonsTarik();
+            });
+        }
+    }, 100);
+})();
 
 // Expose fungsi ke global scope
 window.handleCheckAllClick = handleCheckAllClick;

@@ -3,6 +3,153 @@
 require_once dirname(dirname(__DIR__)) . '/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
+if (isset($_POST['Simpan'])) {
+    $sql_simpan = "INSERT INTO tb_siswa (nis,nama_siswa,jekel,id_kelas,status,th_masuk) VALUES (
+        '".$_POST['nis']."',
+        '".$_POST['nama_siswa']."',
+        '".$_POST['jekel']."',
+        '".$_POST['id_kelas']."',
+        'Aktif',
+        '".$_POST['th_masuk']."')";
+    $query_simpan = mysqli_query($koneksi, $sql_simpan);
+    
+    if ($query_simpan) {
+        if (!function_exists('logActivity')) {
+            $paths = [
+                __DIR__ . '/../../inc/activity_log.php',
+                dirname(dirname(__DIR__)) . '/inc/activity_log.php',
+                'inc/activity_log.php',
+                '../../inc/activity_log.php'
+            ];
+            foreach ($paths as $path) {
+                if (file_exists($path)) {
+                    include_once $path;
+                    break;
+                }
+            }
+        }
+        if (function_exists('logActivity')) {
+            logActivity($koneksi, 'CREATE', 'tb_siswa', 'Menambah siswa: ' . $_POST['nama_siswa'] . ' (NIS: ' . $_POST['nis'] . ')', $_POST['nis'] ?? null);
+        }
+
+        echo "<script>
+        (function(){
+            if(typeof Swal!=='undefined'){
+                Swal.fire({
+                    title:'Berhasil!',
+                    text:'Data siswa berhasil ditambahkan',
+                    icon:'success',
+                    confirmButtonText:'OK',
+                    confirmButtonColor:'#28a745',
+                    allowOutsideClick:false,
+                    allowEscapeKey:false,
+                    timer:2500,
+                    timerProgressBar:true
+                }).then(function(){
+                    window.location.href='index.php?page=MyApp/data_siswa';
+                });
+                
+                setTimeout(function(){
+                    window.location.href='index.php?page=MyApp/data_siswa';
+                }, 2600);
+            } else {
+                alert('Data siswa berhasil ditambahkan');
+                window.location.href='index.php?page=MyApp/data_siswa';
+            }
+        })();
+        </script>";
+    }else{
+        echo "<script>
+        (function(){
+            if(typeof Swal!=='undefined'){
+                Swal.fire({
+                    title:'Gagal!',
+                    text:'Data siswa gagal ditambahkan',
+                    icon:'error',
+                    confirmButtonText:'OK',
+                    confirmButtonColor:'#d33'
+                });
+            } else {
+                alert('Data siswa gagal ditambahkan');
+            }
+        })();
+        </script>";
+    }
+}
+
+if (isset($_POST['Ubah'])) {
+    $sql_ubah = "UPDATE tb_siswa SET
+        nama_siswa='".$_POST['nama_siswa']."',
+        jekel='".$_POST['jekel']."',
+        id_kelas='".$_POST['id_kelas']."',
+        th_masuk='".$_POST['th_masuk']."'
+        WHERE nis='".$_POST['nis']."'";
+    $query_ubah = mysqli_query($koneksi, $sql_ubah);
+
+    if ($query_ubah) {
+        if (!function_exists('logActivity')) {
+            $paths = [
+                __DIR__ . '/../../inc/activity_log.php',
+                dirname(dirname(__DIR__)) . '/inc/activity_log.php',
+                'inc/activity_log.php',
+                '../../inc/activity_log.php'
+            ];
+            foreach ($paths as $path) {
+                if (file_exists($path)) {
+                    include_once $path;
+                    break;
+                }
+            }
+        }
+        if (function_exists('logActivity')) {
+            logActivity($koneksi, 'UPDATE', 'tb_siswa', 'Mengubah siswa: ' . $_POST['nama_siswa'] . ' (NIS: ' . $_POST['nis'] . ')', $_POST['nis'] ?? null);
+        }
+
+        echo "<script>
+        (function(){
+            if(typeof Swal!=='undefined'){
+                Swal.fire({
+                    title:'Berhasil!',
+                    text:'Data siswa berhasil diubah',
+                    icon:'success',
+                    confirmButtonText:'OK',
+                    confirmButtonColor:'#28a745',
+                    allowOutsideClick:false,
+                    allowEscapeKey:false,
+                    timer:2500,
+                    timerProgressBar:true
+                }).then(function(){
+                    window.location.href='index.php?page=MyApp/data_siswa';
+                });
+                
+                setTimeout(function(){
+                    window.location.href='index.php?page=MyApp/data_siswa';
+                }, 2600);
+            } else {
+                alert('Data siswa berhasil diubah');
+                window.location.href='index.php?page=MyApp/data_siswa';
+            }
+        })();
+        </script>";
+    }else{
+        echo "<script>
+        (function(){
+            if(typeof Swal!=='undefined'){
+                Swal.fire({
+                    title:'Gagal!',
+                    text:'Data siswa gagal diubah',
+                    icon:'error',
+                    confirmButtonText:'OK',
+                    confirmButtonColor:'#d33'
+                });
+            } else {
+                alert('Data siswa gagal diubah');
+            }
+        })();
+        </script>";
+    }
+}
+
 // Proses Upload Excel
 if (isset($_POST['simpan'])) {
     if (isset($_FILES['file_excel']) && $_FILES['file_excel']['error'] == 0) {
@@ -196,8 +343,9 @@ if (isset($_POST['simpan'])) {
                     ?>
                 </span>
             </h3>
-            <a href="?page=MyApp/add_siswa" title="Tambah Data" class="btn btn-primary">
-                <i class="glyphicon glyphicon-plus"></i> Tambah Data</a>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                <i class="glyphicon glyphicon-plus"></i> Tambah Data
+            </button>
             <button type="button" id="btnEditTerpilih" class="btn btn-success" onclick="editTerpilih()" disabled>
                 <i class="glyphicon glyphicon-edit"></i> Edit Terpilih
             </button>
@@ -380,15 +528,20 @@ if (isset($_POST['simpan'])) {
                             </td>
 
                             <td>
-                                <a href="?page=MyApp/edit_siswa&kode=<?php echo $data['nis']; ?>" title="Ubah"
-                                    class="btn btn-success">
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal"
+                                    data-nis="<?php echo $data['nis']; ?>"
+                                    data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>"
+                                    data-jekel="<?php echo $data['jekel']; ?>"
+                                    data-id_kelas="<?php echo $data['id_kelas']; ?>"
+                                    data-th_masuk="<?php echo $data['th_masuk']; ?>"
+                                    title="Ubah">
                                     <i class="glyphicon glyphicon-edit"></i>
-                                </a>
+                                </button>
                                 <a href="?page=MyApp/del_siswa&kode=<?php echo $data['nis']; ?>"
                                     onclick="return confirmHapus(event, 'Yakin hapus data siswa <?php echo htmlspecialchars($data['nama_siswa']); ?>?')" title="Hapus"
                                     class="btn btn-danger">
                                     <i class="glyphicon glyphicon-trash"></i>
-                                    <a />
+                                    </a>
                             </td>
                         </tr>
                         <?php
@@ -397,6 +550,7 @@ if (isset($_POST['simpan'])) {
                               // Tampilkan pesan jika tidak ada data
                               echo '<tr><td colspan="10" class="text-center">';
                               if ($sql === false) {
+
                                   echo '<span class="text-danger">Error: ' . htmlspecialchars($koneksi->error) . '</span>';
                               } else {
                                   echo '<span class="text-muted">Tidak ada data siswa. Silakan tambah data siswa terlebih dahulu.</span>';
@@ -1003,6 +1157,139 @@ window.toggleButtonsSiswa = toggleButtonsSiswa;
     </div>
     <!-- /.modal-dialog -->
 </div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="addModalLabel">Tambah Siswa</h4>
+      </div>
+      <form action="" method="post">
+      <div class="modal-body">
+        <div class="form-group">
+            <label>NIS</label>
+            <input type="text" name="nis" class="form-control" placeholder="NIS" required>
+        </div>
+        <div class="form-group">
+            <label>Nama Siswa</label>
+            <input type="text" name="nama_siswa" class="form-control" placeholder="Nama Siswa" required>
+        </div>
+        <div class="form-group">
+            <label>Jenis Kelamin</label>
+            <select name="jekel" class="form-control" required>
+                <option value="">-- Pilih --</option>
+                <option value="LK">LK</option>
+                <option value="PR">PR</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Kelas</label>
+            <select name="id_kelas" class="form-control" required>
+                <option value="">-- Pilih --</option>
+                <?php
+                $query_kelas = "select * from tb_kelas";
+                $hasil_kelas = mysqli_query($koneksi, $query_kelas);
+                while ($row_kelas = mysqli_fetch_array($hasil_kelas)) {
+                    echo '<option value="'.$row_kelas['id_kelas'].'">'.$row_kelas['kelas'].'</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tahun Masuk</label>
+            <input type="number" name="th_masuk" class="form-control" placeholder="Th Masuk" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+        <input type="submit" name="Simpan" value="Simpan" class="btn btn-primary">
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="editModalLabel">Ubah Siswa</h4>
+      </div>
+      <form action="" method="post">
+      <div class="modal-body">
+        <div class="form-group">
+            <label>NIS</label>
+            <input type="text" name="nis" id="edit_nis" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+            <label>Nama Siswa</label>
+            <input type="text" name="nama_siswa" id="edit_nama_siswa" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Jenis Kelamin</label>
+            <select name="jekel" id="edit_jekel" class="form-control" required>
+                <option value="">-- Pilih --</option>
+                <option value="LK">LK</option>
+                <option value="PR">PR</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Kelas</label>
+            <select name="id_kelas" id="edit_id_kelas" class="form-control" required>
+                <option value="">-- Pilih --</option>
+                <?php
+                // Re-query to reset pointer or just use a new query
+                $hasil_kelas_edit = mysqli_query($koneksi, "select * from tb_kelas");
+                while ($row_kelas = mysqli_fetch_array($hasil_kelas_edit)) {
+                    echo '<option value="'.$row_kelas['id_kelas'].'">'.$row_kelas['kelas'].'</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tahun Masuk</label>
+            <input type="number" name="th_masuk" id="edit_th_masuk" class="form-control" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+        <input type="submit" name="Ubah" value="Ubah" class="btn btn-success">
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Tunggu sampai jQuery dimuat
+    (function() {
+        var waitForJQuery = setInterval(function() {
+            if (typeof $ !== 'undefined') {
+                clearInterval(waitForJQuery);
+                
+                $('#editModal').on('show.bs.modal', function (event) {
+                    var button = $(event.relatedTarget)
+                    var nis = button.data('nis')
+                    var nama = button.data('nama')
+                    var jekel = button.data('jekel')
+                    var id_kelas = button.data('id_kelas')
+                    var th_masuk = button.data('th_masuk')
+                    
+                    var modal = $(this)
+                    modal.find('#edit_nis').val(nis)
+                    modal.find('#edit_nama_siswa').val(nama)
+                    modal.find('#edit_jekel').val(jekel)
+                    modal.find('#edit_id_kelas').val(id_kelas)
+                    modal.find('#edit_th_masuk').val(th_masuk)
+                });
+            }
+        }, 100);
+    })();
+</script>
 
 <script>
 // Pastikan fungsi confirmHapus didefinisikan setelah semua library dimuat
