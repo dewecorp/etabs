@@ -23,6 +23,8 @@ Thumbs.db
 # Backup files
 *.bak
 *.backup
+*.zip
+*.sql
 
 # Database (jika ada file database lokal)
 *.sqlite
@@ -42,4 +44,3 @@ node_modules/
 # Cache
 cache/
 tmp/
-
