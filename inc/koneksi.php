@@ -5,6 +5,22 @@
  * Untuk hosting, gunakan file config_db.php atau edit langsung di sini
  */
 
+// Konfigurasi Error Reporting
+// Set ke true untuk development, false untuk production
+if (!defined('DEBUG')) {
+    define('DEBUG', true); // Ubah ke false saat deploy ke hosting
+}
+
+if (DEBUG) {
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    error_reporting(0);
+}
+
 // Cek apakah file config_db.php ada (untuk hosting)
 if (file_exists(__DIR__ . '/config_db.php')) {
     require_once __DIR__ . '/config_db.php';
