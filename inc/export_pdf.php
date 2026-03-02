@@ -9,7 +9,7 @@
 /**
  * Ekspor data ke PDF - fungsi utama
  */
-function exportToPDF($title, $headers, $data, $filename = null, $profil_data = null) {
+function exportToPDF($title, $headers, $data, $filename = null, $profil_data = null, $force_print_html = false) {
     if ($filename === null) {
         $filename = 'Export_' . date('Ymd_His') . '.pdf';
     }
@@ -19,10 +19,10 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         ob_end_clean();
     }
     
-    // Cek apakah mPDF tersedia
+    // Cek apakah mPDF tersedia (skip jika dipaksa ke HTML print)
     $vendorPath = dirname(__DIR__) . '/vendor/autoload.php';
     
-    if (file_exists($vendorPath)) {
+    if (!$force_print_html && file_exists($vendorPath)) {
         require_once $vendorPath;
         
         // Cek mPDF
@@ -68,20 +68,20 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                 
                 // Build HTML content
                 $html = '<style>
-                    body { font-family: Arial, sans-serif; }
+                    body { font-family: Arial, sans-serif; color: #000; }
                     .header { margin-bottom: 20px; border-bottom: 2px solid #4472C4; padding-bottom: 15px; }
                     .header-content { display: table; width: 100%; }
                     .header-logo { display: table-cell; vertical-align: middle; width: 80px; }
                     .header-logo img { max-width: 70px; max-height: 70px; }
                     .header-text { display: table-cell; vertical-align: middle; text-align: center; }
-                    .header-text h2 { margin: 0; font-size: 16pt; color: #333; font-weight: bold; }
-                    .header-text p { margin: 5px 0; font-size: 10pt; color: #666; }
-                    .title { text-align: center; color: #333; margin: 15px 0; font-size: 14pt; font-weight: bold; }
+                    .header-text h2 { margin: 0; font-size: 16pt; color: #000; font-weight: bold; }
+                    .header-text p { margin: 5px 0; font-size: 10pt; color: #000; }
+                    .title { text-align: center; color: #000; margin: 15px 0; font-size: 14pt; font-weight: bold; }
                     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th { background-color: #4472C4; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #ddd; }
-                    td { padding: 6px; border: 1px solid #ddd; text-align: left; }
-                    tr:nth-child(even) { background-color: #f9f9f9; }
-                    .footer { text-align: center; font-size: 8pt; color: #666; margin-top: 20px; }
+                    th { background-color: #4472C4; color: #000; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #000; }
+                    td { padding: 6px; border: 1px solid #000; text-align: left; }
+                    tr:nth-child(even) { background-color: #fff; }
+                    .footer { text-align: center; font-size: 8pt; color: #000; margin-top: 20px; }
                 </style>';
                 
                 // Header dengan logo dan nama sekolah
@@ -97,6 +97,9 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                     $html .= '<h2>' . htmlspecialchars($profil_data['nama_sekolah']) . '</h2>';
                     if (!empty($profil_data['alamat'])) {
                         $html .= '<p>' . htmlspecialchars($profil_data['alamat']) . '</p>';
+                    }
+                    if (!empty($profil_data['tahun_ajaran'])) {
+                        $html .= '<p>Tahun Ajaran: ' . htmlspecialchars($profil_data['tahun_ajaran']) . '</p>';
                     }
                 } else {
                     $html .= '<h2>e-TABS System</h2>';
@@ -128,21 +131,22 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                 $html .= '<div class="footer">';
                 $html .= '<p>Dicetak pada: ' . date('d/m/Y H:i:s') . '</p>';
                 if ($profil_data && !empty($profil_data['nama_bendahara'])) {
-                    $html .= '<p style="margin-top: 20px;">Bendahara,<br><br><br><strong>' . htmlspecialchars($profil_data['nama_bendahara']) . '</strong></p>';
+                    $html .= '<div style="margin-top: 20px; display: inline-block; text-align: right; width: 100%;">';
+                    $html .= '<div style="display: inline-block; vertical-align: top; margin-right: 20px;">';
+                    $html .= '<barcode code="' . htmlspecialchars($profil_data['nama_bendahara']) . '" type="QR" class="barcode" error="M" />';
+                    $html .= '</div>';
+                    $html .= '<div style="display: inline-block; vertical-align: top; text-align: left;">';
+                    $html .= 'Bendahara,<br><br><br><strong>' . htmlspecialchars($profil_data['nama_bendahara']) . '</strong>';
+                    $html .= '</div>';
+                    $html .= '</div>';
                 }
                 $html .= '<p style="margin-top: 10px;">e-TABS System</p>';
                 $html .= '</div>';
                 
                 // Write HTML to PDF
                 $mpdf->WriteHTML($html);
-                
-                // Set headers sebelum output
-                header('Content-Type: application/pdf');
-                header('Content-Disposition: attachment;filename="' . $filename . '"');
-                header('Cache-Control: max-age=0');
-                header('Pragma: public');
-                
-                $mpdf->Output($filename, 'D');
+
+                $mpdf->Output($filename, 'I');
                 exit;
                 
             } catch (Exception $e) {
@@ -191,66 +195,21 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                 size: A4 landscape;
             }
             body { margin: 0; }
-            .print-btn, .info-box { display: none; }
+            .print-btn { display: none; }
         }
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 9pt;
-            margin: 20px;
-            background-color: #f5f5f5;
-        }
-        .info-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        .info-box p {
-            margin: 5px 0;
-            color: #856404;
-        }
+        body { font-family: Arial, sans-serif; font-size: 9pt; margin: 20px; background-color: #ffffff; color: #000; }
         .header {
             margin-bottom: 20px;
             border-bottom: 2px solid #4472C4;
             padding-bottom: 15px;
         }
-        .header-content {
-            display: table;
-            width: 100%;
-        }
-        .header-logo {
-            display: table-cell;
-            vertical-align: middle;
-            width: 80px;
-        }
-        .header-logo img {
-            max-width: 70px;
-            max-height: 70px;
-        }
-        .header-text {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-        }
-        .header-text h2 {
-            margin: 0;
-            font-size: 16pt;
-            color: #333;
-            font-weight: bold;
-        }
-        .header-text p {
-            margin: 5px 0;
-            font-size: 10pt;
-            color: #666;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin: 15px 0;
-            font-size: 14pt;
-            font-weight: bold;
-        }
+        .header-logo { float: left; width: 80px; }
+        .header-logo img { max-width: 70px; max-height: 70px; }
+        .header-text { text-align: center; margin-left: 90px; }
+        .clearfix::after { content: ""; clear: both; display: table; }
+        .header-text h2 { margin: 0; font-size: 16pt; color: #000; font-weight: bold; }
+        .header-text p { margin: 5px 0; font-size: 10pt; color: #000; }
+        h1 { text-align: center; color: #000; margin: 15px 0; font-size: 14pt; font-weight: bold; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -260,33 +219,22 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         }
         th {
             background-color: #4472C4;
-            color: white;
+            color: #000;
             padding: 10px 8px;
             text-align: center;
-            border: 1px solid #2d5aa0;
+            border: 1px solid #000;
             font-weight: bold;
             font-size: 10pt;
         }
         td {
             padding: 8px 6px;
-            border: 1px solid #ddd;
+            border: 1px solid #000;
             text-align: left;
             font-size: 9pt;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f0f0f0;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 8pt;
-            color: #666;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-        }
+        tr:nth-child(even) { background-color: #fff; }
+        tr:hover { background-color: #fff; }
+        .footer { margin-top: 30px; text-align: center; font-size: 8pt; color: #000; padding-top: 10px; border-top: 1px solid #000; }
         .print-btn {
             text-align: center;
             margin: 20px 0;
@@ -307,17 +255,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
     </style>
 </head>
 <body>
-    <div class="info-box">
-        <p><strong>Info:</strong> Library mPDF belum terinstall. Halaman ini dapat dicetak sebagai PDF menggunakan fitur Print to PDF di browser.</p>
-        <p>Untuk mendapatkan file PDF langsung, install mPDF dengan menjalankan: <code>composer require mpdf/mpdf</code></p>
-    </div>
-    <div class="print-btn">
-        <button onclick="window.print()">
-            <span style="font-size: 18px;">🖨️</span> Cetak / Save as PDF
-        </button>
-    </div>
-    <div class="header">
-        <div class="header-content">';
+    <div class="header clearfix">';
     
     if (!empty($logo_url)) {
         $html .= '<div class="header-logo">
@@ -331,11 +269,13 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         if (!empty($profil_data['alamat'])) {
             $html .= '<p>' . htmlspecialchars($profil_data['alamat']) . '</p>';
         }
+        if (!empty($profil_data['tahun_ajaran'])) {
+            $html .= '<p>Tahun Ajaran: ' . htmlspecialchars($profil_data['tahun_ajaran']) . '</p>';
+        }
     } else {
         $html .= '<h2>e-TABS System</h2>';
     }
     $html .= '</div>
-        </div>
     </div>
     <h1>' . htmlspecialchars($title) . '</h1>
     <table>
@@ -370,15 +310,8 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
     $html .= '<p style="margin-top: 10px;">e-TABS System</p>
     </div>
     <script>
-        // Auto trigger print dialog setelah halaman dimuat
         window.onload = function() {
-            // Tunggu sebentar agar halaman selesai render
-            setTimeout(function() {
-                // Tampilkan dialog print (user bisa pilih Save as PDF)
-                if (confirm("Klik OK untuk membuka dialog Print. Pilih \'Save as PDF\' sebagai destination.")) {
-                    window.print();
-                }
-            }, 500);
+            setTimeout(function() { window.print(); }, 300);
         };
     </script>
 </body>

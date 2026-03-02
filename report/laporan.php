@@ -1,4 +1,7 @@
 <?php
+// Load mPDF
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
 include "../inc/koneksi.php";
 //FUNGSI RUPIAH
 include "../inc/rupiah.php";
@@ -23,33 +26,42 @@ $profil_data = $sql->fetch_assoc();
 
 $nama = $profil_data['nama_sekolah'];
 $alamat = $profil_data['alamat'];
-$logo_path = !empty($profil_data['logo_sekolah']) ? '../uploads/logo/' . $profil_data['logo_sekolah'] : '../images/logo.png';
+$tahun_ajaran = isset($profil_data['tahun_ajaran']) ? $profil_data['tahun_ajaran'] : '';
 $nama_bendahara = isset($profil_data['nama_bendahara']) ? $profil_data['nama_bendahara'] : '';
+
+// Logo handling for mPDF
+$logo_base64 = '';
+if (!empty($profil_data['logo_sekolah'])) {
+    $logo_file = dirname(__DIR__) . '/uploads/logo/' . $profil_data['logo_sekolah'];
+    if (file_exists($logo_file)) {
+        $image_data = file_get_contents($logo_file);
+        $image_info = getimagesize($logo_file);
+        if ($image_data && $image_info) {
+            $logo_base64 = 'data:' . $image_info['mime'] . ';base64,' . base64_encode($image_data);
+        }
+    }
+}
+if (empty($logo_base64)) {
+    $logo_file = dirname(__DIR__) . '/images/logo.png';
+    if (file_exists($logo_file)) {
+        $image_data = file_get_contents($logo_file);
+        $image_info = getimagesize($logo_file);
+        if ($image_data && $image_info) {
+            $logo_base64 = 'data:' . $image_info['mime'] . ';base64,' . base64_encode($image_data);
+        }
+    }
+}
+
+// Start buffering
+ob_start();
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Laporan Tabungan Siswa</title>
 	<style>
-		@page {
-			margin: 1.5cm;
-			size: A4;
-		}
-		
-		@media print {
-			body { margin: 0; }
-			.no-print { display: none; }
-		}
-		
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-		
 		body {
 			font-family: 'Arial', sans-serif;
 			font-size: 11pt;
@@ -64,27 +76,22 @@ $nama_bendahara = isset($profil_data['nama_bendahara']) ? $profil_data['nama_ben
 		}
 		
 		.header-content {
-			display: table;
 			width: 100%;
-			margin-bottom: 10px;
 		}
 		
 		.header-logo {
-			display: table-cell;
-			vertical-align: middle;
+			float: left;
 			width: 80px;
 		}
 		
 		.header-logo img {
 			max-width: 70px;
 			max-height: 70px;
-			object-fit: contain;
 		}
 		
 		.header-text {
-			display: table-cell;
-			vertical-align: middle;
 			text-align: center;
+            margin-left: 90px;
 		}
 		
 		.header-text h1 {
@@ -145,10 +152,6 @@ $nama_bendahara = isset($profil_data['nama_bendahara']) ? $profil_data['nama_ben
 			background-color: #f9f9f9;
 		}
 		
-		tbody tr:hover {
-			background-color: #f0f0f0;
-		}
-		
 		.text-right {
 			text-align: right;
 		}
@@ -174,20 +177,28 @@ $nama_bendahara = isset($profil_data['nama_bendahara']) ? $profil_data['nama_ben
 			border-top: 1px solid #ddd;
 			padding-top: 10px;
 		}
+        
+        /* Clearfix for header */
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
 	</style>
 </head>
 <body>
-	<div class="header">
-		<div class="header-content">
-			<div class="header-logo">
-				<img src="<?php echo htmlspecialchars($logo_path); ?>" alt="Logo Sekolah" onerror="this.src='../images/logo.png'">
-			</div>
-			<div class="header-text">
-				<h1><?php echo htmlspecialchars($nama); ?></h1>
-				<?php if (!empty($alamat)): ?>
-				<p><?php echo htmlspecialchars($alamat); ?></p>
-				<?php endif; ?>
-			</div>
+	<div class="header clearfix">
+		<div class="header-logo">
+			<img src="<?php echo $logo_base64; ?>" alt="Logo Sekolah">
+		</div>
+		<div class="header-text">
+			<h1><?php echo htmlspecialchars($nama); ?></h1>
+			<?php if (!empty($alamat)): ?>
+			<p><?php echo htmlspecialchars($alamat); ?></p>
+			<?php endif; ?>
+            <?php if (!empty($tahun_ajaran)): ?>
+            <p>Tahun Ajaran: <?php echo htmlspecialchars($tahun_ajaran); ?></p>
+            <?php endif; ?>
 		</div>
 	</div>
 	
@@ -249,18 +260,40 @@ $nama_bendahara = isset($profil_data['nama_bendahara']) ? $profil_data['nama_ben
 		<?php if (!empty($nama_bendahara)): ?>
 		<div style="margin-top: 30px; text-align: right; padding-right: 50px;">
 			<p>Bendahara,</p>
-			<p style="margin-top: 50px;">
-				<strong><?php echo htmlspecialchars($nama_bendahara); ?></strong>
-			</p>
+			<br><br><br>
+			<p><strong><?php echo htmlspecialchars($nama_bendahara); ?></strong></p>
 		</div>
 		<?php endif; ?>
 		<p style="margin-top: 10px;">e-TABS System</p>
 	</div>
-	
-	<script>
-		window.onload = function() {
-			window.print();
-		};
-	</script>
 </body>
 </html>
+
+<?php
+// Get content from buffer
+$html = ob_get_clean();
+
+try {
+    // Create mPDF instance
+    $mpdf = new \Mpdf\Mpdf([
+        'mode' => 'utf-8',
+        'format' => 'A4',
+        'margin_left' => 15,
+        'margin_right' => 15,
+        'margin_top' => 15,
+        'margin_bottom' => 15
+    ]);
+    
+    // Set title
+    $mpdf->SetTitle('Laporan Tabungan Siswa');
+    
+    // Write HTML
+    $mpdf->WriteHTML($html);
+    
+    // Output PDF
+    $mpdf->Output('Laporan_Tabungan_' . date('Ymd_His') . '.pdf', 'I');
+    
+} catch (\Mpdf\MpdfException $e) {
+    echo $e->getMessage();
+}
+?>

@@ -164,9 +164,10 @@ $profil_data = mysqli_fetch_assoc($sql_profil);
 
 // Export
 if ($type === 'excel') {
-    exportToExcel($config['title'], $config['headers'], $data, $filename);
+    exportToExcel($config['title'], $config['headers'], $data, $filename, $profil_data);
 } else {
-    // Gunakan fungsi exportToPDF yang sudah ada dengan data profil
-    exportToPDF($config['title'], $config['headers'], $data, $filename, $profil_data);
+    // Untuk tabel siswa, paksa mode HTML print agar terbuka di tab baru
+    $force_print_html = ($table === 'siswa');
+    exportToPDF($config['title'], $config['headers'], $data, $filename, $profil_data, $force_print_html);
 }
 

@@ -85,6 +85,13 @@ if(isset($_GET['kode'])){
 								<option value="TT" <?php echo (isset($data_cek['akreditasi']) && $data_cek['akreditasi'] == 'TT') ? 'selected' : ''; ?>>TT (Belum Terakreditasi)</option>
 							</select>
 						</div>
+
+						<div class="form-group">
+							<label><i class="fa fa-calendar"></i> Tahun Ajaran Aktif</label>
+							<input type="text" class="form-control" name="tahun_ajaran" 
+							       value="<?php echo htmlspecialchars(isset($data_cek['tahun_ajaran']) ? $data_cek['tahun_ajaran'] : ''); ?>" 
+							       placeholder="Contoh: 2023/2024">
+						</div>
 						
 						<div class="form-group">
 							<label><i class="fa fa-image"></i> Logo Sekolah</label>
@@ -239,6 +246,7 @@ if (isset($_POST['Ubah'])) {
     }
     
     $nama_bendahara = isset($_POST['nama_bendahara']) ? mysqli_real_escape_string($koneksi, $_POST['nama_bendahara']) : '';
+    $tahun_ajaran = isset($_POST['tahun_ajaran']) ? mysqli_real_escape_string($koneksi, $_POST['tahun_ajaran']) : '';
     
     // Update database - cek apakah kolom logo_sekolah sudah ada
     $check_column = mysqli_query($koneksi, "SHOW COLUMNS FROM tb_profil LIKE 'logo_sekolah'");
@@ -253,13 +261,21 @@ if (isset($_POST['Ubah'])) {
         // Tambahkan kolom nama_bendahara jika belum ada
         mysqli_query($koneksi, "ALTER TABLE tb_profil ADD COLUMN nama_bendahara VARCHAR(100) NULL AFTER logo_sekolah");
     }
+
+    // Cek apakah kolom tahun_ajaran sudah ada
+    $check_column_ta = mysqli_query($koneksi, "SHOW COLUMNS FROM tb_profil LIKE 'tahun_ajaran'");
+    if (mysqli_num_rows($check_column_ta) == 0) {
+        // Tambahkan kolom tahun_ajaran jika belum ada
+        mysqli_query($koneksi, "ALTER TABLE tb_profil ADD COLUMN tahun_ajaran VARCHAR(20) NULL AFTER nama_bendahara");
+    }
     
     $sql_ubah = "UPDATE tb_profil SET
         nama_sekolah='$nama_sekolah',
         alamat='$alamat',
         akreditasi='$akreditasi',
         logo_sekolah='$logo_sekolah',
-        nama_bendahara='$nama_bendahara'
+        nama_bendahara='$nama_bendahara',
+        tahun_ajaran='$tahun_ajaran'
         WHERE id_profil='$id_profil'";
     
     $query_ubah = mysqli_query($koneksi, $sql_ubah);

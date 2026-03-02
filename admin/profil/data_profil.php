@@ -21,6 +21,13 @@
 		// Tambahkan kolom nama_bendahara jika belum ada
 		mysqli_query($koneksi, "ALTER TABLE tb_profil ADD COLUMN nama_bendahara VARCHAR(100) NULL AFTER logo_sekolah");
 	}
+
+	// Cek apakah kolom tahun_ajaran sudah ada, jika tidak tambahkan
+	$check_column_ta = mysqli_query($koneksi, "SHOW COLUMNS FROM tb_profil LIKE 'tahun_ajaran'");
+	if (mysqli_num_rows($check_column_ta) == 0) {
+		// Tambahkan kolom tahun_ajaran jika belum ada
+		mysqli_query($koneksi, "ALTER TABLE tb_profil ADD COLUMN tahun_ajaran VARCHAR(20) NULL AFTER nama_bendahara");
+	}
 	
 	$sql = $koneksi->query("SELECT * FROM tb_profil LIMIT 1");
 	$profil = $sql->fetch_assoc();
@@ -64,6 +71,15 @@
 									<div class="info-value">
 										<span class="label label-success" style="font-size: 14px; padding: 5px 10px;">
 											Akreditasi <?php echo htmlspecialchars($profil['akreditasi']); ?>
+										</span>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label"><i class="fa fa-calendar"></i> Tahun Ajaran Aktif</label>
+									<div class="info-value">
+										<span class="label label-info" style="font-size: 14px; padding: 5px 10px;">
+											<?php echo htmlspecialchars(!empty($profil['tahun_ajaran']) ? $profil['tahun_ajaran'] : '-'); ?>
 										</span>
 									</div>
 								</div>

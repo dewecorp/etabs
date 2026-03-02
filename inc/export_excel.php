@@ -23,8 +23,9 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
  * @param array $headers Array header kolom
  * @param array $data Array data (array of arrays)
  * @param string $filename Nama file output
+ * @param array $profil_data Data profil sekolah
  */
-function exportToExcel($title, $headers, $data, $filename = null) {
+function exportToExcel($title, $headers, $data, $filename = null, $profil_data = null) {
     if ($filename === null) {
         $filename = 'Export_' . date('Ymd_His') . '.xlsx';
     }
@@ -38,19 +39,53 @@ function exportToExcel($title, $headers, $data, $filename = null) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     
-    // Set title
+    // Set title sheet
     $sheet->setTitle('Data Export');
     
-    // Set judul laporan
-    $sheet->setCellValue('A1', $title);
+    $currentRow = 1;
     $lastColLetter = chr(64 + count($headers));
-    $sheet->mergeCells('A1:' . $lastColLetter . '1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getRowDimension(1)->setRowHeight(30);
+    
+    // Tampilkan Informasi Sekolah jika ada
+    if ($profil_data) {
+        // Nama Sekolah
+        if (!empty($profil_data['nama_sekolah'])) {
+            $sheet->setCellValue('A' . $currentRow, $profil_data['nama_sekolah']);
+            $sheet->mergeCells('A' . $currentRow . ':' . $lastColLetter . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $currentRow++;
+        }
+        
+        // Alamat
+        if (!empty($profil_data['alamat'])) {
+            $sheet->setCellValue('A' . $currentRow, $profil_data['alamat']);
+            $sheet->mergeCells('A' . $currentRow . ':' . $lastColLetter . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $currentRow++;
+        }
+        
+        // Tahun Ajaran
+        if (!empty($profil_data['tahun_ajaran'])) {
+            $sheet->setCellValue('A' . $currentRow, 'Tahun Ajaran: ' . $profil_data['tahun_ajaran']);
+            $sheet->mergeCells('A' . $currentRow . ':' . $lastColLetter . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A' . $currentRow)->getFont()->setBold(true);
+            $currentRow++;
+        }
+        
+        // Spasi
+        $currentRow++;
+    }
+    
+    // Set judul laporan
+    $sheet->setCellValue('A' . $currentRow, $title);
+    $sheet->mergeCells('A' . $currentRow . ':' . $lastColLetter . $currentRow);
+    $sheet->getStyle('A' . $currentRow)->getFont()->setBold(true)->setSize(16);
+    $sheet->getStyle('A' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getRowDimension($currentRow)->setRowHeight(30);
     
     // Header row
-    $headerRow = 3;
+    $headerRow = $currentRow + 2;
     $col = 'A';
     foreach ($headers as $header) {
         $sheet->setCellValue($col . $headerRow, $header);
@@ -132,4 +167,3 @@ function exportToExcel($title, $headers, $data, $filename = null) {
     $writer->save('php://output');
     exit;
 }
-
