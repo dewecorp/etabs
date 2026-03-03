@@ -10,122 +10,99 @@
 <section class="content-header">
     <h1>
         Master Data
-        <small>siswa</small>
+        <small>Siswa</small>
     </h1>
-    <ol class="breadcrumb">
-        <li>
-            <a href="index.php">
-                <i class="fa fa-home"></i>
-                <b>e-TABS</b>
-            </a>
-        </li>
-    </ol>
 </section>
 
 <section class="content">
-    <div class="row">
-        <div class="col-md-12">
-            <!-- general form elements -->
-            <div class="box box-success">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Ubah siswa</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-box-tool" data-widget="remove">
-                            <i class="fa fa-remove"></i>
-                        </button>
+    <div class="rounded-2xl bg-white shadow-sm">
+        <div class="border-b border-slate-100 px-6 py-4">
+            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+                <i class="fa-solid fa-user-pen text-indigo-500"></i> Ubah Data Siswa
+            </h3>
+        </div>
+        <!-- /.box-header -->
+        <!-- form start -->
+        <form action="" method="post" enctype="multipart/form-data">
+            <div class="p-6 space-y-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <input type='text' class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none    name="nis" value="<?php echo $data_cek['nis']; ?>" readonly>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Siswa</label>"><input class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     name="nama_siswa" value="<?php echo $data_cek['nama_siswa']; ?>" />
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Kelamin</label>"><select name="jekel" id="jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <?php
+                            //cek data yg dipilih sebelumnya
+                            if ($data_cek['jekel'] == "LK") echo "<option value='LK' selected>LK</option>";
+                            else echo "<option value='LK'>LK</option>";
+                            
+                            if ($data_cek['jekel'] == "PR") echo "<option value='PR' selected>PR</option>";
+                            else echo "<option value='PR'>PR</option>";
+                        ?>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <select name="id_kelas" id="id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <?php
+                                // ambil data dari database
+                                $query = "select * from tb_kelas";
+                                $hasil = mysqli_query($koneksi, $query);
+                                while ($row = mysqli_fetch_array($hasil)) {
+
+                                //mengecek data yang dipilih sebelumnya
+                                ?>
+                            <option value="<?php echo $row['id_kelas'] ?>" <?=$data_cek[
+                             'id_kelas']==$row[ 'id_kelas'] ? "selected" : null ?>>
+                                <?php echo $row['kelas'] ?>
+                            </option>
+                            <?php
+                        }
+                        ?>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Masuk</label>"><input class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     name="th_masuk" value="<?php echo $data_cek['th_masuk']; ?>">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <select name="status" id="status" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <?php
+                            //cek data yg dipilih sebelumnya
+                            if ($data_cek['status'] == "Aktif") echo "<option value='Aktif' selected>Aktif</option>";
+                            else echo "<option value='Aktif'>Aktif</option>";
+                            
+                            if ($data_cek['status'] == "Lulus") echo "<option value='Lulus' selected>Lulus</option>";
+                            else echo "<option value='Lulus'>Lulus</option>";
+
+                            if ($data_cek['status'] == "Pindah") echo "<option value='Pindah' selected>Pindah</option>";
+                            else echo "<option value='Pindah'>Pindah</option>";
+                        ?>
+                        </select>
                     </div>
                 </div>
-                <!-- /.box-header -->
-                <!-- form start -->
-                <form action="" method="post" enctype="multipart/form-data">
-                    <div class="box-body">
 
-                        <div class="form-group">
-                            <label>NIS</label>
-                            <input type='text' class="form-control" name="nis" value="<?php echo $data_cek['nis']; ?>"
-                                readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nama siswa</label>
-                            <input class="form-control" name="nama_siswa"
-                                value="<?php echo $data_cek['nama_siswa']; ?>" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Jenis Kelamin</label>
-                            <select name="jekel" id="jekel" class="form-control" required>
-                                <option value="">-- Pilih --</option>
-                                <?php
-                                //cek data yg dipilih sebelumnya
-                                if ($data_cek['jekel'] == "LK") echo "<option value='LK' selected>LK</option>";
-                                else echo "<option value='LK'>LK</option>";
-                                
-                                if ($data_cek['jekel'] == "PR") echo "<option value='PR' selected>PR</option>";
-                                else echo "<option value='PR'>PR</option>";
-                            ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Kelas</label>
-                            <select name="id_kelas" id="id_kelas" class="form-control" required>
-                                <option value="">-- Pilih --</option>
-                                <?php
-                                    // ambil data dari database
-                                    $query = "select * from tb_kelas";
-                                    $hasil = mysqli_query($koneksi, $query);
-                                    while ($row = mysqli_fetch_array($hasil)) {
-
-                                    //mengecek data yang dipilih sebelumnya
-                                    ?>
-                                <option value="<?php echo $row['id_kelas'] ?>" <?=$data_cek[
-								 'id_kelas']==$row[ 'id_kelas'] ? "selected" : null ?>>
-                                    <?php echo $row['kelas'] ?>
-                                </option>
-                                <?php
-                            }
-                            ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Th Masuk</label>
-                            <input class="form-control" name="th_masuk" value="<?php echo $data_cek['th_masuk']; ?>">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select name="status" id="status" class="form-control" required>
-                                <option value="">-- Pilih --</option>
-                                <?php
-                                //cek data yg dipilih sebelumnya
-                                if ($data_cek['status'] == "Aktif") echo "<option value='Aktif' selected>Aktif</option>";
-                                else echo "<option value='Aktif'>Aktif</option>";
-                                
-                                if ($data_cek['status'] == "Lulus") echo "<option value='Lulus' selected>Lulus</option>";
-                                else echo "<option value='Lulus'>Lulus</option>";
-
-                                if ($data_cek['status'] == "Pindah") echo "<option value='Pindah' selected>Pindah</option>";
-                                else echo "<option value='Pindah'>Pindah</option>";
-                            ?>
-                            </select>
-                        </div>
-
-
-                    </div>
-                    <!-- /.box-body -->
-
-                    <div class="box-footer">
-                        <input type="submit" name="Ubah" value="Ubah" class="btn btn-success">
-                        <a href="?page=MyApp/data_siswa" class="btn btn-warning">Batal</a>
-                    </div>
-                </form>
             </div>
-            <!-- /.box -->
+            <!-- /.box-body -->
+
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100   flex justify-end gap-3">
+                <a href="?page=MyApp/data_siswa" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      transition-all">Batal</a>
+                <button type="submit" name="Ubah" value="Ubah" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
 </section>
 
 <?php
@@ -215,3 +192,4 @@ if (isset ($_POST['Ubah'])){
         return;
     }
 }
+

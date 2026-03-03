@@ -24,97 +24,163 @@ while ($data= $sql->fetch_assoc()) {
 $saldo=$setor-$tarik;
 ?>
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-	<h1>
-		Dashboard
-		<small>Administrator</small>
-	</h1>
-</section>
+<!-- Info atas -->
+<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div>
+        <p class="text-xs font-medium uppercase tracking-[0.18em] text-indigo-600">Ringkasan Dashboard</p>
+        <h2 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+            Selamat Datang, Petugas
+        </h2>
+        <p class="text-slate-500 text-xs mt-1">Snapshot performa sistem tabungan hari ini</p>
+    </div>
+    <div class="flex items-center gap-2 text-[11px] text-slate-500">
+        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/30">
+            <i class="fa-solid fa-circle text-[6px] mr-2"></i> Sistem Stabil
+        </span>
+    </div>
+</div>
 
-<!-- Main content -->
-<section class="content">
-	<!-- Small boxes (Stat box) -->
-	<div class="row">
+<!-- Kartu metrik -->
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Siswa Aktif -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Siswa Aktif</p>
+                <p class="mt-2 text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
+            </div>
+            <div class="rounded-xl bg-indigo-500/10 p-3 ring-1 ring-indigo-500/30">
+                <i class="fa-solid fa-users text-indigo-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=petugas" class="text-indigo-600 hover:text-indigo-600 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-yellow">
-				<div class="inner">
-					<h4>
-						<?= $siswa; ?>
-					</h4>
+    <!-- Total Setoran -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-emerald-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Setoran</p>
+                <p class="mt-2 text-xl font-bold text-slate-900"><?= rupiah($setor); ?></p>
+            </div>
+            <div class="rounded-xl bg-emerald-500/10 p-3 ring-1 ring-emerald-500/30">
+                <i class="fa-solid fa-arrow-down-long text-emerald-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=data_setor" class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
 
-					<p>Siswa Aktif</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-person-add"></i>
-				</div>
-				<a href="?page=petugas" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
+    <!-- Total Penarikan -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-rose-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Penarikan</p>
+                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
+            </div>
+            <div class="rounded-xl bg-rose-500/10 p-3 ring-1 ring-rose-500/30">
+                <i class="fa-solid fa-arrow-up-long text-rose-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=data_setor" class="text-rose-600 hover:text-rose-700 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-aqua">
-				<div class="inner">
-					<h4>
-						<?= rupiah($setor); ?>
-					</h4>
+    <!-- Saldo Kas -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-amber-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Saldo Kas</p>
+                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
+            </div>
+            <div class="rounded-xl bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
+                <i class="fa-solid fa-wallet text-amber-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=view_kas" class="text-amber-600 hover:text-amber-300 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
+</div>
 
-					<p>Total Setoran</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-bag"></i>
-				</div>
-				<a href="?page=data_setor" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
+<div class="grid gap-4 lg:grid-cols-3 mt-6">
+    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900">Statistik Tabungan</h3>
+                <p class="text-[11px] text-slate-500">Monitoring aktivitas harian</p>
+            </div>
+        </div>
+        <div class="h-64 w-full">
+            <canvas id="petugasSavingChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+        <h3 class="text-sm font-semibold text-slate-900 mb-4">Aksi Cepat</h3>
+        <div class="grid gap-3">
+            <a href="?page=data_setor" class="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20 transition-all">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="text-xs font-medium">Input Setoran Baru</span>
+            </a>
+            <a href="?page=data_tarik" class="flex items-center gap-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 hover:bg-rose-500/20 transition-all">
+                <i class="fa-solid fa-minus-circle"></i>
+                <span class="text-xs font-medium">Input Penarikan Baru</span>
+            </a>
+            <a href="?page=view_tabungan" class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 hover:bg-indigo-500/20 transition-all">
+                <i class="fa-solid fa-search"></i>
+                <span class="text-xs font-medium">Cek Saldo Siswa</span>
+            </a>
+        </div>
+    </div>
+</div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-red">
-				<div class="inner">
-					<h4>
-						<?= rupiah($tarik); ?>
-					</h4>
-					<p>Total Penarikan</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-stats-bars"></i>
-				</div>
-				<a href="?page=data_tarik" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
-
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-green">
-				<div class="inner">
-					<h4>
-						<?= rupiah($saldo); ?>
-					</h4>
-					<p>Total Saldo</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-pie-graph"></i>
-				</div>
-				<a href="#" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-	</div>
-
-	<!-- /.box-body -->
-</section>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('petugasSavingChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                datasets: [{
+                    label: 'Transaksi',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: '#6366f1',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#64748b', font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    });
+</script>
 <!-- /.content -->
+

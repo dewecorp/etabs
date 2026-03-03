@@ -68,20 +68,22 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                 
                 // Build HTML content
                 $html = '<style>
-                    body { font-family: Arial, sans-serif; color: #000; }
-                    .header { margin-bottom: 20px; border-bottom: 2px solid #4472C4; padding-bottom: 15px; }
+                    body { font-family: Arial, sans-serif; color: #000 !important; }
+                    p, div, span, strong, td, th { color: #000 !important; }
+                    th { color: #fff !important; background-color: #000 !important; }
+                    .header { margin-bottom: 20px; border-bottom: 3px solid #000 !important; padding-bottom: 15px; }
                     .header-content { display: table; width: 100%; }
                     .header-logo { display: table-cell; vertical-align: middle; width: 80px; }
                     .header-logo img { max-width: 70px; max-height: 70px; }
                     .header-text { display: table-cell; vertical-align: middle; text-align: center; }
-                    .header-text h2 { margin: 0; font-size: 16pt; color: #000; font-weight: bold; }
-                    .header-text p { margin: 5px 0; font-size: 10pt; color: #000; }
-                    .title { text-align: center; color: #000; margin: 15px 0; font-size: 14pt; font-weight: bold; }
+                    .header-text h2 { margin: 0; font-size: 16pt; font-weight: bold; }
+                    .header-text p { margin: 5px 0; font-size: 10pt; }
+                    .title { text-align: center; margin: 15px 0; font-size: 14pt; font-weight: bold; }
                     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th { background-color: #4472C4; color: #000; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #000; }
-                    td { padding: 6px; border: 1px solid #000; text-align: left; }
+                    th { padding: 8px; text-align: center; font-weight: bold; border: 1px solid #000 !important; }
+                    td { padding: 6px; border: 1px solid #000 !important; text-align: left; }
                     tr:nth-child(even) { background-color: #fff; }
-                    .footer { text-align: center; font-size: 8pt; color: #000; margin-top: 20px; }
+                    .footer { text-align: center; font-size: 8pt; margin-top: 20px; border-top: 1px solid #000 !important; padding-top: 10px; }
                 </style>';
                 
                 // Header dengan logo dan nama sekolah
@@ -131,22 +133,27 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                 $html .= '<div class="footer">';
                 $html .= '<p>Dicetak pada: ' . date('d/m/Y H:i:s') . '</p>';
                 if ($profil_data && !empty($profil_data['nama_bendahara'])) {
-                    $html .= '<div style="margin-top: 20px; display: inline-block; text-align: right; width: 100%;">';
-                    $html .= '<div style="display: inline-block; vertical-align: top; margin-right: 20px;">';
-                    $html .= '<barcode code="' . htmlspecialchars($profil_data['nama_bendahara']) . '" type="QR" class="barcode" error="M" />';
+                    $html .= '<div style="margin-top: 20px; text-align: right; padding-right: 20px;">';
+                    $html .= '<div style="display: inline-block; text-align: center;">';
+                    $html .= '<p>Bendahara,</p>';
+                    $html .= '<div style="margin: 10px 0;">';
+                    $html .= '<barcode code="' . htmlspecialchars($profil_data['nama_bendahara']) . '" type="QR" class="barcode" size="0.8" error="M" />';
                     $html .= '</div>';
-                    $html .= '<div style="display: inline-block; vertical-align: top; text-align: left;">';
-                    $html .= 'Bendahara,<br><br><br><strong>' . htmlspecialchars($profil_data['nama_bendahara']) . '</strong>';
+                    $html .= '<p><strong>' . htmlspecialchars($profil_data['nama_bendahara']) . '</strong></p>';
                     $html .= '</div>';
                     $html .= '</div>';
                 }
                 $html .= '<p style="margin-top: 10px;">e-TABS System</p>';
                 $html .= '</div>';
                 
+                // Set JS to trigger print dialog
+                $mpdf->SetJS('this.print();');
+                
                 // Write HTML to PDF
                 $mpdf->WriteHTML($html);
 
-                $mpdf->Output($filename, 'I');
+                // Output PDF Inline to browser (I) to open in new tab
+                $mpdf->Output('', 'I');
                 exit;
                 
             } catch (Exception $e) {
@@ -197,44 +204,44 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
             body { margin: 0; }
             .print-btn { display: none; }
         }
-        body { font-family: Arial, sans-serif; font-size: 9pt; margin: 20px; background-color: #ffffff; color: #000; }
+        body { font-family: Arial, sans-serif; font-size: 9pt; margin: 20px; background-color: #ffffff; color: #000 !important; }
+        p, div, span, strong, td, th { color: #000 !important; }
+        th { color: #fff !important; background-color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .header {
             margin-bottom: 20px;
-            border-bottom: 2px solid #4472C4;
+            border-bottom: 3px solid #000 !important;
             padding-bottom: 15px;
         }
         .header-logo { float: left; width: 80px; }
         .header-logo img { max-width: 70px; max-height: 70px; }
         .header-text { text-align: center; margin-left: 90px; }
         .clearfix::after { content: ""; clear: both; display: table; }
-        .header-text h2 { margin: 0; font-size: 16pt; color: #000; font-weight: bold; }
-        .header-text p { margin: 5px 0; font-size: 10pt; color: #000; }
-        h1 { text-align: center; color: #000; margin: 15px 0; font-size: 14pt; font-weight: bold; }
+        .header-text h2 { margin: 0; font-size: 16pt; font-weight: bold; }
+        .header-text p { margin: 5px 0; font-size: 10pt; }
+        h1 { text-align: center; margin: 15px 0; font-size: 14pt; font-weight: bold; }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             background-color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: none;
         }
         th {
-            background-color: #4472C4;
-            color: #000;
             padding: 10px 8px;
             text-align: center;
-            border: 1px solid #000;
+            border: 1px solid #000 !important;
             font-weight: bold;
             font-size: 10pt;
         }
         td {
             padding: 8px 6px;
-            border: 1px solid #000;
+            border: 1px solid #000 !important;
             text-align: left;
             font-size: 9pt;
         }
         tr:nth-child(even) { background-color: #fff; }
         tr:hover { background-color: #fff; }
-        .footer { margin-top: 30px; text-align: center; font-size: 8pt; color: #000; padding-top: 10px; border-top: 1px solid #000; }
+        .footer { margin-top: 30px; text-align: center; font-size: 8pt; padding-top: 10px; border-top: 1px solid #000 !important; }
         .print-btn {
             text-align: center;
             margin: 20px 0;
@@ -242,15 +249,15 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         .print-btn button {
             padding: 12px 30px;
             font-size: 16px;
-            background-color: #4472C4;
-            color: white;
+            background-color: #000 !important;
+            color: white !important;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .print-btn button:hover {
-            background-color: #365a9e;
+            background-color: #333 !important;
         }
     </style>
 </head>
@@ -304,7 +311,15 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         <p>Dicetak pada: ' . date('d/m/Y H:i:s') . '</p>';
     
     if ($profil_data && !empty($profil_data['nama_bendahara'])) {
-        $html .= '<p style="margin-top: 20px;">Bendahara,<br><br><br><strong>' . htmlspecialchars($profil_data['nama_bendahara']) . '</strong></p>';
+        $html .= '<div style="margin-top: 20px; text-align: right; padding-right: 20px;">
+            <div style="display: inline-block; text-align: center;">
+                <p>Bendahara,</p>
+                <div style="margin: 10px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' . urlencode($profil_data['nama_bendahara']) . '" alt="QR Code Signature" style="width: 80px; height: 80px;">
+                </div>
+                <p><strong>' . htmlspecialchars($profil_data['nama_bendahara']) . '</strong></p>
+            </div>
+        </div>';
     }
     
     $html .= '<p style="margin-top: 10px;">e-TABS System</p>

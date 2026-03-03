@@ -87,16 +87,12 @@ function getPageTitle($page = '') {
         
         // Transaksi - Setoran
         'data_setor' => 'Data Setoran',
-        'add_setor' => 'Tambah Setoran',
-        'edit_setor' => 'Edit Setoran',
         'edit_setor_multiple' => 'Edit Multiple Setoran',
         'del_setor' => 'Hapus Setoran',
         'del_setor_multiple' => 'Hapus Multiple Setoran',
         
         // Transaksi - Tarikan
         'data_tarik' => 'Data Tarikan',
-        'add_tarik' => 'Tambah Tarikan',
-        'edit_tarik' => 'Edit Tarikan',
         'edit_tarik_multiple' => 'Edit Multiple Tarikan',
         'del_tarik' => 'Hapus Tarikan',
         'del_tarik_multiple' => 'Hapus Multiple Tarikan',

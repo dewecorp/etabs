@@ -16,127 +16,143 @@ $activities = getRecentActivities($koneksi, 100);
 		<i class="fa fa-history"></i> Aktivitas Terbaru
 		<small>Log Aktivitas Sistem</small>
 	</h1>
-	<ol class="breadcrumb">
-		<li>
-			<a href="index.php">
-				<i class="fa fa-home"></i>
-				<b>e-TABS</b>
-			</a>
-		</li>
-		<li class="active">Aktivitas Terbaru</li>
-	</ol>
 </section>
 
 <section class="content">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="box box-primary">
-				<div class="box-header with-border">
-					<h3 class="box-title">
-						<i class="fa fa-list"></i> Timeline Aktivitas
-					</h3>
-					<div class="box-tools pull-right">
-						<span class="label label-info" style="font-size: 14px; padding: 5px 10px;">
-							<i class="fa fa-bell"></i> Total: <?php echo number_format($total_activities); ?> Aktivitas
-						</span>
-						<button type="button" class="btn btn-box-tool" data-widget="collapse">
-							<i class="fa fa-minus"></i>
-						</button>
-					</div>
-				</div>
-				<div class="box-body">
-					<?php if (empty($activities)): ?>
-					<div class="alert alert-info">
-						<i class="fa fa-info-circle"></i> Belum ada aktivitas yang tercatat.
-					</div>
-					<?php else: ?>
-					<ul class="timeline">
-						<?php
-						$current_date = '';
-						foreach ($activities as $index => $activity):
-							$activity_date = date('Y-m-d', strtotime($activity['created_at']));
-							$activity_time = date('H:i:s', strtotime($activity['created_at']));
-							$time_ago = getTimeAgo($activity['created_at']);
-							
-							// Tampilkan label tanggal jika berbeda dengan sebelumnya
-							if ($current_date != $activity_date):
-								$current_date = $activity_date;
-								$date_label = date('d M Y', strtotime($activity_date));
-								if ($activity_date == date('Y-m-d')) {
-									$date_label = 'Hari Ini';
-								} elseif ($activity_date == date('Y-m-d', strtotime('-1 day'))) {
-									$date_label = 'Kemarin';
-								}
-						?>
-						<li class="time-label">
-							<span class="bg-blue">
-								<?php echo $date_label; ?>
-							</span>
-						</li>
-						<?php endif; ?>
-						
-						<?php
-						// Pastikan format datetime benar
-						$created_at = $activity['created_at'];
-						// Konversi datetime MySQL ke timestamp Unix
-						$timestamp = strtotime($created_at);
-						// Jika strtotime gagal, coba format lain
-						if (!$timestamp && !empty($created_at)) {
-							// Coba parse dengan DateTime
-							try {
-								$dt = new DateTime($created_at);
-								$timestamp = $dt->getTimestamp();
-							} catch (Exception $e) {
-								$timestamp = time(); // Fallback ke waktu sekarang
-							}
-						}
-						// Pastikan timestamp valid
-						if (!$timestamp || $timestamp <= 0) {
-							$timestamp = time();
-						}
-						?>
-						<li>
-							<i class="fa <?php echo htmlspecialchars($activity['icon']); ?> bg-<?php echo htmlspecialchars($activity['color']); ?>"></i>
-							<div class="timeline-item">
-								<span class="time" data-timestamp="<?php echo $timestamp; ?>">
-									<i class="fa fa-clock-o"></i> <span class="time-text"><?php echo $time_ago; ?></span>
-								</span>
-								<h3 class="timeline-header">
-									<a href="#"><?php echo htmlspecialchars($activity['user_name']); ?></a>
-									<span class="label label-<?php echo htmlspecialchars($activity['color']); ?>" style="margin-left: 10px;">
-										<?php echo htmlspecialchars($activity['action']); ?>
-									</span>
-									<?php if ($activity['user_level']): ?>
-									<small class="text-muted">(<?php echo htmlspecialchars($activity['user_level']); ?>)</small>
-									<?php endif; ?>
-								</h3>
-								<div class="timeline-body">
-									<?php echo htmlspecialchars($activity['description']); ?>
-									<?php if ($activity['table_name']): ?>
-									<br><small class="text-muted">
-										<i class="fa fa-table"></i> Tabel: <strong><?php echo htmlspecialchars($activity['table_name']); ?></strong>
-										<?php if ($activity['record_id']): ?>
-										| ID: <strong><?php echo htmlspecialchars($activity['record_id']); ?></strong>
-										<?php endif; ?>
-									</small>
-									<?php endif; ?>
-								</div>
-								<div class="timeline-footer">
-									<small class="text-muted">
-										<i class="fa fa-calendar"></i> <?php echo date('d/m/Y H:i:s', strtotime($activity['created_at'])); ?>
-									</small>
-								</div>
-							</div>
-						</li>
-						<?php endforeach; ?>
-						
-						<li>
-							<i class="fa fa-clock-o bg-gray"></i>
-						</li>
-					</ul>
-					<?php endif; ?>
+	<div class="rounded-2xl bg-white shadow-sm">
+		<div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-100 px-6 py-4">
+			<h3 class="text-lg font-semibold text-slate-900">
+				<i class="fa-solid fa-list-ul text-indigo-500 mr-2"></i> Timeline Aktivitas
+			</h3>
+			<span class="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
+				<i class="fa-solid fa-bell mr-1.5"></i> Total: <?php echo number_format($total_activities); ?> Aktivitas
+			</span>
+		</div>
+		<div class="p-6">
+			<?php if (empty($activities)): ?>
+			<div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-700">
+				<div class="flex items-center gap-3">
+					<i class="fa-solid fa-circle-info text-lg"></i>
+					<span>Belum ada aktivitas yang tercatat.</span>
 				</div>
 			</div>
+			<?php else: ?>
+			<div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+				<?php
+				$current_date = '';
+				foreach ($activities as $index => $activity):
+					$activity_date = date('Y-m-d', strtotime($activity['created_at']));
+					$activity_time = date('H:i:s', strtotime($activity['created_at']));
+					$time_ago = getTimeAgo($activity['created_at']);
+					
+					// Tampilkan label tanggal jika berbeda dengan sebelumnya
+					if ($current_date != $activity_date):
+						$current_date = $activity_date;
+						$date_label = date('d M Y', strtotime($activity_date));
+						if ($activity_date == date('Y-m-d')) {
+							$date_label = 'Hari Ini';
+						} elseif ($activity_date == date('Y-m-d', strtotime('-1 day'))) {
+							$date_label = 'Kemarin';
+						}
+				?>
+				<div class="relative flex items-center justify-center md:justify-between md:gap-10 before:absolute before:left-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-px before:bg-slate-200 before:md:ml-auto before:md:mr-auto before:md:left-1/2 before:hidden">
+					<!-- Date separator handled by spacing -->
+				</div>
+				<div class="relative z-10 text-center my-8 first:mt-0">
+					<span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
+						<?php echo $date_label; ?>
+					</span>
+				</div>
+				<?php endif; ?>
+				
+				<?php
+				// Pastikan format datetime benar
+				$created_at = $activity['created_at'];
+				$timestamp = strtotime($created_at);
+				if (!$timestamp && !empty($created_at)) {
+					try {
+						$dt = new DateTime($created_at);
+						$timestamp = $dt->getTimestamp();
+					} catch (Exception $e) {
+						$timestamp = time();
+					}
+				}
+				if (!$timestamp || $timestamp <= 0) {
+					$timestamp = time();
+				}
+				
+				// Map colors
+				$bg_color = 'bg-indigo-500';
+				$text_color = 'text-indigo-600';
+				$bg_light = 'bg-indigo-50';
+				
+				switch($activity['color']) {
+					case 'blue': $bg_color = 'bg-blue-500'; $text_color = 'text-blue-600'; $bg_light = 'bg-blue-50'; break;
+					case 'green': $bg_color = 'bg-emerald-500'; $text_color = 'text-emerald-600'; $bg_light = 'bg-emerald-50'; break;
+					case 'yellow': $bg_color = 'bg-amber-500'; $text_color = 'text-amber-600'; $bg_light = 'bg-amber-50'; break;
+					case 'red': $bg_color = 'bg-rose-500'; $text_color = 'text-rose-600'; $bg_light = 'bg-rose-50'; break;
+					case 'purple': $bg_color = 'bg-purple-500'; $text_color = 'text-purple-600'; $bg_light = 'bg-purple-50'; break;
+					default: $bg_color = 'bg-slate-500'; $text_color = 'text-slate-600'; $bg_light = 'bg-slate-50'; break;
+				}
+				?>
+				
+				<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+					<!-- Icon -->
+					<div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white"><?php echo $bg_color; ?> text-white shadow-sm  md:left-1/2 md:translate-y-0">
+						<i class="fa"><?php echo htmlspecialchars($activity['icon']); ?> text-sm"></i>
+					</div>
+					
+					<!-- Card -->
+					<div class="ml-16 w-full rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200   md:ml-0 md:w-[calc(50%-2.5rem)] hover:bg-slate-50  transition-all">
+						<div class="flex items-center justify-between gap-x-4 border-b border-slate-200 pb-2 mb-2">
+							<div class="text-xs text-slate-600  time" data-timestamp="<?php echo $timestamp; ?>">
+								<i class="fa-regular fa-clock mr-1"></i> <span class="time-text"><?php echo $time_ago; ?></span>
+							</div>
+							<div class="text-xs text-slate-500">
+								<?php echo date('H:i', strtotime($activity['created_at'])); ?>
+							</div>
+						</div>
+						
+						<div class="group relative">
+							<h3 class="mt-1 text-sm font-semibold leading-6 text-slate-800  flex items-center gap-2 flex-wrap">
+								<span><?php echo htmlspecialchars($activity['user_name']); ?></span>
+								<span class="inline-flex items-center rounded-md"><?php echo $bg_light; ?> px-2 py-1 text-xs font-medium <?php echo $text_color; ?> ring-1 ring-inset ring-current/10">
+									<?php echo htmlspecialchars($activity['action']); ?>
+								</span>
+								<?php if ($activity['user_level']): ?>
+								<span class="text-xs font-normal text-slate-600  echo htmlspecialchars($activity['user_level']); ?>)</span>">
+								<?php endif; ?>
+							</h3>
+							<p class="mt-2 text-sm text-slate-700  line-clamp-3">
+								<?php echo htmlspecialchars($activity['description']); ?>
+							</p>
+						</div>
+						
+						<?php if ($activity['table_name']): ?>
+						<div class="mt-3 flex items-center gap-x-2 text-xs leading-5 text-slate-600  border-t border-slate-200 pt-2">
+							<div class="flex items-center gap-1">
+								<i class="fa-solid fa-table"></i>
+								<span><?php echo htmlspecialchars($activity['table_name']); ?></span>
+							</div>
+							<?php if ($activity['record_id']): ?>
+							<div class="flex items-center gap-1 text-slate-600">
+								<i class="fa-solid fa-hashtag"></i>
+								<span>ID: <?php echo htmlspecialchars($activity['record_id']); ?></span>
+							</div>
+							<?php endif; ?>
+						</div>
+						<?php endif; ?>
+					</div>
+				</div>
+				<?php endforeach; ?>
+				
+				<div class="relative flex items-center justify-center">
+					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-500 ring-4 ring-white">
+						<i class="fa-solid fa-check"></i>
+					</div>
+				</div>
+			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 </section>
@@ -403,4 +419,6 @@ function getTimeAgo($datetime) {
 	}
 })();
 </script>
+
+
 

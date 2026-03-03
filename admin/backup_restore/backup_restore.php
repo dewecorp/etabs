@@ -500,161 +500,171 @@ if (isset($_POST['restore'])) {
         Backup & Restore Database
         <small>Kelola backup dan restore database</small>
     </h1>
-    <ol class="breadcrumb">
-        <li><a href="?page=admin"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Backup & Restore</li>
-    </ol>
 </section>
 
 <section class="content">
-    <div class="row">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Backup Card -->
-        <div class="col-md-6">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">
-                        <i class="fa fa-download"></i> Backup Database
-                    </h3>
-                </div>
-                <form method="POST" action="">
-                    <div class="box-body">
-                        <div class="alert alert-info">
-                            <i class="fa fa-info-circle"></i> 
-                            <strong>Informasi:</strong> Backup akan membuat file SQL dari seluruh database. 
-                            File akan disimpan di folder <code>backup/</code>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Nama Database</label>
-                            <input type="text" class="form-control" value="db_tabsis" readonly>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Format File</label>
-                            <input type="text" class="form-control" value="SQL (MySQL Dump)" readonly>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Lokasi Backup</label>
-                            <input type="text" class="form-control" value="backup/" readonly>
-                        </div>
-                    </div>
-                    <div class="box-footer">
-                        <button type="submit" name="backup" class="btn btn-primary btn-lg btn-block">
-                            <i class="fa fa-download"></i> Buat Backup Sekarang
-                        </button>
-                    </div>
-                </form>
+        <div class="rounded-2xl bg-white shadow-sm h-full flex flex-col">
+            <div class="border-b border-slate-100 px-6 py-4">
+                <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-download text-indigo-500"></i>
+                    <span>Backup Database</span>
+                </h3>
             </div>
-        </div>
-
-        <!-- Restore Card -->
-        <div class="col-md-6">
-            <div class="box box-warning">
-                <div class="box-header with-border">
-                    <h3 class="box-title">
-                        <i class="fa fa-upload"></i> Restore Database
-                    </h3>
-                </div>
-                <form method="POST" action="" enctype="multipart/form-data">
-                    <div class="box-body">
-                        <div class="alert alert-warning">
-                            <i class="fa fa-exclamation-triangle"></i> 
-                            <strong>Peringatan:</strong> Restore akan mengganti seluruh data di database dengan data dari file SQL. 
-                            Pastikan Anda sudah melakukan backup sebelum restore!
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Pilih File SQL</label>
-                            <input type="file" name="file_restore" class="form-control" accept=".sql" required>
-                            <small class="help-block">Format: File SQL (.sql)</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" id="confirm_restore" name="confirm_restore" required 
-                                           onchange="document.getElementById('btn_restore').disabled = !this.checked; 
-                                                    if(this.checked) {
-                                                        document.getElementById('btn_restore').style.opacity = '1';
-                                                        document.getElementById('btn_restore').style.cursor = 'pointer';
-                                                    } else {
-                                                        document.getElementById('btn_restore').style.opacity = '0.6';
-                                                        document.getElementById('btn_restore').style.cursor = 'not-allowed';
-                                                    }">
-                                    Saya mengerti bahwa restore akan mengganti seluruh data database
-                                </label>
+            <form method="POST" action="" class="flex-1 flex flex-col">
+                <div class="p-6 space-y-4 flex-1">
+                    <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-info text-lg text-blue-600"></i>
+                            <div>
+                                <strong class="text-blue-900">Informasi:</strong>
+                                <span> Backup akan membuat file SQL dari seluruh database. File akan disimpan di folder </span>
+                                <code class="bg-blue-100 px-1 py-0.5 rounded font-mono text-xs font-bold text-blue-900">backup/</code>
                             </div>
                         </div>
                     </div>
-                    <div class="box-footer">
-                        <button type="submit" name="restore" class="btn btn-warning btn-lg btn-block" id="btn_restore" disabled style="opacity: 0.6; cursor: not-allowed;">
-                            <i class="fa fa-upload"></i> Restore Database
-                        </button>
+                    
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Nama Database</label>
+                        <input type="text" class="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:outline-none" value="db_tabsis" readonly>
                     </div>
-                </form>
+                    
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Format File</label>
+                        <input type="text" class="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:outline-none" value="SQL (MySQL Dump)" readonly>
+                    </div>
+                    
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Lokasi Backup</label>
+                        <input type="text" class="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:outline-none" value="backup/" readonly>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                    <button type="submit" name="backup" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Buat Backup Sekarang</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Restore Card -->
+        <div class="rounded-2xl bg-white shadow-sm h-full flex flex-col">
+            <div class="border-b border-slate-100 px-6 py-4">
+                <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-upload text-amber-500"></i>
+                    <span>Restore Database</span>
+                </h3>
             </div>
+            <form method="POST" action="" enctype="multipart/form-data" class="flex-1 flex flex-col">
+                <div class="p-6 space-y-4 flex-1">
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-triangle-exclamation text-lg text-amber-600"></i>
+                            <div>
+                                <strong class="text-amber-900">Peringatan:</strong>
+                                <span> Restore akan mengganti seluruh data di database dengan data dari file SQL. Pastikan Anda sudah melakukan backup sebelum restore!</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Pilih File SQL</label>
+                        <input type="file" name="file_restore" class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" accept=".sql" required>
+                        <p class="text-xs text-slate-600 mt-1">Format: File SQL (.sql)</p>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 rounded-xl bg-slate-50 p-4">
+                        <div class="h-5 flex items-center">
+                            <input type="checkbox" id="confirm_restore" name="confirm_restore" required class="h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500">
+                        </div>
+                        <label for="confirm_restore" class="text-sm text-slate-800 cursor-pointer select-none">
+                            Saya mengerti bahwa restore akan mengganti seluruh data database dengan data yang ada di file backup.
+                        </label>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                    <button type="submit" name="restore" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition-all opacity-50 cursor-not-allowed" id="btn_restore" disabled>
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Restore Database</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- List Backup Files -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title">
-                        <i class="fa fa-list"></i> Daftar File Backup
-                    </h3>
-                </div>
-                <div class="box-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-hover" id="table-backup">
-                            <thead>
-                                <tr>
-                                    <th style="width: 5%;">No</th>
-                                    <th style="width: 40%;">Nama File</th>
-                                    <th style="width: 15%;">Ukuran</th>
-                                    <th style="width: 20%;">Tanggal</th>
-                                    <th style="width: 20%; text-align: center;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $backup_dir = dirname(dirname(__DIR__)) . '/backup/';
-                                if (file_exists($backup_dir)) {
-                                    $files = glob($backup_dir . 'backup_*.sql');
-                                    rsort($files); // Sort by newest first
-                                    
-                                    if (empty($files)) {
-                                        echo '<tr><td colspan="5" class="text-center">Tidak ada file backup</td></tr>';
-                                    } else {
-                                        $no = 1;
-                                        foreach ($files as $file) {
-                                            $filename = basename($file);
-                                            $filesize = filesize($file);
-                                            $filesize_mb = round($filesize / 1024 / 1024, 2);
-                                            $filedate = date('Y-m-d H:i:s', filemtime($file));
-                                            $filepath = '../backup/' . $filename;
-                                            
-                                            echo '<tr>';
-                                            echo '<td>' . $no++ . '</td>';
-                                            echo '<td><i class="fa fa-file-code-o"></i> ' . $filename . '</td>';
-                                            echo '<td>' . $filesize_mb . ' MB</td>';
-                                            echo '<td>' . $filedate . '</td>';
-                                            echo '<td class="text-center">';
-                                            echo '<a href="' . $filepath . '" class="btn btn-sm btn-success" download><i class="fa fa-download"></i> Download</a> ';
-                                            echo '<button type="button" class="btn btn-sm btn-danger btn-hapus-backup" onclick="hapusBackupFile(\'' . htmlspecialchars($filename, ENT_QUOTES) . '\', \'' . $filesize_mb . '\', \'' . $filedate . '\', \'?page=MyApp/backup_restore&hapus_backup=' . urlencode($filename) . '\')" data-file="' . htmlspecialchars($filename) . '" data-size="' . $filesize_mb . '" data-date="' . $filedate . '" data-url="?page=MyApp/backup_restore&hapus_backup=' . urlencode($filename) . '"><i class="fa fa-trash"></i> Hapus</button>';
-                                            echo '</td>';
-                                            echo '</tr>';
-                                        }
-                                    }
-                                } else {
-                                    echo '<tr><td colspan="5" class="text-center">Folder backup belum dibuat</td></tr>';
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+    <div class="rounded-2xl bg-white shadow-sm">
+        <div class="border-b border-slate-100 px-6 py-4">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-list text-indigo-500"></i> Daftar File Backup
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="table-responsive">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <input id="datatableSearch" class="auth-input" placeholder="Cari file backup...">
+                        <select id="datatablePageSize" class="auth-input">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
                     </div>
+                </div>
+                
+                <table id="example1" class="w-full table-dashboard text-xs">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 font-medium text-center" width="5%">No</th>
+                            <th class="px-4 py-3 font-medium">Nama File</th>
+                            <th class="px-4 py-3 font-medium">Ukuran</th>
+                            <th class="px-4 py-3 font-medium">Tanggal</th>
+                            <th class="px-4 py-3 font-medium text-center" width="20%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="datatableUsersBody">
+                        <?php
+                        $backup_dir = dirname(dirname(__DIR__)) . '/backup/';
+                        if (file_exists($backup_dir)) {
+                            $files = glob($backup_dir . 'backup_*.sql');
+                            rsort($files); // Sort by newest first
+                            
+                            if (empty($files)) {
+                                // Empty state handled by JS or simple row
+                            } else {
+                                $no = 1;
+                                foreach ($files as $file) {
+                                    $filename = basename($file);
+                                    $filesize = filesize($file);
+                                    $filesize_mb = round($filesize / 1024 / 1024, 2);
+                                    $filedate = date('Y-m-d H:i:s', filemtime($file));
+                                    $filepath = 'backup/' . $filename;
+                                    
+                                    echo '<tr>';
+                                    echo '<td class="text-center font-bold text-slate-800">' . $no++ . '</td>';
+                                    echo '<td class="font-bold text-slate-900" style="color: #0f172a !important;"><div class="flex items-center gap-2"><i class="fa-regular fa-file-code text-indigo-600"></i> ' . $filename . '</div></td>';
+                                    echo '<td class="font-bold text-slate-700">' . $filesize_mb . ' MB</td>';
+                                    echo '<td class="font-bold text-slate-700">' . $filedate . '</td>';
+                                    echo '<td class="text-center">';
+                                    echo '<div class="flex items-center justify-center gap-2">';
+                                    echo '<a href="' . $filepath . '" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-sm transition-all hover:bg-emerald-600 hover:shadow-emerald-500/30" download title="Download Backup"><i class="fa-solid fa-download"></i></a> ';
+                                    echo '<a href="?page=MyApp/backup_restore&hapus_backup=' . urlencode($filename) . '" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500 text-white shadow-sm transition-all hover:bg-rose-600 hover:shadow-rose-500/30 btn-hapus" title="Hapus Backup"><i class="fa-solid fa-trash"></i></a>';
+                                    echo '</div>';
+                                    echo '</td>';
+                                    echo '</tr>';
+                                }
+                            }
+                        }
+                        ?>
+                    </tbody>
+                </table>
+                
+                <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span id="datatableInfoText" class="text-[11px] text-slate-500"></span>
+                    <ul id="datatablePagination" class="pagination"></ul>
                 </div>
             </div>
         </div>
@@ -662,248 +672,46 @@ if (isset($_POST['restore'])) {
 </section>
 
 <script>
-// Fungsi global untuk hapus backup (fallback jika jQuery tidak bekerja)
-function hapusBackupFile(filename, filesize, filedate, deleteUrl) {
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
-            html: '<div style="text-align: center; padding: 10px;">' +
-                  '<h3 style="color: #d33; margin-bottom: 20px; font-weight: bold;">Konfirmasi Hapus File Backup</h3>' +
-                  '<p style="font-size: 16px; margin-bottom: 20px; color: #495057;">Anda yakin ingin menghapus file backup berikut?</p>' +
-                  '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">' +
-                  '<p style="margin: 8px 0; font-size: 15px;"><i class="fa fa-file-code-o" style="margin-right: 8px;"></i><strong>Nama File:</strong><br><span style="font-family: monospace; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 5px;">' + filename + '</span></p>' +
-                  '<p style="margin: 8px 0; font-size: 15px;"><i class="fa fa-hdd-o" style="margin-right: 8px;"></i><strong>Ukuran:</strong> ' + filesize + ' MB</p>' +
-                  '<p style="margin: 8px 0; font-size: 15px;"><i class="fa fa-calendar" style="margin-right: 8px;"></i><strong>Tanggal:</strong> ' + filedate + '</p>' +
-                  '</div>' +
-                  '<div style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
-                  '<p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">' +
-                  '<i class="fa fa-warning" style="margin-right: 8px;"></i>' +
-                  'PERINGATAN: File yang dihapus tidak dapat dikembalikan!</p>' +
-                  '</div>' +
-                  '</div>',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fa fa-trash"></i> Ya, Hapus Sekarang!',
-            cancelButtonText: '<i class="fa fa-times"></i> Batal',
-            reverseButtons: true,
-            focusCancel: true,
-            allowOutsideClick: false,
-            allowEscapeKey: true,
-            width: '650px',
-            customClass: {
-                popup: 'animated fadeIn'
-            },
-            buttonsStyling: true
-        }).then((result) => {
-            if (result.isConfirmed === true) {
-                Swal.fire({
-                    title: 'Sedang Menghapus...',
-                    html: '<div style="padding: 20px;">' +
-                          '<i class="fa fa-spinner fa-spin fa-3x" style="color: #d33; margin-bottom: 15px;"></i>' +
-                          '<p style="font-size: 16px; margin-top: 15px;">Menghapus file: <strong>' + filename + '</strong></p>' +
-                          '<p style="font-size: 14px; color: #6c757d;">Mohon tunggu...</p>' +
-                          '</div>',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
-                setTimeout(function() {
-                    window.location.href = deleteUrl;
-                }, 500);
-            } else {
-                Swal.fire({
-                    title: 'Dibatalkan',
-                    text: 'File backup tidak dihapus',
-                    icon: 'info',
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    timer: 2000,
-                    timerProgressBar: true
-                });
-            }
-        });
-    } else {
-        // Fallback jika SweetAlert tidak tersedia
-        Swal.fire({
-            title: 'Error',
-            text: 'SweetAlert tidak tersedia. Silakan refresh halaman.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    }
-}
+    // Restore Button Logic
+    const confirmRestore = document.getElementById('confirm_restore');
+    const btnRestore = document.getElementById('btn_restore');
 
-// Pastikan jQuery dan SweetAlert tersedia
-// (Silent check - tidak ada logging)
-
-// Semua script dalam satu document.ready
-$(document).ready(function() {
-    // Enable/disable restore button
-    var checkbox = $('#confirm_restore');
-    var button = $('#btn_restore');
-    
-    // Function to update button
-    function updateButton() {
-        var isChecked = checkbox.is(':checked');
-        button.prop('disabled', !isChecked);
-        
-        if (isChecked) {
-            button.css({
-                'opacity': '1',
-                'cursor': 'pointer'
-            }).removeClass('disabled');
-        } else {
-            button.css({
-                'opacity': '0.6',
-                'cursor': 'not-allowed'
-            }).addClass('disabled');
-        }
-    }
-    
-    // Event handler untuk checkbox restore
-    checkbox.on('change click', function() {
-        updateButton();
-    });
-    
-    // Initial state
-    updateButton();
-    
-    // Fallback dengan vanilla JS juga untuk checkbox
-    var checkboxEl = document.getElementById('confirm_restore');
-    var buttonEl = document.getElementById('btn_restore');
-    
-    if (checkboxEl && buttonEl) {
-        checkboxEl.addEventListener('change', function() {
-            buttonEl.disabled = !this.checked;
+    if (confirmRestore && btnRestore) {
+        confirmRestore.addEventListener('change', function() {
+            btnRestore.disabled = !this.checked;
             if (this.checked) {
-                buttonEl.style.opacity = '1';
-                buttonEl.style.cursor = 'pointer';
+                btnRestore.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnRestore.classList.add('hover:bg-amber-700', 'hover:shadow-lg', 'hover:shadow-amber-500/30');
             } else {
-                buttonEl.style.opacity = '0.6';
-                buttonEl.style.cursor = 'not-allowed';
+                btnRestore.classList.add('opacity-50', 'cursor-not-allowed');
+                btnRestore.classList.remove('hover:bg-amber-700', 'hover:shadow-lg', 'hover:shadow-amber-500/30');
             }
         });
     }
-    
-    // Hapus backup file - dengan alert konfirmasi WAJIB
-    // Gunakan event delegation untuk memastikan handler terpasang
-    $(document).on('click', '.btn-hapus-backup', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        var $btn = $(this);
-        var filename = $btn.data('file');
-        var filesize = $btn.data('size') || 'N/A';
-        var filedate = $btn.data('date') || 'N/A';
-        var deleteUrl = $btn.data('url');
-        
-        // Validasi data
-        if (!filename || !deleteUrl) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Data tidak lengkap',
-                    icon: 'error'
-                });
-            } else {
-                Swal.fire({
-                    title: 'Data Tidak Lengkap',
-                    text: 'Silakan lengkapi semua data yang diperlukan',
-                    icon: 'warning',
-                    confirmButtonText: 'OK'
-                });
-            }
-            return false;
-        }
-        
-        // Alert konfirmasi WAJIB sebelum menghapus
-        if (typeof Swal !== 'undefined') {
+
+    // Delete Confirmation
+    document.addEventListener('click', function(e) {
+        const deleteBtn = e.target.closest('.btn-hapus');
+        if (deleteBtn) {
+            e.preventDefault();
+            const url = deleteBtn.getAttribute('href');
+            
             Swal.fire({
-                title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
-                html: '<div style="text-align: center; padding: 10px;">' +
-                      '<h3 style="color: #d33; margin-bottom: 20px; font-weight: bold;">Konfirmasi Hapus File Backup</h3>' +
-                      '<p style="font-size: 16px; margin-bottom: 20px; color: #495057;">Anda yakin ingin menghapus file backup berikut?</p>' +
-                      '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">' +
-                      '<p style="margin: 8px 0; font-size: 15px;"><i class="fa fa-file-code-o" style="margin-right: 8px;"></i><strong>Nama File:</strong><br><span style="font-family: monospace; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 5px;">' + filename + '</span></p>' +
-                      '<p style="margin: 8px 0; font-size: 15px;"><i class="fa fa-hdd-o" style="margin-right: 8px;"></i><strong>Ukuran:</strong> ' + filesize + ' MB</p>' +
-                      '<p style="margin: 8px 0; font-size: 15px;"><i class="fa fa-calendar" style="margin-right: 8px;"></i><strong>Tanggal:</strong> ' + filedate + '</p>' +
-                      '</div>' +
-                      '<div style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
-                      '<p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">' +
-                      '<i class="fa fa-warning" style="margin-right: 8px;"></i>' +
-                      'PERINGATAN: File yang dihapus tidak dapat dikembalikan!</p>' +
-                      '</div>' +
-                      '</div>',
+                title: 'Hapus Backup?',
+                text: "File backup yang dihapus tidak dapat dikembalikan!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: '<i class="fa fa-trash"></i> Ya, Hapus Sekarang!',
-                cancelButtonText: '<i class="fa fa-times"></i> Batal',
-                reverseButtons: true,
-                focusCancel: true,
-                allowOutsideClick: false,
-                allowEscapeKey: true,
-                width: '650px',
-                customClass: {
-                    popup: 'animated fadeIn'
-                },
-                buttonsStyling: true
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
             }).then((result) => {
-                // HANYA hapus jika user mengkonfirmasi dengan jelas
-                if (result.isConfirmed === true) {
-                    // Show loading indicator
-                    Swal.fire({
-                        title: 'Sedang Menghapus...',
-                        html: '<div style="padding: 20px;">' +
-                              '<i class="fa fa-spinner fa-spin fa-3x" style="color: #d33; margin-bottom: 15px;"></i>' +
-                              '<p style="font-size: 16px; margin-top: 15px;">Menghapus file: <strong>' + filename + '</strong></p>' +
-                              '<p style="font-size: 14px; color: #6c757d;">Mohon tunggu...</p>' +
-                              '</div>',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    
-                    // Redirect ke URL hapus HANYA setelah konfirmasi
-                    setTimeout(function() {
-                        window.location.href = deleteUrl;
-                    }, 500);
-                } else {
-                    // User membatalkan atau menutup dialog
-                    Swal.fire({
-                        title: 'Dibatalkan',
-                        text: 'File backup tidak dihapus',
-                        icon: 'info',
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'OK',
-                        timer: 2000,
-                        timerProgressBar: true
-                    });
+                if (result.isConfirmed) {
+                    window.location.href = url;
                 }
             });
-        } else {
-            // Fallback jika SweetAlert tidak tersedia - gunakan alert biasa
-            Swal.fire({
-                title: 'Error',
-                text: 'SweetAlert tidak tersedia. Silakan refresh halaman.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
         }
-        
-        return false;
     });
-});
 </script>
 
 <style>

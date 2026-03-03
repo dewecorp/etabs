@@ -24,63 +24,58 @@ $saldo=$setor-$tarik;
 
 <section class="content-header">
     <h1>
-        Transaksi
-        <small>Info Kas</small>
+        Info Kas
     </h1>
-    <ol class="breadcrumb">
-        <li>
-            <a href="index.php">
-                <i class="fa fa-home"></i>
-                <b>e-TABS</b>
-            </a>
-        </li>
-    </ol>
 </section>
 <!-- Main content -->
 
 <section class="content">
 
-    <!-- /.box-header -->
-    <div class="box box-primary">
-        <div class="box-header">
-            Saldo Tabungan (Kas)
-            <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                    <i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-box-tool" data-widget="remove">
-                    <i class="fa fa-remove"></i>
-                </button>
-            </div>
+    <div class="rounded-2xl bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+                <i class="fa-solid fa-vault text-indigo-500"></i>
+                Saldo Tabungan (Kas)
+            </h3>
         </div>
         <!-- /.box-header -->
-        <div class="box-body">
+        <div class="p-6">
             <div class="table-responsive">
-                <table id="example1" class="table table-bordered table-striped">
+                <table class="w-full table-dashboard">
                     <thead>
                         <tr>
-                            <th>Total Setoran</th>
-                            <th>Total Tarikan</th>
-                            <th>Saldo Tabungan</th>
+                            <th class="px-6 py-4 font-medium">Total Setoran</th>
+                            <th class="px-6 py-4 font-medium">Total Tarikan</th>
+                            <th class="px-6 py-4 font-medium">Saldo Tabungan</th>
                         </tr>
                     </thead>
                     <tbody>
 
-                        <tr>
-                            <td>
-                                <a href="?page=data_setor" class="btn btn-success btn-sm">
-                                    <i class="glyphicon glyphicon-info-sign" title="Detail"> </i>
-                                </a>
-                                <?php echo rupiah($setor); ?>
+                        <tr class="hover:bg-slate-50  transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <a href="?page=data_setor" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200    transition-colors" title="Detail">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </a>
+                                    <span class="text-lg font-semibold text-emerald-600">
+                                        <?php echo rupiah($setor); ?>
+                                    </span>
+                                </div>
                             </td>
-                            <td>
-                                <a href="?page=data_tarik" class="btn btn-danger btn-sm">
-                                    <i class="glyphicon glyphicon-info-sign" title="Detail"> </i>
-                                </a>
-                                <?php echo rupiah($tarik); ?>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <a href="?page=data_tarik" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200    transition-colors" title="Detail">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </a>
+                                    <span class="text-lg font-semibold text-rose-600">
+                                        <?php echo rupiah($tarik); ?>
+                                    </span>
+                                </div>
                             </td>
-                            <td>
-                                <?php echo rupiah($saldo); ?>
+                            <td class="px-6 py-4">
+                                <span class="text-2xl font-bold text-slate-900">
+                                    <?php echo rupiah($saldo); ?>
+                                </span>
                             </td>
                         </tr>
                     </tbody>
@@ -90,3 +85,4 @@ $saldo=$setor-$tarik;
         </div>
     </div>
 </section>
+

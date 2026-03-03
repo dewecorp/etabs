@@ -1,4 +1,5 @@
 <?php
+session_start();
 include "inc/koneksi.php";
 
 $sql = $koneksi->query("SELECT * from tb_profil");
@@ -6,6 +7,9 @@ $data= $sql->fetch_assoc();
 
 $nama=$data['nama_sekolah'];
 $alamat=$data['alamat'];
+// Handle Logo & Background dynamic
+$logo_path = !empty($data['logo_sekolah']) ? 'uploads/logo/' . $data['logo_sekolah'] : 'images/logo.png';
+$bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg/' . $data['bg_login'] : 'images/bg_sf.jpg';
 ?>
 
 
@@ -16,84 +20,109 @@ $alamat=$data['alamat'];
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Login | e-TABS</title>
-    <link rel="icon" href="dist/img/logo.png">
+    <link rel="icon" href="<?php echo $logo_path; ?>">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <!-- Bootstrap 3.3.6 -->
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/dashboard.css">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        .auth-bg {
+            background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('<?php echo $bg_path; ?>');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .auth-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            box-shadow: 0 10px 24px -6px rgba(2, 8, 23, 0.08);
+        }
+        .auth-input {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #1f2937;
+            padding: 12px 16px;
+            border-radius: 12px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .auth-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            background: #ffffff;
+        }
+    </style>
 </head>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <img src="images/logo.png" alt="" width="130" height="100">
-            <a href="">
-                <h2><b>E-Tabungan Siswa</h2></b>
-            </a>
-            <h3><b><?=$nama?></h3></b>
-        </div>
-        <!-- /.login-logo -->
-        <div class="login-box-body">
-            <h3 class="login-box-msg"><b>Login E-Tabs</b></h3>
+<body class="hold-transition auth-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="auth-card p-6">
+            <div class="text-center mb-6">
+                <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 shadow-lg shadow-indigo-500/40 mb-4">
+                    <img src="<?php echo $logo_path; ?>" alt="Logo" class="h-14 w-14 object-contain">
+                </div>
+                <h2 class="text-2xl font-bold text-white tracking-tight">E-Tabungan Siswa</h2>
+                <p class="text-slate-400 text-sm mt-1"><?= $nama ?></p>
+            </div>
 
-            <form action="#" method="post">
-                <div class="form-group has-feedback">
-                    <input type="text" class="form-control" name="username" placeholder="Username" required>
-                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                </div>
-                <div class="form-group has-feedback">
-                    <input type="password" class="form-control" name="password" placeholder="Password" required>
-                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-                </div>
-                <div class="row">
-                    <div class="col-xs-8">
 
+
+            <form action="#" method="post" class="space-y-3">
+                <div class="space-y-1">
+                    <label class="text-xs font-medium text-slate-300 ml-1">Username</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <i class="fa-solid fa-user text-xs"></i>
+                        </span>
+                        <input type="text" class="auth-input pl-10" name="username" placeholder="Masukkan username" required>
                     </div>
-                    <!-- /.col -->
-                    <div class="col-xs-4">
-                        <button type="submit" class="btn btn-primary btn-block btn-flat" name="btnLogin"
-                            title="Masuk Sistem">
-                            <b>Masuk</b>
-                        </button>
-                    </div>
-                    <!-- /.col -->
                 </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-medium text-slate-300 ml-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </span>
+                        <input type="password" class="auth-input pl-10" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="rounded border-slate-700 bg-slate-800 text-indigo-500 focus:ring-indigo-500">
+                        <label for="remember" class="ml-2 text-xs text-slate-400">Ingat saya</label>
+                    </div>
+                    <a href="#" class="text-xs text-indigo-400 hover:text-indigo-300">Lupa password?</a>
+                </div>
+
+                <button type="submit" class="w-full btn-dashboard-primary mt-3 flex items-center justify-center gap-2 py-3" name="btnLogin">
+                    <span>Masuk</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                </button>
             </form>
-            <!-- /.social-auth-links -->
+            
+            <div class="mt-6 pt-6 border-t border-slate-800 text-center">
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
+                    &copy; 2026 e-TABS • <?= $nama ?>
+                </p>
+            </div>
         </div>
-        <!-- /.login-box-body -->
     </div>
-    <!-- /.login-box -->
-</body>
-<!-- jQuery 2.2.3 -->
-<script src="plugins/jQuery/jquery-2.2.3.min.js"></script>
-<!-- Bootstrap 3.3.6 -->
-<script src="bootstrap/js/bootstrap.min.js"></script>
-<!-- iCheck -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
-<!-- sweet alert -->
 
-<body class="hold-transition login-page" style="background:url(images/wp.jpeg)
-no-repeat center center fixed; background-size: cover;
--webkit-background-size: cover; 
--moz-background-size: cover; -o-background-size: cover;">
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
-
 </html>
-
 
 <?php 
 if (isset($_POST['btnLogin'])) {  
@@ -109,7 +138,6 @@ if (isset($_POST['btnLogin'])) {
 	
 
 	if ($jumlah_login == 1 ){
-		session_start();
 		$_SESSION["ses_id"]=$data_login["id_pengguna"];
 		$_SESSION["ses_nama"]=$data_login["nama_pengguna"];
 		$_SESSION["ses_username"]=$data_login["username"];
@@ -127,20 +155,14 @@ if (isset($_POST['btnLogin'])) {
 			title: 'Selamat Datang!',
 			html: '<h3><strong>" . htmlspecialchars($data_login["nama_pengguna"]) . "</strong></h3><p>Login berhasil. Anda akan diarahkan ke halaman utama.</p>',
 			icon: 'success',
-			showConfirmButton: true,
-			confirmButtonText: 'OK',
-			timer: 3000,
+			showConfirmButton: false,
+			timer: 2000,
 			timerProgressBar: true,
 			allowOutsideClick: false,
 			allowEscapeKey: false
-		}).then((result) => {
+		}).then(() => {
 			window.location = 'index.php';
 		});
-		
-		// Redirect otomatis setelah 3 detik jika user tidak klik OK
-		setTimeout(function() {
-			window.location = 'index.php';
-		}, 3000);
 		</script>";
 	}else{
 		echo "<script>

@@ -1,0 +1,231 @@
+/* Badges */
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px; /* rounded-full */
+    padding: 0.25rem 0.75rem; /* px-3 py-1 */
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 600; /* font-semibold */
+    line-height: 1;
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.badge-pill-primary {
+    background-color: rgba(79, 70, 229, 0.1); /* indigo-500/10 */
+    color: #818cf8; /* indigo-400 */
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.badge-pill-success {
+    background-color: rgba(34, 197, 94, 0.1); /* emerald-500/10 */
+    color: #4ade80; /* emerald-400 */
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.badge-pill-danger {
+    background-color: rgba(244, 63, 94, 0.1); /* rose-500/10 */
+    color: #fb7185; /* rose-400 */
+    border-color: rgba(244, 63, 94, 0.2);
+}
+
+.badge-pill-warning {
+    background-color: rgba(245, 158, 11, 0.1); /* amber-500/10 */
+    color: #fbbf24; /* amber-400 */
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.badge-pill-info {
+    background-color: rgba(14, 165, 233, 0.1); /* sky-500/10 */
+    color: #38bdf8; /* sky-400 */
+    border-color: rgba(14, 165, 233, 0.2);
+}
+
+.badge-pill-secondary {
+    background-color: rgba(148, 163, 184, 0.1); /* slate-500/10 */
+    color: #94a3b8; /* slate-400 */
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 0.5rem 1rem; /* px-4 py-2 */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Primary Button (Gradient Blue/Indigo) */
+.btn-dashboard-primary {
+    background-image: linear-gradient(to bottom right, #4f46e5, #3b82f6); /* from-indigo-600 to-blue-500 */
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+}
+.btn-dashboard-primary:hover {
+    background-image: linear-gradient(to bottom right, #4338ca, #2563eb);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2), 0 4px 6px -2px rgba(79, 70, 229, 0.1);
+}
+
+/* Soft Button (Light Background) */
+.btn-dashboard-soft {
+    background-color: #f1f5f9; /* bg-slate-100 */
+    color: #475569; /* text-slate-600 */
+}
+.btn-dashboard-soft:hover {
+    background-color: #e2e8f0; /* bg-slate-200 */
+    color: #1e293b; /* text-slate-800 */
+}
+
+/* Danger Button (Red) */
+.btn-dash-danger, .btn-dashboard-danger {
+    background-color: #ef4444; /* bg-red-500 */
+    color: #ffffff;
+}
+.btn-dash-danger:hover, .btn-dashboard-danger:hover {
+    background-color: #dc2626; /* bg-red-600 */
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+}
+
+/* Success Button (Green - usually for edits/actions) */
+.btn-dashboard-success {
+    background-color: #10b981; /* bg-emerald-500 */
+    color: #ffffff;
+}
+.btn-dashboard-success:hover {
+    background-color: #059669; /* bg-emerald-600 */
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+/* Small Button Variant */
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem; /* text-xs */
+    border-radius: 0.5rem;
+}
+
+/* Form Inputs */
+.auth-input {
+    display: block;
+    width: 100%;
+    border-radius: 0.75rem;
+    border-width: 1px;
+    border-color: #e2e8f0;
+    background-color: #ffffff;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: #1e293b;
+}
+.auth-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Table Styles */
+.table-dashboard thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.table-dashboard tbody td {
+    padding: 0.75rem 1rem;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+.table-dashboard tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.pagination {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+.page-item .page-link {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    background-color: #ffffff;
+    color: #334155;
+}
+.page-item .page-link:hover {
+    background-color: #f8fafc;
+}
+.page-item.active .page-link {
+    background-color: #6366f1;
+    border-color: #6366f1;
+    color: #ffffff;
+}
+.page-item.disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bg-slate-950 {
+    background-color: #ffffff !important;
+}
+.bg-slate-900 {
+    background-color: #ffffff !important;
+}
+.bg-slate-800 {
+    background-color: #ffffff !important;
+}
+.bg-slate-950\/80 {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+}
+.bg-slate-950\/70 {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+.bg-slate-950\/60 {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+}
+.bg-slate-900\/80 {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+}
+.bg-slate-900\/70 {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+.bg-slate-900\/60 {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+}
+.bg-slate-900\/50 {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+.bg-slate-950\/50 {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+.text-slate-50 {
+    color: #1e293b !important;
+}
+.text-slate-200 {
+    color: #334155 !important;
+}
+.text-slate-300 {
+    color: #475569 !important;
+}
+.border-slate-800 {
+    border-color: #e2e8f0 !important;
+}

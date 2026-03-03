@@ -4,75 +4,65 @@
 		Tabungan
 		<small>Pencarian</small>
 	</h1>
-	<ol class="breadcrumb">
-		<li>
-			<a href="index.php">
-				<i class="fa fa-home"></i>
-				<b>e-TABS</b>
-			</a>
-		</li>
-	</ol>
 </section>
 
 <section class="content">
-	<div class="row">
-		<div class="col-md-12">
-			<!-- general form elements -->
-			<div class="box box-primary">
-				<div class="box-header with-border">
-					<h3 class="box-title">Cari Siswa</h3>
-					<div class="box-tools pull-right">
-						<button type="button" class="btn btn-box-tool" data-widget="collapse">
-							<i class="fa fa-minus"></i>
-						</button>
-						<button type="button" class="btn btn-box-tool" data-widget="remove">
-							<i class="fa fa-remove"></i>
-						</button>
-					</div>
-				</div>
-				<!-- /.box-header -->
-				<!-- form start -->
-				<form action="?page=data_tabungan" method="post" enctype="multipart/form-data">
-					<div class="box-body">
+	<div class="rounded-2xl bg-white shadow-sm">
+		<div class="border-b border-slate-100 px-6 py-4">
+			<h3 class="text-lg font-semibold text-slate-900">
+                <i class="fa-solid fa-magnifying-glass text-indigo-500 mr-2"></i>Cari Siswa
+            </h3>
+		</div>
+		<!-- /.box-header -->
+		<!-- form start -->
+		<form action="?page=data_tabungan" method="post" enctype="multipart/form-data">
+			<div class="p-6 space-y-6">
 
-						<div class="form-group">
-							<label>Siswa</label>
-							<select name="nis" id="nis" class="form-control select2" style="width: 100%;">
-								<option selected="selected">-- Pilih --</option>
-								<?php
-                        // ambil data dari database
-                        $query = "select * from tb_siswa where status='Aktif'";
-                        $hasil = mysqli_query($koneksi, $query);
-                        while ($row = mysqli_fetch_array($hasil)) {
-                        ?>
-								<option value="<?php echo $row['nis'] ?>">
-									<?php echo $row['nis'] ?>
-									-
-									<?php echo $row['nama_siswa'] ?>
-								</option>
-								<?php
-                        }
-                        ?>
-							</select required>
-						</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
+                        <select name="nis" id="nis" class="auth-input appearance-none" required>
+                            <option selected="selected">-- Pilih --</option>
+                            <?php
+                            // ambil data dari database
+                            $query = "select * from tb_siswa where status='Aktif'";
+                            $hasil = mysqli_query($koneksi, $query);
+                            while ($row = mysqli_fetch_array($hasil)) {
+                            ?>
+                            <option value="<?php echo $row['nis'] ?>">
+                                <?php echo $row['nis'] ?>
+                                -
+                                <?php echo $row['nama_siswa'] ?>
+                            </option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
 
-						<div class="form-group">
-							<label>Saldo Tabungan</label>
-							<input type="text" name="saldo" id="saldo" class="form-control" placeholder="Saldo" readonly>
-						</div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Jumlah Tabungan</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span class="text-slate-500 font-medium">Rp</span>
+                            </div>
+                            <input type="text" name="saldo" id="saldo" class="auth-input pl-10" placeholder="Saldo" readonly>
+                        </div>
+                    </div>
+                </div>
 
-					</div>
-					<!-- /.box-body -->
-
-					<div class="box-footer">
-						<input type="submit" name="Lihat" value="Lihat" class="btn btn-primary">
-					</div>
-				</form>
 			</div>
-			<!-- /.box -->
+			<!-- /.box-body -->
+
+			<div class="px-6 py-4 bg-slate-50 border-t border-slate-100   flex justify-end">
+				<button type="submit" name="Lihat" value="Lihat" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+                    <i class="fa-solid fa-eye"></i> Lihat Data
+                </button>
+			</div>
+		</form>
+	</div>
 </section>
 
-<script src="././bootstrap/lookup.js"></script>
 <script>
 	$(document).ready(function() {
 		$('#nis').change(function() {
@@ -90,3 +80,4 @@
 		});
 	});
 </script>
+

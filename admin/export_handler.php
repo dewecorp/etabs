@@ -87,6 +87,14 @@ $table_config = [
                     WHERE t.jenis='TR' 
                     ORDER BY t.tgl DESC, t.id_tabungan DESC",
         'headers' => ['No', 'NIS', 'Nama Siswa', 'Tanggal', 'Tarikan', 'Petugas']
+    ],
+    'riwayat' => [
+        'title' => 'Riwayat Transaksi',
+        'query' => "SELECT r.jenis, r.status, r.nis, COALESCE(s.nama_siswa, '') AS nama_siswa, r.tgl, r.setor, r.tarik, r.petugas, r.tgl_hapus, r.petugas_hapus
+                    FROM tb_riwayat r
+                    LEFT JOIN tb_siswa s ON r.nis = s.nis
+                    ORDER BY r.tgl DESC, r.id_riwayat DESC",
+        'headers' => ['No', 'Jenis', 'Status', 'NIS', 'Nama', 'Tanggal Transaksi', 'Jumlah', 'Petugas Transaksi', 'Tanggal Hapus', 'Petugas Hapus']
     ]
 ];
 
@@ -150,6 +158,19 @@ while ($row = mysqli_fetch_assoc($result)) {
             $rowData[] = number_format($row['tarik'], 0, ',', '.');
             $rowData[] = $row['petugas'];
             break;
+        
+        case 'riwayat':
+            $rowData[] = ($row['jenis'] === 'ST') ? 'Setoran' : 'Penarikan';
+            $rowData[] = $row['status'];
+            $rowData[] = $row['nis'];
+            $rowData[] = $row['nama_siswa'];
+            $rowData[] = date('d/m/Y', strtotime($row['tgl']));
+            $jumlah = ($row['jenis'] === 'ST') ? (int)$row['setor'] : (int)$row['tarik'];
+            $rowData[] = number_format($jumlah, 0, ',', '.');
+            $rowData[] = $row['petugas'];
+            $rowData[] = !empty($row['tgl_hapus']) ? date('d/m/Y H:i', strtotime($row['tgl_hapus'])) : '-';
+            $rowData[] = !empty($row['petugas_hapus']) ? $row['petugas_hapus'] : '-';
+            break;
     }
     
     $data[] = $rowData;
@@ -166,8 +187,8 @@ $profil_data = mysqli_fetch_assoc($sql_profil);
 if ($type === 'excel') {
     exportToExcel($config['title'], $config['headers'], $data, $filename, $profil_data);
 } else {
-    // Untuk tabel siswa, paksa mode HTML print agar terbuka di tab baru
-    $force_print_html = ($table === 'siswa');
+    // Gunakan mode HTML print agar terbuka di tab baru dan memicu dialog cetak browser
+    $force_print_html = true;
     exportToPDF($config['title'], $config['headers'], $data, $filename, $profil_data, $force_print_html);
 }
 

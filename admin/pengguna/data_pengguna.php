@@ -2,54 +2,51 @@
 	<h1>
 		Pengguna Sistem
 	</h1>
-	<ol class="breadcrumb">
-		<li>
-			<a href="index.php">
-				<i class="fa fa-home"></i>
-				<b>eTABS</b>
-			</a>
-		</li>
-	</ol>
 </section>
 
 <!-- Main content -->
 <section class="content">
-	<div class="box box-primary">
-		<div class="box-header">
-			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
-				<i class="glyphicon glyphicon-plus"></i> Tambah Data
-			</button>
-			<div class="btn-group">
-				<a href="admin/export_handler.php?type=excel&table=pengguna" class="btn btn-info" title="Ekspor ke Excel">
-					<i class="fa fa-file-excel-o"></i> Excel
-				</a>
-				<a href="admin/export_handler.php?type=pdf&table=pengguna" class="btn btn-danger" title="Ekspor ke PDF" target="_blank">
-					<i class="fa fa-file-pdf-o"></i> PDF
-				</a>
-			</div>
-			<div class="box-tools pull-right">
-				<button type="button" class="btn btn-box-tool" data-widget="collapse">
-					<i class="fa fa-minus"></i>
-				</button>
-				<button type="button" class="btn btn-box-tool" data-widget="remove">
-					<i class="fa fa-remove"></i>
-				</button>
-			</div>
+	<div class="rounded-2xl bg-white shadow-sm">
+		<div class="border-b border-slate-100 px-6 py-4">
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" class="btn btn-dashboard-primary inline-flex items-center gap-2 tw-modal-open" data-target="#addModal">
+                    <i class="fa-solid fa-user-plus text-xs"></i><span>Tambah Data</span>
+                </button>
+                <div class="inline-flex gap-2">
+                    <a href="admin/export_handler.php?type=excel&table=pengguna" class="btn btn-sm btn-dashboard-soft text-[11px]" title="Ekspor ke Excel">
+                        <i class="fa-solid fa-file-excel text-xs"></i><span>Excel</span>
+                    </a>
+                    <a href="admin/export_handler.php?type=pdf&table=pengguna" class="btn btn-sm btn-dashboard-soft text-[11px]" title="Ekspor ke PDF" target="_blank">
+                        <i class="fa-solid fa-file-pdf text-xs"></i><span>PDF</span>
+                    </a>
+                </div>
+            </div>
 		</div>
 		<!-- /.box-header -->
-		<div class="box-body">
+		<div class="p-6">
 			<div class="table-responsive">
-				<table id="example1" class="table table-bordered table-striped">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <input id="datatableSearch" class="auth-input" placeholder="Cari di tabel...">
+                        <select id="datatablePageSize" class="auth-input">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+				<table id="example1" class="w-full table-dashboard text-xs">
 					<thead>
 						<tr>
-							<th>No</th>
+							<th class="text-center" width="30px">No</th>
 							<th>Nama</th>
 							<th>Username</th>
 							<th>Level</th>
-							<th>Aksi</th>
+							<th class="text-center">Aksi</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody id="datatableUsersBody">
 
 						<?php
                   $no = 1;
@@ -58,34 +55,44 @@
                 ?>
 
 						<tr>
-							<td>
+							<td class="text-center">
 								<?php echo $no++; ?>
 							</td>
-							<td>
+							<td class="font-medium">
 								<?php echo $data['nama_pengguna']; ?>
 							</td>
 							<td>
-								<?php echo $data['username']; ?>
+								<code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-indigo-600"><?php echo $data['username']; ?></code>
 							</td>
-							<td>
-								<?php echo $data['level']; ?>
+							<td class="px-4 py-3 text-center">
+								<?php 
+                                if ($data['level'] == 'Administrator') {
+                                    echo '<span class="badge-pill badge-pill-primary">Administrator</span>';
+                                } else {
+                                    echo '<span class="badge-pill badge-pill-success">Petugas</span>';
+                                }
+                                ?>
 							</td>
-							<td>
-								<button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal"
-									data-id="<?php echo $data['id_pengguna']; ?>"
-									data-nama="<?php echo $data['nama_pengguna']; ?>"
-									data-username="<?php echo $data['username']; ?>"
-									data-password="<?php echo $data['password']; ?>"
-									data-level="<?php echo $data['level']; ?>"
-									title="Ubah">
-									<i class="glyphicon glyphicon-edit"></i>
-								</button>
-								<?php if ($data['level'] != 'Administrator'): ?>
-								<a href="?page=MyApp/del_pengguna&kode=<?php echo $data['id_pengguna']; ?>"
-								 onclick="return confirmHapus(event, 'Yakin hapus pengguna <?php echo htmlspecialchars($data['nama_pengguna']); ?>?')" title="Hapus" class="btn btn-danger">
-									<i class="glyphicon glyphicon-trash"></i>
-								</a>
-								<?php endif; ?>
+							<td class="px-4 py-3 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button type="button" 
+                                        class="btn btn-sm btn-dashboard-success tw-modal-open" 
+                                        data-target="#editModal" 
+                                        data-id="<?php echo $data['id_pengguna']; ?>"
+                                        data-nama="<?php echo $data['nama_pengguna']; ?>"
+                                        data-username="<?php echo $data['username']; ?>"
+                                        data-password="<?php echo $data['password']; ?>"
+                                        data-level="<?php echo $data['level']; ?>"
+                                        title="Ubah">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <?php if ($data['level'] != 'Administrator'): ?>
+                                    <a href="?page=MyApp/del_pengguna&kode=<?php echo $data['id_pengguna']; ?>"
+                                    onclick="return confirmHapus(event, 'Yakin hapus pengguna <?php echo htmlspecialchars($data['nama_pengguna']); ?>?')" title="Hapus" class="btn btn-sm btn-dashboard-danger">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                    <?php endif; ?>
+                                </div>
 							</td>
 						</tr>
 						<?php
@@ -94,124 +101,171 @@
 					</tbody>
 
 				</table>
+                <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span id="datatableInfoText" class="text-[11px] text-slate-500"></span>
+                    <ul id="datatablePagination" class="pagination"></ul>
+                </div>
 			</div>
 		</div>
 	</div>
 </section>
 
 <!-- Add Modal -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addModalLabel">Tambah Pengguna</h4>
-      </div>
-      <form action="" method="post">
-      <div class="modal-body">
-        <div class="form-group">
-            <label>Nama Pengguna</label>
-            <input type="text" name="nama_pengguna" class="form-control" placeholder="Nama pengguna" required>
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="addModal">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl transition-all">
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-indigo-500"></i>
+                Tambah Pengguna
+            </h3>
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 tw-modal-close transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" placeholder="Username" required>
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
-        </div>
-        <div class="form-group">
-            <label>Level</label>
-            <select name="level" class="form-control" required>
-                <option value="">-- Pilih Level --</option>
-                <option value="Administrator">Administrator</option>
-                <option value="Petugas">Petugas</option>
-            </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-        <input type="submit" name="Simpan" value="Simpan" class="btn btn-primary">
-      </div>
-      </form>
+        
+        <!-- Body -->
+        <form action="" method="post">
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Nama Pengguna</label>
+                    <input type="text" name="nama_pengguna" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Nama lengkap" required>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Username</label>
+                        <input type="text" name="username" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Username" required>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Level</label>
+                        <select name="level" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                            <option value="">-- Pilih Level --</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Petugas">Petugas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Password</label>
+                    <input type="password" name="password" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Password" required>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50 tw-modal-close transition-all">
+                    Batal
+                </button>
+                <button type="submit" name="Simpan" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan</span>
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="editModalLabel">Ubah Pengguna</h4>
-      </div>
-      <form action="" method="post">
-      <div class="modal-body">
-        <input type="hidden" name="id_pengguna" id="edit_id_pengguna">
-        <div class="form-group">
-            <label>Nama Pengguna</label>
-            <input type="text" name="nama_pengguna" id="edit_nama_pengguna" class="form-control" placeholder="Nama pengguna" required>
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="editModal">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl transition-all">
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-pen text-indigo-500"></i>
+                Ubah Pengguna
+            </h3>
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 tw-modal-close transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" id="edit_username" class="form-control" placeholder="Username" required>
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" id="edit_password" class="form-control" placeholder="Password" required>
-            <input type="checkbox" onclick="toggleEditPassword()"> Lihat Password
-        </div>
-        <div class="form-group">
-            <label>Level</label>
-            <select name="level" id="edit_level" class="form-control" required>
-                <option value="">-- Pilih Level --</option>
-                <option value="Administrator">Administrator</option>
-                <option value="Petugas">Petugas</option>
-            </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-        <input type="submit" name="Ubah" value="Ubah" class="btn btn-success">
-      </div>
-      </form>
+        
+        <!-- Body -->
+        <form action="" method="post">
+            <div class="space-y-4">
+                <input type="hidden" name="id_pengguna" id="edit_id_pengguna">
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Nama Pengguna</label>
+                    <input type="text" name="nama_pengguna" id="edit_nama_pengguna" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Username</label>
+                        <input type="text" name="username" id="edit_username" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Level</label>
+                        <select name="level" id="edit_level" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                            <option value="">-- Pilih Level --</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Petugas">Petugas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Password</label>
+                    <div class="relative">
+                        <input type="password" name="password" id="edit_password" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                        <button type="button" onclick="toggleEditPassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i id="eye_icon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50 tw-modal-close transition-all">
+                    Batal
+                </button>
+                <button type="submit" name="Ubah" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan Perubahan</span>
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
 <script>
-    (function() {
-        var waitForJQuery = setInterval(function() {
-            if (typeof $ !== 'undefined') {
-                clearInterval(waitForJQuery);
-                
-                $('#editModal').on('show.bs.modal', function (event) {
-                    var button = $(event.relatedTarget)
-                    var id = button.data('id')
-                    var nama = button.data('nama')
-                    var username = button.data('username')
-                    var password = button.data('password')
-                    var level = button.data('level')
-                    
-                    var modal = $(this)
-                    modal.find('#edit_id_pengguna').val(id)
-                    modal.find('#edit_nama_pengguna').val(nama)
-                    modal.find('#edit_username').val(username)
-                    modal.find('#edit_password').val(password)
-                    modal.find('#edit_level').val(level)
-                })
-            }
-        }, 100);
-    })();
+    $(document).on('click', '.tw-modal-open', function (event) {
+        event.preventDefault();
+        var target = $(this).data('target');
+        
+        if (target === '#editModal') {
+            var id = $(this).data('id');
+            var nama = $(this).data('nama');
+            var username = $(this).data('username');
+            var password = $(this).data('password');
+            var level = $(this).data('level');
+            
+            $('#edit_id_pengguna').val(id);
+            $('#edit_nama_pengguna').val(nama);
+            $('#edit_username').val(username);
+            $('#edit_password').val(password);
+            $('#edit_level').val(level);
+        }
+        $(target).removeClass('hidden').addClass('flex');
+    });
+
+    $(document).on('click', '.tw-modal-close', function () {
+        $(this).closest('.modal').addClass('hidden').removeClass('flex');
+    });
+
+    $(document).on('click', '.modal', function (e) {
+        if ($(e.target).hasClass('modal')) { $(this).addClass('hidden').removeClass('flex'); }
+    });
 
     function toggleEditPassword() {
         var x = document.getElementById("edit_password");
+        var icon = document.getElementById("eye_icon");
         if (x.type === "password") {
             x.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
         } else {
             x.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
         }
     }
 </script>

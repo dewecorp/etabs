@@ -62,561 +62,325 @@ $page_title = getPageTitle($current_page);
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><?= htmlspecialchars($page_title) ?> | e-TABS | <?= htmlspecialchars($nama) ?></title>
-    <link rel="icon" href="dist/img/logo.png">
+    <link rel="icon" href="images/logo.png">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <!-- Bootstrap 3.3.6 -->
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- DataTables -->
-    <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
+    
+    <!-- Bootstrap 5.3.3 -->
+
+
+    <!-- Tailwind CSS -->
+    <script>
+        (function () {
+            var originalWarn = console.warn;
+            console.warn = function () {
+                try {
+                    if (arguments && typeof arguments[0] === 'string' && arguments[0].indexOf('cdn.tailwindcss.com should not be used in production') !== -1) {
+                        return;
+                    }
+                } catch (e) {}
+                return originalWarn.apply(console, arguments);
+            };
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- DataTables (no Bootstrap theme) -->
     <!-- Select2 -->
     <link rel="stylesheet" href="plugins/select2/select2.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
-    <!-- AdminLTE Skins. Choose a skin from the css/skins
-      folder instead of downloading all of them to reduce the load. -->
-    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <!-- Toastr -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha512-6S2HWzVFxruDlZxI3FeXOspiGkXH0pYqltg8Ai8a3gHmumZX8fiT5O8Mc0C05lHZ6f8YgOI5q1gJd0wQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGv2WhlBxpbK7pSUJytVqef6MxXU7pS4gFyR2b0j1z5f0PwHD3r4n8Ef3hC+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <!-- Custom CSS untuk Sticky Navbar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=<?php echo time(); ?>">
     <style>
-        /* Sticky Navbar - hanya navbar, bukan seluruh header */
-        .main-header .navbar {
-            position: fixed !important;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1030;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-            width: 100% !important;
+        /* CRITICAL CSS OVERRIDES - DO NOT REMOVE */
+        .badge-pill {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 9999px !important;
+            padding: 0.25rem 0.75rem !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
         }
-        
-        /* Pastikan main-header tidak fixed, hanya navbar */
-        .main-header {
-            position: relative;
-            margin-bottom: 0;
-            height: 50px;
+        .badge-pill-success {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            border: 1px solid #bbf7d0 !important;
         }
-        
-        /* Logo tetap di tempat dan tidak ikut sticky */
-        .main-header .logo {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1031;
-            width: 230px;
-            height: 50px;
+        .badge-pill-danger {
+            background-color: #ffe4e6 !important;
+            color: #9f1239 !important;
+            border: 1px solid #fecdd3 !important;
         }
-        
-        /* Adjust body untuk mengakomodasi fixed navbar */
-        body {
-            padding-top: 50px;
+        .badge-pill-primary {
+            background-color: #e0e7ff !important;
+            color: #3730a3 !important;
+            border: 1px solid #c7d2fe !important;
         }
-        
-        /* Fix untuk sidebar - sidebar tidak ikut sticky dan tidak bergerak saat scroll */
-        .main-sidebar {
-            position: fixed !important;
-            top: 50px;
-            left: 0;
-            padding-top: 0;
-            z-index: 1000;
-            height: calc(100vh - 50px) !important;
-            max-height: calc(100vh - 50px) !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Pastikan sidebar tidak bergerak dan bisa di-scroll */
-        .sidebar {
-            position: relative;
-            min-height: calc(100vh - 50px);
-            height: auto;
-            padding-bottom: 60px !important;
-            margin-bottom: 20px;
-            /* Pastikan pointer events bekerja dengan baik */
-            pointer-events: auto;
-        }
-        
-        /* Pastikan sidebar-menu bisa di-scroll */
-        .sidebar-menu {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            padding-bottom: 20px;
-            /* Pastikan pointer events bekerja */
-            pointer-events: auto;
-        }
-        
-        /* Pastikan semua item menu bisa diklik */
-        .sidebar-menu > li {
-            position: relative;
-            pointer-events: auto;
-        }
-        
-        .sidebar-menu > li > a {
-            pointer-events: auto;
-            cursor: pointer;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Pastikan treeview menu (dropdown) bisa ditampilkan dengan benar */
-        .sidebar-menu .treeview-menu {
-            position: relative !important;
-            z-index: 10 !important;
-            pointer-events: auto !important;
-            /* Pastikan dropdown tidak dipotong */
-            overflow: visible !important;
-            max-height: none !important;
-        }
-        
-        /* Pastikan treeview menu item bisa diklik */
-        .sidebar-menu .treeview-menu > li > a {
-            pointer-events: auto !important;
-            cursor: pointer !important;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Pastikan sidebar container tidak memotong dropdown menu */
-        .sidebar {
-            overflow: visible !important;
-        }
-        
-        /* Pastikan sidebar menu tidak memotong dropdown */
-        .sidebar-menu {
-            overflow: visible !important;
-        }
-        
-        /* Pastikan menu logout terlihat */
-        .sidebar-menu li:last-child {
-            margin-bottom: 20px;
-        }
-        
-        /* Style scrollbar untuk sidebar */
-        .main-sidebar::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .main-sidebar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        .main-sidebar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        
-        .main-sidebar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Pastikan user panel tidak menghalangi scroll */
-        .user-panel {
-            position: relative;
-            margin-bottom: 10px;
-        }
-        
-        /* Pastikan semua elemen sidebar bisa diakses */
-        .sidebar .form-control,
-        .sidebar .btn {
-            position: relative;
-        }
-        
-        /* Content wrapper adjust untuk navbar fixed */
-        .content-wrapper {
-            margin-top: 0;
-            margin-left: 0;
-        }
-        
-        /* Pastikan content tidak tertutup oleh navbar */
-        @media (min-width: 768px) {
-            .sidebar-mini.sidebar-collapse .content-wrapper {
-                margin-left: 50px;
-            }
-            
-            body:not(.sidebar-collapse) .content-wrapper {
-                margin-left: 230px;
-            }
-        }
-        
-        /* Fix untuk sidebar collapsed */
-        @media (min-width: 768px) {
-            .sidebar-mini.sidebar-collapse .main-header .navbar {
-                left: 50px;
-                width: calc(100% - 50px) !important;
-            }
-            
-            .sidebar-mini.sidebar-collapse .main-header .logo {
-                width: 50px;
-            }
-            
-            .sidebar-mini.sidebar-collapse .main-sidebar {
-                width: 50px;
-            }
-            
-            body:not(.sidebar-collapse) .main-header .navbar {
-                left: 230px;
-                width: calc(100% - 230px) !important;
-            }
-            
-            body:not(.sidebar-collapse) .main-header .logo {
-                width: 230px;
-            }
-            
-            body:not(.sidebar-collapse) .main-sidebar {
-                width: 230px;
-            }
-        }
-        
-        /* Fix untuk mobile */
-        @media (max-width: 767px) {
-            .main-header .navbar {
-                left: 0 !important;
-                width: 100% !important;
-            }
-            
-            .main-sidebar {
-                top: 50px;
-            }
-        }
-        
-        /* Shadow saat scroll untuk efek visual */
-        .main-header .navbar.navbar-sticky-active {
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        .badge-pill-secondary {
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border: 1px solid #e2e8f0 !important;
         }
     </style>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
 </head>
 
-<body class="hold-transition skin-green sidebar-mini">
-    <!-- Site wrapper -->
-    <div class="wrapper">
-        <header class="main-header">
-            <!-- Logo -->
-            <a href="index.php" class="logo">
-                <span class="logo-lg">
-                    <img src="dist/img/logo.png" width="45px">
-                    <b>e-TABS</b>
-                </span>
-            </a>
-            <!-- Header Navbar: style can be found in header.less -->
-            <nav class="navbar navbar-static-top">
-                <!-- Sidebar toggle button-->
-                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
+<body class="min-h-screen bg-slate-50 text-slate-900 flex flex-col transition-colors duration-200">
+    <!-- Navbar sticky -->
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl">
+        <div class="flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 shadow-lg shadow-indigo-500/20">
+                    <img src="images/logo.png" alt="Logo" class="h-6 w-6 object-contain">
+                </div>
+                <div>
+                    <h1 class="text-sm font-medium tracking-tight text-slate-900 sm:text-base">e-TABS Dashboard</h1>
+                    <p class="text-[11px] text-slate-500 sm:text-xs"><?= $nama ?></p>
+                </div>
+            </div>
+
+            <div class="hidden items-center gap-3 md:flex">
+                <div class="text-[11px] text-slate-500 mr-2">
+                    <i class="fa-regular fa-calendar-days mr-1"></i>
+                    <?php $date = date('Y-m-d'); echo format_hari_tanggal($date) ?>
+                </div>
+                
+                <div class="relative group">
+                    <button class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all">
+                        <div class="h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                            <?= substr($data_nama, 0, 2) ?>
+                        </div>
+                        <span><?= $data_nama ?></span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    </button>
+                </div>
+
+                <a href="logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?')" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-sm hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 transition-all">
+                    <i class="fa-solid fa-right-from-bracket text-rose-500"></i>
+                    Keluar
                 </a>
+            </div>
 
-                <div class="navbar-custom-menu">
+            <button class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 md:hidden" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
 
-                    <ul class="nav navbar-nav pull-left">
-                        <li class="dropdown messages-menu">
-                            <a class="dropdown-toggle" data-toggle="dropdown">
-                                <span>
-                                    <?php $date = date('Y-m-d'); echo format_hari_tanggal($date) ?>
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                    <ul class="nav navbar-nav">
-                        <!-- Messages: style can be found in dropdown.less-->
-                        <li class="dropdown user user-menu">
-                            <a href="" class="dropdown-toggle" data-toggle="dropdown">
-                                <img src="dist/img/avatar.png" class="rounded-circle" width="25" height="25">
-                                <span>
-                                    <?= $data_nama;?>
-                                </span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="user-header">
-                                    <img src="dist/img/avatar.png" class="img-circle" alt="User Image" width="60"
-                                        height="60">
-                                    <p>
-                                        <?= $data_nama;?>
-                                    </p>
-                                </li>
-                                <!-- Menu Body -->
+    <!-- Konten utama -->
+    <main class="flex w-full flex-1 flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:flex-row lg:items-start">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20">
+            
 
-                                <!-- Menu Footer-->
-                                <li class="user-footer">
-                                    <div class="pull-left">
-                                        <a href="#" class="btn btn-default btn-flat">Profile
-                                        </a>
-                                    </div>
-                                    <div class="pull-right">
-                                        <a href="logout.php"
-                                            onclick="return confirmLogout(event)"
-                                            class="btn btn-default btn-flat">Sign out
-                                        </a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </li>
-
-                    </ul>
-                </div>
-            </nav>
-        </header>
-
-        <!-- =============================================== -->
-
-        <!-- Left side column. contains the sidebar -->
-        <aside class="main-sidebar">
-            <!-- sidebar: style can be found in sidebar.less -->
-            <section class="sidebar">
-                <!-- Sidebar user panel -->
-                </<b>
-                <div class="user-panel">
-                    <div class="pull-left image">
-                        <img src="dist/img/avatar.png" class="img-circle" alt="User Image">
-                    </div>
-                    <div class="pull-left info">
-                        <p>
-                            <?php echo $data_nama; ?>
-                        </p>
-                        <span class="label label-success">
-                            <?php echo $data_level; ?>
-                        </span>
-                    </div>
-                </div>
-                </br>
-                <!-- /.search form -->
-                <!-- sidebar menu: : style can be found in sidebar.less -->
-                <ul class="sidebar-menu">
-                    <li class="header">MAIN NAVIGATION</li>
-
-                    <!-- Level  -->
-                    <?php
-                if ($data_level=="Administrator"){
-                   ?>
-
-                    <li class="treeview">
-                        <a href="?page=admin">
-                            <i class="fa fa-dashboard"></i>
-                            <span>Dashboard</span>
-                            <span class="pull-right-container">
+            <nav class="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm">
+                <p class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Menu Utama</p>
+                <ul class="space-y-1.5">
+                    <?php if ($data_level == "Administrator") { ?>
+                    <li>
+                        <a href="?page=admin" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'admin') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'admin') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-house text-[10px]"></i>
                             </span>
+                            Dashboard
                         </a>
                     </li>
-
-                    <li class="treeview">
-                        <a href="#">
-                            <i class="fa fa-folder"></i>
-                            <span>Master Data</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-
-                            <li>
-                                <a href="?page=MyApp/data_siswa">
-                                    <i class="fa fa-users"></i>Siswa
-                                </a>
-                            </li>
-                            <li>
-                                <a href="?page=MyApp/data_kelas">
-                                    <i class="fa fa-feed"></i>Kelas
-                                </a>
-                            </li>
-                        </ul>
+                    
+                    <!-- Master Data Dropdown -->
+                    <li>
+                        <div class="flex flex-col gap-1">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 w-full sidebar-dropdown-toggle" data-target="#masterDataMenu">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                        <i class="fa-solid fa-folder text-[10px]"></i>
+                                    </span>
+                                    Master Data
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </button>
+                            <div class="sidebar-dropdown-menu <?= (strpos($current_page, 'MyApp/data_') !== false) ? '' : 'hidden' ?>" id="masterDataMenu">
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-slate-200 ml-3">
+                                    <li><a href="?page=MyApp/data_siswa" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'MyApp/data_siswa') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Data Siswa</a></li>
+                                    <li><a href="?page=MyApp/data_kelas" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'MyApp/data_kelas') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Data Kelas</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </li>
 
-                    <li class="treeview">
-                        <a href="#">
-                            <i class="fa fa-refresh"></i>
-                            <span>Transaksi</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right">
-                                </i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-
-                            <li>
-                                <a href="?page=data_setor">
-                                    <i class="fa fa-arrow-circle-o-down">
-                                    </i>Setoran
-                                </a>
-                            </li>
-                            <li>
-                                <a href="?page=data_tarik">
-                                    <i class="fa fa-arrow-circle-o-up">
-                                    </i>Penarikan
-                                </a>
-                            </li>
-                            <li>
-                                <a href="?page=view_kas">
-                                    <i class="fa  fa-pie-chart">
-                                    </i>Info Kas
-                                </a>
-                            </li>
-                        </ul>
+                    <!-- Transaksi Dropdown -->
+                    <li>
+                        <div class="flex flex-col gap-1">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 w-full sidebar-dropdown-toggle" data-target="#transaksiMenu">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                        <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
+                                    </span>
+                                    Transaksi
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </button>
+                            <div class="sidebar-dropdown-menu <?= (in_array($current_page, ['data_setor', 'data_tarik', 'view_kas'])) ? '' : 'hidden' ?>" id="transaksiMenu">
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-slate-200 ml-3">
+                                    <li><a href="?page=data_setor" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_setor') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Setoran</a></li>
+                                    <li><a href="?page=data_tarik" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_tarik') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Penarikan</a></li>
+                                    <li><a href="?page=view_kas" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'view_kas') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Info Kas</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </li>
-
-                    <li class="treeview">
-                        <a href="?page=view_tabungan">
-                            <i class="fa fa-book"></i>
-                            <span>Tabungan</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=laporan">
-                            <i class="fa fa-file"></i>
-                            <span>Laporan</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=data_riwayat">
-                            <i class="fa fa-history"></i>
-                            <span>Riwayat</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="header">SETTING</li>
-
-                    <li class="treeview">
-                        <a href="?page=MyApp/data_pengguna">
-                            <i class="fa fa-user"></i>
-                            <span>Pengguna Sistem</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=MyApp/data_profil">
-                            <i class="fa fa-bank"></i>
-                            <span>Profil Sekolah</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=MyApp/backup_restore">
-                            <i class="fa fa-database"></i>
-                            <span>Backup & Restore</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-
-                    <?php
-            } elseif($data_level=="Petugas"){
-             ?>
-
-                    <li class="treeview">
-                        <a href="?page=petugas">
-                            <i class="fa fa-dashboard"></i>
-                            <span>Dashboard</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="#">
-                            <i class="fa fa-refresh"></i>
-                            <span>Transaksi</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-
-                            <li>
-                                <a href="?page=data_setor">
-                                    <i class="fa fa-arrow-circle-o-down"></i>Setoran</a>
-                            </li>
-                            <li>
-                                <a href="?page=data_tarik">
-                                    <i class="fa fa-arrow-circle-o-up"></i>Penarikan</a>
-                            </li>
-                            <li>
-                                <a href="?page=view_kas">
-                                    <i class="fa  fa-pie-chart"></i>Info Kas</a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=view_tabungan">
-                            <i class="fa fa-book"></i>
-                            <span>Tabungan</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=laporan">
-                            <i class="fa fa-file"></i>
-                            <span>Laporan</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="treeview">
-                        <a href="?page=data_riwayat">
-                            <i class="fa fa-history"></i>
-                            <span>Riwayat</span>
-                            <span class="pull-right-container">
-                            </span>
-                        </a>
-                    </li>
-
-                    <li class="header">SETTING</li>
-
-                    <?php
-                    }
-                    ?>
 
                     <li>
-                        <a href="logout.php" onclick="return confirmLogout(event)">
-                            <i class="fa fa-sign-out"></i>
-                            <span>Logout</span>
-                            <span class="pull-right-container"></span>
+                        <a href="?page=view_tabungan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'view_tabungan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'view_tabungan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-book text-[10px]"></i>
+                            </span>
+                            Tabungan
                         </a>
                     </li>
 
+                    <li>
+                        <a href="?page=laporan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'laporan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'laporan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-file-invoice text-[10px]"></i>
 
-            </section>
-            <!-- /.sidebar -->
+                            </span>
+                            Laporan
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="?page=data_riwayat" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'data_riwayat') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'data_riwayat') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-clock-rotate-left text-[10px]"></i>
+                            </span>
+                            Riwayat
+                        </a>
+                    </li>
+
+                    <p class="mt-4 mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Pengaturan</p>
+                    
+                    <li>
+                        <a href="?page=MyApp/data_pengguna" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/data_pengguna') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/data_pengguna') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-users-gear text-[10px]"></i>
+                            </span>
+                            Pengguna Sistem
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="?page=MyApp/data_profil" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/data_profil') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/data_profil') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-gear text-[10px]"></i>
+                            </span>
+                            Pengaturan
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="?page=MyApp/backup_restore" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/backup_restore') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/backup_restore') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-database text-[10px]"></i>
+                            </span>
+                            Backup & Restore
+                        </a>
+                    </li>
+
+                    <?php } else { ?>
+                    <!-- Petugas Menu -->
+                    <li>
+                        <a href="?page=petugas" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'petugas') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'petugas') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-house text-[10px]"></i>
+                            </span>
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li>
+                        <div class="flex flex-col gap-1">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 w-full sidebar-dropdown-toggle" data-target="#transaksiMenuPetugas">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                        <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
+                                    </span>
+                                    Transaksi
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </button>
+                            <div class="sidebar-dropdown-menu <?= (in_array($current_page, ['data_setor', 'data_tarik', 'view_kas'])) ? '' : 'hidden' ?>" id="transaksiMenuPetugas">
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-slate-200 ml-3">
+                                    <li><a href="?page=data_setor" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_setor') ? 'text-indigo-600 font-medium' : 'text-slate-600' ?>">Setoran</a></li>
+                                    <li><a href="?page=data_tarik" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_tarik') ? 'text-indigo-600 font-medium' : 'text-slate-600' ?>">Penarikan</a></li>
+                                    <li><a href="?page=view_kas" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'view_kas') ? 'text-indigo-600 font-medium' : 'text-slate-600' ?>">Info Kas</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li>
+                        <a href="?page=view_tabungan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'view_tabungan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'view_tabungan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-book text-[10px]"></i>
+                            </span>
+                            Tabungan
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="?page=laporan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'laporan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'laporan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-file-invoice text-[10px]"></i>
+                            </span>
+                            Laporan
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="?page=data_riwayat" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'data_riwayat') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'data_riwayat') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                                <i class="fa-solid fa-clock-rotate-left text-[10px]"></i>
+                            </span>
+                            Riwayat
+                        </a>
+                    </li>
+                    <?php } ?>
+                    
+                    <li class="mt-6 border-t border-slate-200 pt-2">
+                        <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i>
+                            </span>
+                            Keluar Sistem
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </aside>
 
-        <!-- =============================================== -->
+        <!-- Main Content Wrapper -->
+        <section id="mainContent" class="order-2 flex-1 space-y-4">
+            <nav class="mb-1 text-[11px] text-slate-500" aria-label="Breadcrumb">
+                <a href="index.php" class="text-slate-500 hover:text-indigo-600">Home</a>
+                <span class="mx-1 text-slate-400">/</span>
+                <span class="text-slate-700"><?= htmlspecialchars($page_title) ?></span>
+            </nav>
 
-        <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper">
-            <!-- Content Header (Page header) -->
-            <!-- Main content -->
-            <section class="content">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <?php 
                     if(isset($_GET['page'])){
                         $hal = $_GET['page'];
@@ -702,12 +466,6 @@ $page_title = getPageTitle($current_page);
                             case 'data_setor':
                             include "petugas/setor/data_setor.php";
                             break;
-                            case 'add_setor':
-                            include "petugas/setor/add_setor.php";
-                            break;
-                            case 'edit_setor':
-                            include "petugas/setor/edit_setor.php";
-                            break;
                             case 'edit_setor_multiple':
                             include "petugas/setor/edit_setor_multiple.php";
                             break;
@@ -721,12 +479,6 @@ $page_title = getPageTitle($current_page);
 				//Tarik
                             case 'data_tarik':
                             include "petugas/tarik/data_tarik.php";
-                            break;
-                            case 'add_tarik':
-                            include "petugas/tarik/add_tarik.php";
-                            break;
-                            case 'edit_tarik':
-                            include "petugas/tarik/edit_tarik.php";
                             break;
                             case 'edit_tarik_multiple':
                             include "petugas/tarik/edit_tarik_multiple.php";
@@ -788,280 +540,73 @@ $page_title = getPageTitle($current_page);
                      }
                  }
                  ?>
-
-            </section>
-            <!-- /.content -->
-        </div>
-
-        <!-- /.content-wrapper -->
-
-        <footer class="main-footer">
-            <div class="pull-right hidden-xs">
             </div>
-            <strong>Copyright &copy; e-Tabs
-                <a href="https://misultanfattah.sch.id/" target="blank">MI Sultan Fattah Jepara
-                </a><?=date('Y')?>
-            </strong>
-        </footer>
-        <div class="control-sidebar-bg"></div>
+        </section>
+    </main>
 
-        <!-- ./wrapper -->
+    <footer class="border-t border-slate-200 bg-white/80 px-4 py-4 sm:px-6 lg:px-8 mt-auto">
+        <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 text-[11px] text-slate-500 sm:flex-row">
+            <p class="text-center sm:text-left">
+                © 2026 e-TABS • <?= $nama ?> • All rights reserved.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <a href="index.php" class="hover:text-indigo-600">Dashboard</a>
+                <span class="text-slate-300">|</span>
+                <span class="text-slate-500">v2.0-modern</span>
+            </div>
+        </div>
+    </footer>
 
-        <!-- jQuery 2.2.3 -->
-        <script src="plugins/jQuery/jquery-2.2.3.min.js"></script>
-        <!-- Bootstrap 3.3.6 -->
-        <script src="bootstrap/js/bootstrap.min.js"></script>
+    <!-- DataTables -->
+    <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+    
+    <!-- Select2 -->
+    <script src="plugins/select2/select2.full.min.js"></script>
+    <!-- Custom Dashboard JS -->
+    <script src="assets/js/dashboard.js"></script>
 
-        <script src="plugins/select2/select2.full.min.js"></script>
-        <!-- DataTables -->
-        <script src="plugins/datatables/jquery.dataTables.min.js"></script>
-        <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
-
-        <!-- AdminLTE App -->
-        <script src="dist/js/app.min.js"></script>
-        <!-- AdminLTE for demo purposes -->
-        <script src="dist/js/demo.js"></script>
-        <!-- page script -->
-
-
-        <script>
+    <script>
         $(function() {
-            $("#example1").DataTable();
-            $('#example2').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false
-            });
-            
-            // Pastikan navbar sticky bekerja
-            $(window).on('scroll', function() {
-                var scrollTop = $(window).scrollTop();
-                if (scrollTop > 0) {
-                    $('.main-header .navbar').addClass('navbar-sticky-active');
-                } else {
-                    $('.main-header .navbar').removeClass('navbar-sticky-active');
-                }
-            });
-            
-            // Update navbar position saat sidebar toggle
-            $(document).on('click', '.sidebar-toggle', function() {
-                setTimeout(function() {
-                    updateNavbarPosition();
-                }, 350);
-            });
-            
-            // Fungsi untuk update posisi navbar dan logo
-            function updateNavbarPosition() {
-                var navbar = $('.main-header .navbar');
-                var logo = $('.main-header .logo');
-                
-                if ($('body').hasClass('sidebar-collapse')) {
-                    navbar.css({
-                        'left': '50px',
-                        'width': 'calc(100% - 50px)'
-                    });
-                    logo.css({
-                        'width': '50px'
-                    });
-                } else {
-                    navbar.css({
-                        'left': '230px',
-                        'width': 'calc(100% - 230px)'
-                    });
-                    logo.css({
-                        'width': '230px'
-                    });
-                }
+            // Initialize Select2 if available
+            if ($.fn.select2) {
+                $(".select2").select2();
             }
-            
-            // Update posisi saat pertama kali load
-            setTimeout(function() {
-                updateNavbarPosition();
-            }, 100);
-            
-            // Pastikan sidebar bisa di-scroll dan menu logout terlihat
-            function ensureSidebarScroll() {
-                var sidebar = $('.main-sidebar');
-                var sidebarContent = $('.sidebar');
-                
-                if (sidebar.length > 0 && sidebarContent.length > 0) {
-                    // Pastikan overflow-y aktif
-                    sidebar.css({
-                        'overflow-y': 'auto',
-                        'overflow-x': 'hidden'
-                    });
-                    
-                    // Scroll ke bawah sedikit untuk memastikan scrollbar aktif
-                    setTimeout(function() {
-                        var scrollHeight = sidebarContent[0].scrollHeight;
-                        var clientHeight = sidebar[0].clientHeight;
-                        
-                        if (scrollHeight > clientHeight) {
-                            // Sidebar bisa di-scroll, pastikan scrollbar terlihat
-                            sidebar.css('overflow-y', 'auto');
-                        }
-                    }, 200);
-                }
-            }
-            
-            // Pastikan sidebar scroll saat pertama kali load
-            setTimeout(function() {
-                ensureSidebarScroll();
-            }, 300);
-            
-            // Pastikan sidebar scroll saat window resize
-            $(window).on('resize', function() {
-                ensureSidebarScroll();
+
+            // Mobile Menu Toggle
+            $('#menuToggle').click(function() {
+                $('#sidebar').toggleClass('hidden');
+            });
+
+            // Custom Sidebar Dropdown Toggle
+            $('.sidebar-dropdown-toggle').click(function() {
+                const targetId = $(this).data('target');
+                $(targetId).toggleClass('hidden');
+                $(this).find('i.fa-chevron-down').toggleClass('rotate-180'); // Optional: rotate icon
             });
         });
-        </script>
 
-        <script>
-        $(function() {
-            //Initialize Select2 Elements
-            $(".select2").select2();
-            
-            // Fungsi untuk inisialisasi treeview menu
-            function initTreeviewMenu() {
-                // Hapus event handler sebelumnya untuk menghindari duplikasi
-                $(document).off('click.treeview', '.sidebar-menu .treeview > a');
-                
-                // Gunakan event delegation dengan namespace untuk memastikan click bekerja bahkan setelah scroll
-                $(document).on('click.treeview', '.sidebar-menu .treeview > a', function(e) {
-                    var $this = $(this);
-                    var $parent = $this.parent('li');
-                    var checkElement = $this.next('.treeview-menu');
-                    
-                    // Hanya proses jika ini adalah menu dengan submenu
-                    if (checkElement.length > 0 && checkElement.hasClass('treeview-menu')) {
-                        // Hentikan event default dan propagation
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                        
-                        // Jika submenu sudah terbuka, tutup
-                        if ($parent.hasClass('active') && checkElement.is(':visible')) {
-                            checkElement.slideUp(300, function() {
-                                $parent.removeClass('active');
-                            });
-                            // Rotate icon kembali
-                            $this.find('.fa-angle-left, .fa-angle-down').removeClass('fa-angle-down').addClass('fa-angle-left').css('transform', 'rotate(0deg)');
-                        } else {
-                            // Tutup semua submenu lain
-                            $('.sidebar-menu .treeview-menu:visible').not(checkElement).slideUp(300);
-                            $('.sidebar-menu .treeview.active').not($parent).removeClass('active');
-                            
-                            // Reset icon semua treeview
-                            $('.sidebar-menu .treeview > a .fa-angle-left').css('transform', 'rotate(0deg)');
-                            
-                            // Buka submenu ini
-                            $parent.addClass('active');
-                            checkElement.slideDown(300);
-                            // Rotate icon
-                            $this.find('.fa-angle-left').css('transform', 'rotate(-90deg)');
-                        }
-                        
-                        return false;
-                    }
-                });
-                
-                // Pastikan submenu item juga bisa diklik dengan benar
-                $(document).off('click.treeviewmenu', '.sidebar-menu .treeview-menu > li > a');
-                $(document).on('click.treeviewmenu', '.sidebar-menu .treeview-menu > li > a', function(e) {
-                    // Biarkan link bekerja normal, hanya pastikan event tidak terhenti oleh parent
-                    e.stopPropagation();
-                    $(this).css('pointer-events', 'auto');
-                });
-            }
-            
-            // Inisialisasi treeview menu dengan delay untuk memastikan DOM siap
-            setTimeout(function() {
-                // Pastikan treeview menu ter-inisialisasi dengan benar
-                // Coba gunakan AdminLTE jika tersedia
-                if (typeof $.AdminLTE !== 'undefined' && typeof $.AdminLTE.tree === 'function') {
-                    try {
-                        // Inisialisasi AdminLTE tree
-                        $.AdminLTE.tree('.sidebar');
-                    } catch(e) {
-                        console.log('AdminLTE tree initialization error, using fallback:', e);
-                    }
-                }
-                
-                // Selalu gunakan inisialisasi manual sebagai backup dan untuk memastikan bekerja dengan scroll
-                initTreeviewMenu();
-                
-                // Pastikan semua element menu bisa diklik
-                $('.sidebar-menu .treeview > a').css({
-                    'pointer-events': 'auto',
-                    'cursor': 'pointer',
-                    'user-select': 'none'
-                });
-                $('.sidebar-menu .treeview-menu > li > a').css({
-                    'pointer-events': 'auto',
-                    'cursor': 'pointer'
-                });
-            }, 200);
-            
-            // Pastikan inisialisasi ulang saat sidebar di-scroll (jika diperlukan)
-            var scrollTimeout;
-            $('.main-sidebar').off('scroll.treeview').on('scroll.treeview', function() {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(function() {
-                    // Pastikan pointer events tetap aktif setelah scroll
-                    $('.sidebar-menu .treeview > a').css('pointer-events', 'auto');
-                    $('.sidebar-menu .treeview-menu > li > a').css('pointer-events', 'auto');
-                }, 50);
-            });
-            
-            // Pastikan inisialisasi ulang saat window resize
-            $(window).off('resize.treeview').on('resize.treeview', function() {
-                setTimeout(function() {
-                    initTreeviewMenu();
-                }, 300);
-            });
-        });
-        
-        
-        
-        // Fungsi konfirmasi logout
         function confirmLogout(event) {
             event.preventDefault();
-            var url = event.currentTarget.getAttribute('href');
+            const url = event.currentTarget.getAttribute('href') || 'logout.php';
             
             Swal.fire({
-                title: '<i class="fa fa-sign-out" style="color: #f39c12; font-size: 48px;"></i>',
-                html: '<div style="text-align: center; padding: 10px;">' +
-                      '<h3 style="color: #2c3e50; margin-bottom: 20px; font-weight: bold;">Konfirmasi Logout</h3>' +
-                      '<p style="font-size: 16px; margin-bottom: 20px; color: #495057;">Anda yakin ingin keluar dari aplikasi?</p>' +
-                      '<div style="background-color: #e3f2fd; border: 2px solid #2196F3; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
-                      '<p style="margin: 0; color: #1565C0; font-size: 14px; font-weight: bold;">' +
-                      '<i class="fa fa-info-circle" style="margin-right: 8px;"></i>' +
-                      'Anda akan diarahkan ke halaman login setelah logout.</p>' +
-                      '</div>' +
-                      '</div>',
-                icon: 'question',
+                title: 'Keluar?',
+                text: "Apakah Anda yakin ingin keluar dari sistem?",
+                icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: '<i class="fa fa-sign-out"></i> Ya, Logout',
-                cancelButtonText: '<i class="fa fa-times"></i> Batal',
-                reverseButtons: true,
-                focusCancel: true,
-                allowOutsideClick: false,
-                allowEscapeKey: true,
-                width: '500px'
+                confirmButtonColor: '#6366f1',
+                cancelButtonColor: '#f43f5e',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal',
+                background: '#ffffff',
+                color: '#1e293b'
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = url;
                 }
-            });
-            
-            return false;
+            })
         }
-        </script>
+    </script>
 </body>
 
 </html>

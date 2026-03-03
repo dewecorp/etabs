@@ -45,560 +45,269 @@ if ($sql) {
 $saldo = $setor - $tarik;
 ?>
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-	<h1>
-		Dashboard
-		<small>Administrator</small>
-	</h1>
-</section>
+<!-- Info atas -->
+<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div>
+        <p class="text-xs font-medium uppercase tracking-[0.18em] text-indigo-600">Ringkasan Dashboard</p>
+        <h2 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+            Selamat Datang, Administrator
+        </h2>
+    </div>
+    <div class="flex items-center gap-2 text-[11px] text-slate-500">
+        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/30">
+            <i class="fa-solid fa-circle text-[6px] mr-2"></i> Sistem Stabil
+        </span>
+    </div>
+</div>
 
-<!-- Main content -->
-<section class="content">
-	<!-- Small boxes (Stat box) -->
-	<div class="row">
+<!-- Kartu metrik -->
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Siswa Aktif -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Siswa Aktif</p>
+                <p class="mt-2 text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
+            </div>
+            <div class="rounded-xl bg-indigo-500/10 p-3 ring-1 ring-indigo-500/30">
+                <i class="fa-solid fa-users text-indigo-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=MyApp/data_siswa" class="text-indigo-600 hover:text-indigo-600 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-yellow">
-				<div class="inner">
-					<h4>
-						<?= $siswa; ?>
-					</h4>
+    <!-- Total Setoran -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-emerald-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Setoran</p>
+                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($setor) ? $setor : 0); ?></p>
+            </div>
+            <div class="rounded-xl bg-emerald-500/10 p-3 ring-1 ring-emerald-500/30">
+                <i class="fa-solid fa-arrow-down-long text-emerald-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=data_setor" class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
 
-					<p>Siswa Aktif</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-person-add"></i>
-				</div>
-				<a href="?page=MyApp/data_siswa" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
+    <!-- Total Penarikan -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-rose-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Penarikan</p>
+                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
+            </div>
+            <div class="rounded-xl bg-rose-500/10 p-3 ring-1 ring-rose-500/30">
+                <i class="fa-solid fa-arrow-up-long text-rose-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=data_tarik" class="text-rose-600 hover:text-rose-700 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-aqua">
-				<div class="inner">
-					<h4>
-						<?= rupiah($setor); ?>
-					</h4>
+    <!-- Saldo Kas -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-amber-500/50 hover:bg-slate-50">
+        <div class="relative flex items-start justify-between">
+            <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Saldo Kas</p>
+                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
+            </div>
+            <div class="rounded-xl bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
+                <i class="fa-solid fa-wallet text-amber-600 text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px]">
+            <a href="?page=view_kas" class="text-amber-600 hover:text-amber-300 font-medium transition-colors">
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+            </a>
+        </div>
+    </div>
+</div>
 
-					<p>Total Setoran</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-bag"></i>
-				</div>
-				<a href="?page=data_setor" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
+<!-- Visualisasi & Aktivitas -->
+<div class="grid gap-4 lg:grid-cols-1 mt-6">
+    <!-- Chart Section -->
+    <div class="lg:col-span-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900">Statistik Tabungan</h3>
+                <p class="text-[11px] text-slate-500">Perbandingan setoran dan penarikan</p>
+            </div>
+            <div class="flex gap-2">
+                <span class="inline-flex items-center gap-1.5 text-[10px] text-slate-500">
+                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span> Setoran
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-[10px] text-slate-500">
+                    <span class="h-2 w-2 rounded-full bg-rose-500"></span> Penarikan
+                </span>
+            </div>
+        </div>
+        <div class="h-64 w-full">
+            <canvas id="savingChart"></canvas>
+        </div>
+    </div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-red">
-				<div class="inner">
-					<h4>
-						<?= rupiah($tarik); ?>
-					</h4>
-					<p>Total Penarikan</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-stats-bars"></i>
-				</div>
-				<a href="?page=data_tarik" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
+    <!-- Aktivitas Terbaru (Tailwind Timeline) -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-slate-900">Aktivitas Terbaru</h3>
+            <?php
+            $activity_count = 0;
+            if (function_exists('getActivityCount') && isset($koneksi)) {
+                try {
+                    if (function_exists('createActivityTable')) { @createActivityTable($koneksi); }
+                    if (function_exists('cleanupOldActivities')) { @cleanupOldActivities($koneksi); }
+                    $activity_count = @getActivityCount($koneksi);
+                } catch (Exception $e) { $activity_count = 0; }
+            }
+            ?>
+            <span class="inline-flex items-center rounded-full bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-600 ring-1 ring-indigo-500/30">
+                Total: <?= number_format($activity_count); ?> aktivitas
+            </span>
+        </div>
+        <div class="max-h-[500px] overflow-y-auto">
+            <?php
+            if (!function_exists('getTimeAgo')) {
+                function getTimeAgo($datetime) {
+                    if (empty($datetime)) return '';
+                    $timestamp = false;
+                    try { $dt = new DateTime($datetime); $timestamp = $dt->getTimestamp(); } catch (Exception $e) { $timestamp = @strtotime($datetime); }
+                    if (!$timestamp || $timestamp <= 0) { $timestamp = @strtotime(str_replace('/', '-', $datetime)); if (!$timestamp || $timestamp <= 0) { return ''; } }
+                    $diff = time() - $timestamp; if ($diff < 0) { return 'Baru saja'; }
+                    if ($diff < 60) return 'Baru saja';
+                    if ($diff < 3600) return floor($diff/60) . ' menit yang lalu';
+                    if ($diff < 86400) return floor($diff/3600) . ' jam yang lalu';
+                    if ($diff < 604800) return floor($diff/86400) . ' hari yang lalu';
+                    return date('d M Y', $timestamp);
+                }
+            }
+            $recent_activities = [];
+            if (isset($koneksi) && $koneksi) {
+                try {
+                    if (function_exists('createActivityTable')) { @createActivityTable($koneksi); }
+                    $check_table = @$koneksi->query("SHOW TABLES LIKE 'tb_activity_log'");
+                    if ($check_table && $check_table->num_rows > 0) {
+                        $sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
+                        $result = @$koneksi->query($sql);
+                        if ($result && $result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) { $recent_activities[] = $row; }
+                        }
+                    }
+                } catch (Exception $e) { $recent_activities = []; }
+            }
+            if (empty($recent_activities)) {
+                echo '<div class="text-[12px] text-slate-500">Belum ada aktivitas yang tercatat.</div>';
+            } else {
+                echo '<ol class="relative pl-8">';
+                $total_items = count($recent_activities);
+                $item_index = 0;
+                foreach ($recent_activities as $activity) {
+                    $item_index++;
+                    $timestamp = isset($activity['timestamp_unix']) && $activity['timestamp_unix'] > 0 ? (int)$activity['timestamp_unix'] : time();
+                    $time_ago = getTimeAgo(isset($activity['created_at']) ? $activity['created_at'] : date('Y-m-d H:i:s'));
+                    $color = isset($activity['color']) ? strtolower($activity['color']) : 'indigo';
+                    $tw = 'indigo';
+                    if (in_array($color, ['success'])) $tw = 'emerald';
+                    elseif (in_array($color, ['danger'])) $tw = 'rose';
+                    elseif (in_array($color, ['warning'])) $tw = 'amber';
+                    elseif (in_array($color, ['info','primary'])) $tw = 'sky';
+                    $icon = isset($activity['icon']) ? $activity['icon'] : 'fa-info-circle';
+                    echo '<li class="mb-6 relative">';
+                    echo '<span class="absolute left-0 -translate-x-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-'.$tw.'-500/10 ring-1 ring-'.$tw.'-500/30 text-'.$tw.'-400">';
+                    echo '<i class="fa '.$icon.' text-[12px]"></i>';
+                    echo '</span>';
+                    $connectorClass = 'absolute left-0 -translate-x-1/2 w-px bg-gradient-to-b from-'.$tw.'-400/30 to-'.$tw.'-400/5';
+                    if ($item_index === 1 && $total_items > 1) {
+                        // Pertama: mulai dari bawah bullet ke bawah item
+                        echo '<span class="'.$connectorClass.' top-6 bottom-0"></span>';
+                    } elseif ($item_index < $total_items) {
+                        // Tengah: garis penuh melewati bullet atas ke bawah item
+                        echo '<span class="'.$connectorClass.' top-0 bottom-0"></span>';
+                    } else {
+                        // Terakhir: sambungkan ke bullet sebelumnya (garis dari atas sampai tengah bullet)
+                        echo '<span class="'.$connectorClass.' top-0 h-6"></span>';
+                    }
+                    echo '<div class="p-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50">';
+                    echo '<div class="flex items-center justify-between">';
+                    echo '<p class="text-xs text-slate-700"><span class="font-semibold">'.htmlspecialchars($activity['user_name']).'</span> ';
+                    echo '<span class="uppercase tracking-wide text-'.$tw.'-600 ml-1">'.htmlspecialchars($activity['action']).'</span>';
+                    if (!empty($activity['user_level'])) { echo ' <span class="text-slate-500">('.htmlspecialchars($activity['user_level']).')</span>'; }
+                    echo '</p>';
+                    echo '<span class="text-[11px] text-slate-500">'.$time_ago.'</span>';
+                    echo '</div>';
+                    if (!empty($activity['description'])) {
+                        echo '<p class="mt-2 text-[12px] text-slate-700">'.htmlspecialchars($activity['description']).'</p>';
+                    }
+                    if (!empty($activity['table_name'])) {
+                        echo '<p class="mt-1 text-[11px] text-slate-600"><i class="fa fa-table mr-1"></i>'.htmlspecialchars($activity['table_name']).'</p>';
+                    }
+                    echo '</div>';
+                    echo '</li>';
+                }
+                echo '</ol>';
+            }
+            ?>
+        </div>
+    </div>
+</div>
 
-		<div class="col-lg-3 col-xs-6">
-			<!-- small box -->
-			<div class="small-box bg-green">
-				<div class="inner">
-					<h4>
-						<?= rupiah($saldo); ?>
-					</h4>
-					<p>Total Saldo</p>
-				</div>
-				<div class="icon">
-					<i class="ion ion-pie-graph"></i>
-				</div>
-				<a href="#" class="small-box-footer">More info
-					<i class="fa fa-arrow-circle-right"></i>
-				</a>
-			</div>
-		</div>
-		<!-- ./col -->
-	</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('savingChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Setoran',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: '#6366f1',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                }, {
+                    label: 'Penarikan',
+                    data: [7, 11, 5, 8, 3, 6],
+                    borderColor: '#f43f5e',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(244, 63, 94, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#64748b', font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    });
+</script>
 
-	<!-- /.box-body -->
 
-	<!-- Grafik Setoran dan Penarikan -->
-	<div class="row">
-		<div class="col-md-12">
-			<div class="box box-info">
-				<div class="box-header with-border">
-					<h3 class="box-title">
-						<i class="fa fa-line-chart"></i> Grafik Setoran dan Penarikan (12 Bulan Terakhir)
-					</h3>
-					<div class="box-tools pull-right">
-						<button type="button" class="btn btn-box-tool" data-widget="collapse">
-							<i class="fa fa-minus"></i>
-						</button>
-						<button type="button" class="btn btn-box-tool" data-widget="remove">
-							<i class="fa fa-remove"></i>
-						</button>
-					</div>
-				</div>
-				<div class="box-body">
-					<div class="chart">
-						<canvas id="chartSetoranPenarikan" style="height: 300px;"></canvas>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Aktivitas Terbaru -->
-	<div class="row">
-		<div class="col-md-12">
-			<div class="box box-primary">
-				<div class="box-header with-border">
-					<h3 class="box-title">
-						<i class="fa fa-history"></i> Aktivitas Terbaru
-					</h3>
-					<div class="box-tools pull-right">
-						<?php
-						// Ambil jumlah aktivitas
-						$activity_count = 0;
-						if (function_exists('getActivityCount') && isset($koneksi)) {
-							try {
-								if (function_exists('createActivityTable')) {
-									@createActivityTable($koneksi);
-								}
-								if (function_exists('cleanupOldActivities')) {
-									@cleanupOldActivities($koneksi);
-								}
-								$activity_count = @getActivityCount($koneksi);
-							} catch (Exception $e) {
-								$activity_count = 0;
-							}
-						}
-						?>
-						<span class="label label-primary" style="font-size: 14px; padding: 5px 10px; margin-right: 10px;">
-							<i class="fa fa-list"></i> Total: <?php echo number_format($activity_count); ?> aktivitas
-						</span>
-						<button type="button" class="btn btn-box-tool" data-widget="collapse">
-							<i class="fa fa-minus"></i>
-						</button>
-					</div>
-				</div>
-				<div class="box-body" style="max-height: 500px; overflow-y: auto;">
-					<?php
-					if (!function_exists('getTimeAgo')) {
-						function getTimeAgo($datetime) {
-							if (empty($datetime)) return '';
-							
-							// Coba parse dengan DateTime untuk akurasi lebih baik
-							$timestamp = false;
-							try {
-								$dt = new DateTime($datetime);
-								$timestamp = $dt->getTimestamp();
-							} catch (Exception $e) {
-								// Fallback ke strtotime
-								$timestamp = @strtotime($datetime);
-							}
-							
-							if (!$timestamp || $timestamp <= 0) {
-								// Jika masih gagal, coba format lain
-								$timestamp = @strtotime(str_replace('/', '-', $datetime));
-								if (!$timestamp || $timestamp <= 0) {
-									return '';
-								}
-							}
-							
-							$now = time();
-							$diff = $now - $timestamp;
-							
-							// Pastikan diff positif (tidak ada data masa depan)
-							if ($diff < 0) {
-								return 'Baru saja';
-							}
-							
-							// Hitung dengan lebih akurat
-							if ($diff < 60) {
-								return 'Baru saja';
-							} elseif ($diff < 3600) {
-								$mins = floor($diff / 60);
-								return $mins . ' menit yang lalu';
-							} elseif ($diff < 86400) {
-								$hours = floor($diff / 3600);
-								return $hours . ' jam yang lalu';
-							} elseif ($diff < 604800) {
-								$days = floor($diff / 86400);
-								return $days . ' hari yang lalu';
-							} else {
-								return date('d M Y', $timestamp);
-							}
-						}
-					}
-					
-					$recent_activities = [];
-					// Pastikan koneksi tersedia
-					if (!isset($koneksi) || !$koneksi) {
-						$recent_activities = [];
-					} else {
-						try {
-							// Pastikan tabel sudah dibuat
-							if (function_exists('createActivityTable')) {
-								@createActivityTable($koneksi);
-							}
-							
-							// Ambil aktivitas terbaru langsung dari database dengan format yang jelas
-							if (is_object($koneksi) && method_exists($koneksi, 'query')) {
-								// Cek apakah tabel ada
-								$check_table = @$koneksi->query("SHOW TABLES LIKE 'tb_activity_log'");
-								if ($check_table && $check_table->num_rows > 0) {
-									$sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
-									$result = @$koneksi->query($sql);
-									if ($result && $result->num_rows > 0) {
-										while ($row = $result->fetch_assoc()) {
-											$recent_activities[] = $row;
-										}
-									}
-								}
-							} elseif (is_resource($koneksi)) {
-								$check_table = @mysqli_query($koneksi, "SHOW TABLES LIKE 'tb_activity_log'");
-								if ($check_table && mysqli_num_rows($check_table) > 0) {
-									$sql = "SELECT *, UNIX_TIMESTAMP(created_at) as timestamp_unix FROM tb_activity_log ORDER BY created_at DESC LIMIT 10";
-									$result = @mysqli_query($koneksi, $sql);
-									if ($result && mysqli_num_rows($result) > 0) {
-										while ($row = mysqli_fetch_assoc($result)) {
-											$recent_activities[] = $row;
-										}
-									}
-								}
-							} else {
-								// Fallback ke fungsi getRecentActivities jika ada
-								if (function_exists('getRecentActivities')) {
-									$recent_activities = @getRecentActivities($koneksi, 10);
-								}
-							}
-							
-							if (!is_array($recent_activities)) {
-								$recent_activities = [];
-							}
-						} catch (Exception $e) {
-							// Log error untuk debugging
-							error_log("Error loading activities: " . $e->getMessage());
-							$recent_activities = [];
-						}
-					}
-					
-					if (empty($recent_activities)):
-					?>
-					<div class="alert alert-info">
-						<i class="fa fa-info-circle"></i> Belum ada aktivitas yang tercatat.
-					</div>
-					<?php else: ?>
-					<ul class="timeline timeline-inverse">
-						<?php
-						foreach ($recent_activities as $activity):
-							// Gunakan timestamp_unix jika ada (dari query UNIX_TIMESTAMP)
-							if (isset($activity['timestamp_unix']) && $activity['timestamp_unix'] > 0) {
-								$timestamp = (int)$activity['timestamp_unix'];
-							} else {
-								// Fallback: parse created_at
-								$created_at = isset($activity['created_at']) ? $activity['created_at'] : '';
-								if (empty($created_at)) {
-									$timestamp = time();
-								} else {
-									$timestamp = strtotime($created_at);
-									if (!$timestamp || $timestamp <= 0) {
-										$timestamp = time();
-									}
-								}
-							}
-							
-							// Hitung selisih waktu
-							$now = time();
-							$diff = $now - $timestamp;
-							
-							// Pastikan diff valid (tidak negatif)
-							if ($diff < 0) {
-								$diff = 0;
-							}
-							
-							// Hitung time_ago berdasarkan diff
-							if ($diff < 60) {
-								$time_ago = 'Baru saja';
-							} elseif ($diff < 3600) {
-								$mins = floor($diff / 60);
-								$time_ago = $mins . ' menit yang lalu';
-							} elseif ($diff < 86400) {
-								$hours = floor($diff / 3600);
-								$time_ago = $hours . ' jam yang lalu';
-							} elseif ($diff < 604800) {
-								$days = floor($diff / 86400);
-								$time_ago = $days . ' hari yang lalu';
-							} else {
-								$time_ago = date('d M Y', $timestamp);
-							}
-							
-							// Simpan created_at untuk JavaScript
-							$created_at = isset($activity['created_at']) ? $activity['created_at'] : date('Y-m-d H:i:s');
-						?>
-						<li>
-							<i class="fa <?php echo htmlspecialchars($activity['icon']); ?> bg-<?php echo htmlspecialchars($activity['color']); ?>"></i>
-							<div class="timeline-item">
-								<span class="time" data-timestamp="<?php echo $timestamp; ?>" data-created="<?php echo htmlspecialchars($created_at); ?>" data-diff="<?php echo isset($diff) ? $diff : 0; ?>">
-									<i class="fa fa-clock-o"></i> <span class="time-text"><?php echo $time_ago; ?></span>
-								</span>
-								<h3 class="timeline-header">
-									<a href="#"><?php echo htmlspecialchars($activity['user_name']); ?></a>
-									<span class="label label-<?php echo htmlspecialchars($activity['color']); ?>" style="margin-left: 10px;">
-										<?php echo htmlspecialchars($activity['action']); ?>
-									</span>
-									<?php if ($activity['user_level']): ?>
-									<small class="text-muted">(<?php echo htmlspecialchars($activity['user_level']); ?>)</small>
-									<?php endif; ?>
-								</h3>
-								<div class="timeline-body">
-									<?php echo htmlspecialchars($activity['description']); ?>
-									<?php if ($activity['table_name']): ?>
-									<br><small class="text-muted">
-										<i class="fa fa-table"></i> <?php echo htmlspecialchars($activity['table_name']); ?>
-									</small>
-									<?php endif; ?>
-								</div>
-							</div>
-						</li>
-						<?php endforeach; ?>
-						<li>
-							<i class="fa fa-clock-o bg-gray"></i>
-						</li>
-					</ul>
-					<?php endif; ?>
-				</div>
-			</div>
-		</div>
-	</div>
-
-</section>
-<!-- /.content -->
-
-	<script>
-	// Data untuk grafik - ambil dari database
-	<?php
-	// Query untuk mendapatkan data setoran dan penarikan per bulan (12 bulan terakhir)
-	$chart_data = [];
-	$chart_labels = [];
-	
-	for ($i = 11; $i >= 0; $i--) {
-		$month = date('Y-m', strtotime("-$i months"));
-		$month_label = date('M Y', strtotime("-$i months"));
-		$chart_labels[] = $month_label;
-		
-		$sql_setor = $koneksi->query("SELECT COALESCE(SUM(setor), 0) as total FROM tb_tabungan WHERE jenis='ST' AND DATE_FORMAT(tgl, '%Y-%m') = '$month'");
-		$data_setor = $sql_setor->fetch_assoc();
-		$chart_data['setor'][] = (float)$data_setor['total'];
-		
-		$sql_tarik = $koneksi->query("SELECT COALESCE(SUM(tarik), 0) as total FROM tb_tabungan WHERE jenis='TR' AND DATE_FORMAT(tgl, '%Y-%m') = '$month'");
-		$data_tarik = $sql_tarik->fetch_assoc();
-		$chart_data['tarik'][] = (float)$data_tarik['total'];
-	}
-	?>
-	
-	// Inisialisasi Chart
-	var ctx = document.getElementById('chartSetoranPenarikan').getContext('2d');
-	var chartSetoranPenarikan = new Chart(ctx, {
-		type: 'line',
-		data: {
-			labels: <?php echo json_encode($chart_labels); ?>,
-			datasets: [{
-				label: 'Setoran',
-				data: <?php echo json_encode($chart_data['setor']); ?>,
-				borderColor: 'rgb(0, 166, 90)',
-				backgroundColor: 'rgba(0, 166, 90, 0.1)',
-				borderWidth: 2,
-				fill: true,
-				tension: 0.4,
-				pointRadius: 5,
-				pointHoverRadius: 7
-			}, {
-				label: 'Penarikan',
-				data: <?php echo json_encode($chart_data['tarik']); ?>,
-				borderColor: 'rgb(245, 105, 84)',
-				backgroundColor: 'rgba(245, 105, 84, 0.1)',
-				borderWidth: 2,
-				fill: true,
-				tension: 0.4,
-				pointRadius: 5,
-				pointHoverRadius: 7
-			}]
-		},
-		options: {
-			responsive: true,
-			maintainAspectRatio: false,
-			plugins: {
-				legend: {
-					display: true,
-					position: 'top',
-				},
-				tooltip: {
-					mode: 'index',
-					intersect: false,
-					callbacks: {
-						label: function(context) {
-							var label = context.dataset.label || '';
-							if (label) {
-								label += ': ';
-							}
-							label += 'Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y);
-							return label;
-						}
-					}
-				}
-			},
-			scales: {
-				y: {
-					beginAtZero: true,
-					ticks: {
-						callback: function(value) {
-							if (value >= 1000000) {
-								return 'Rp ' + (value / 1000000).toFixed(1) + 'J';
-							} else if (value >= 1000) {
-								return 'Rp ' + (value / 1000).toFixed(0) + 'K';
-							}
-							return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
-						},
-						maxTicksLimit: 10
-					},
-					grid: {
-						color: 'rgba(0, 0, 0, 0.1)'
-					}
-				},
-				x: {
-					grid: {
-						display: false
-					},
-					ticks: {
-						maxRotation: 45,
-						minRotation: 45
-					}
-				}
-			},
-			interaction: {
-				mode: 'nearest',
-				axis: 'x',
-				intersect: false
-			}
-		}
-	});
-	</script>
-	
-	<style>
-	.timeline {
-		position: relative;
-		margin: 0 0 30px 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.timeline:before {
-		content: '';
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 40px;
-		width: 4px;
-		margin-left: -1.5px;
-		background-color: #ddd;
-	}
-
-	.timeline > li {
-		position: relative;
-		margin-bottom: 20px;
-		min-height: 50px;
-	}
-
-	.timeline > li:before,
-	.timeline > li:after {
-		content: " ";
-		display: table;
-	}
-
-	.timeline > li:after {
-		clear: both;
-	}
-
-	.timeline > li > .timeline-item {
-		-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-		box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-		border-radius: 3px;
-		margin-top: 0;
-		background: #fff;
-		color: #444;
-		margin-left: 60px;
-		margin-right: 15px;
-		padding: 0;
-		position: relative;
-	}
-
-	.timeline > li > .timeline-item > .time {
-		color: #999;
-		float: right;
-		padding: 10px;
-		font-size: 12px;
-	}
-
-	.timeline > li > .timeline-item > .timeline-header {
-		margin: 0;
-		color: #555;
-		border-bottom: 1px solid #f4f4f4;
-		padding: 10px;
-		font-size: 14px;
-		line-height: 1.1;
-	}
-
-	.timeline > li > .timeline-item > .timeline-body {
-		padding: 10px;
-		font-size: 13px;
-	}
-
-	.timeline > li > i {
-		width: 30px;
-		height: 30px;
-		font-size: 15px;
-		line-height: 30px;
-		position: absolute;
-		color: #fff;
-		background: #d2d6de;
-		border-radius: 50%;
-		text-align: center;
-		left: 25px;
-		top: 0;
-	}
-
-	.timeline > li > .bg-blue { background-color: #3c8dbc !important; }
-	.timeline > li > .bg-green { background-color: #00a65a !important; }
-	.timeline > li > .bg-yellow { background-color: #f39c12 !important; }
-	.timeline > li > .bg-red { background-color: #dd4b39 !important; }
-	.timeline > li > .bg-aqua { background-color: #00c0ef !important; }
-	.timeline > li > .bg-purple { background-color: #605ca8 !important; }
-	.timeline > li > .bg-gray { background-color: #d2d6de !important; }
-	.timeline > li > .bg-navy { background-color: #001f3f !important; }
-	.timeline > li > .bg-teal { background-color: #39cccc !important; }
-	.timeline > li > .bg-lime { background-color: #01ff70 !important; }
-	.timeline > li > .bg-orange { background-color: #ff851b !important; }
-	.timeline > li > .bg-fuchsia { background-color: #f012be !important; }
-	</style>
 
 	<script>
 	// Fungsi untuk update waktu aktivitas secara real-time
@@ -748,3 +457,4 @@ $saldo = $setor - $tarik;
 		}, 3000);
 	})();
 	</script>
+

@@ -48,64 +48,63 @@ try {
 		Riwayat
 		<small>Transaksi</small>
 	</h1>
-	<ol class="breadcrumb">
-		<li>
-			<a href="index.php">
-				<i class="fa fa-home"></i>
-				<b>e-TABS</b>
-			</a>
-		</li>
-	</ol>
 </section>
 <!-- Main content -->
 
 <section class="content">
 
-	<div class="box box-primary">
-		<div class="box-header">
-			<button type="button" id="btnHapusTerpilih" class="btn btn-danger" onclick="hapusTerpilih()">
-				<i class="glyphicon glyphicon-trash"></i> Hapus Terpilih
-			</button>
-			<div class="btn-group">
-				<a href="../../admin/export_handler.php?type=excel&table=riwayat" class="btn btn-info" title="Ekspor ke Excel">
-					<i class="fa fa-file-excel-o"></i> Excel
+	<div class="rounded-2xl bg-white shadow-sm">
+		<div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-100 px-6 py-4">
+            <div class="flex items-center gap-2">
+                <button type="button" id="btnHapusTerpilih" class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-medium text-white ring-1 ring-rose-600/30 hover:bg-rose-700 disabled:opacity-50" onclick="hapusTerpilih()" disabled>
+                    <i class="fa-solid fa-trash"></i>
+                    <span>Hapus Terpilih</span>
+                </button>
+            </div>
+            
+			<div class="flex items-center gap-2">
+                <a href="../../admin/export_handler.php?type=excel&table=riwayat" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20 hover:bg-emerald-100" title="Ekspor ke Excel">
+					<i class="fa-solid fa-file-excel"></i><span>Excel</span>
 				</a>
-				<a href="../../admin/export_handler.php?type=pdf&table=riwayat" class="btn btn-danger" title="Ekspor ke PDF" target="_blank">
-					<i class="fa fa-file-pdf-o"></i> PDF
+				<a href="../../admin/export_handler.php?type=pdf&table=riwayat" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20 hover:bg-rose-100" title="Ekspor ke PDF" target="_blank">
+					<i class="fa-solid fa-file-pdf"></i><span>PDF</span>
 				</a>
-			</div>
-			<div class="box-tools pull-right">
-				<button type="button" class="btn btn-box-tool" data-widget="collapse">
-					<i class="fa fa-minus"></i>
-				</button>
-				<button type="button" class="btn btn-box-tool" data-widget="remove">
-					<i class="fa fa-remove"></i>
-				</button>
 			</div>
 		</div>
 		<!-- /.box-header -->
-		<div class="box-body">
+		<div class="p-6">
 			<div class="table-responsive">
 				<form id="formRiwayat" method="post" action="?page=del_riwayat">
-					<table id="example1" class="table table-bordered table-striped">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <input id="datatableSearch" class="auth-input" placeholder="Cari di tabel...">
+                            <select id="datatablePageSize" class="auth-input">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+					<table id="example1" class="w-full table-dashboard text-xs">
 						<thead>
 							<tr>
-								<th width="30">
-									<input type="checkbox" id="checkAll" title="Pilih Semua (hanya Tidak Aktif)" onclick="handleCheckAllClickRiwayat(this)">
+								<th class="px-4 py-3 text-center" width="30">
+									<input type="checkbox" id="checkAll" title="Pilih Semua (hanya Tidak Aktif)">
 								</th>
-								<th>No</th>
-								<th>Jenis</th>
-								<th>Status</th>
-								<th>NIS</th>
-								<th>Nama</th>
-								<th>Tanggal Transaksi</th>
-								<th>Jumlah</th>
-								<th>Petugas Transaksi</th>
-								<th>Tanggal Hapus</th>
-								<th>Petugas Hapus</th>
+								<th class="px-4 py-3 font-medium text-center" width="40px">No</th>
+								<th class="px-4 py-3 font-medium text-center">Jenis</th>
+								<th class="px-4 py-3 font-medium text-center">Status</th>
+								<th class="px-4 py-3 font-medium">NIS</th>
+								<th class="px-4 py-3 font-medium">Nama</th>
+								<th class="px-4 py-3 font-medium">Tanggal Transaksi</th>
+								<th class="px-4 py-3 font-medium text-right">Jumlah</th>
+								<th class="px-4 py-3 font-medium">Petugas Transaksi</th>
+								<th class="px-4 py-3 font-medium">Tanggal Hapus</th>
+								<th class="px-4 py-3 font-medium">Petugas Hapus</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="datatableUsersBody" class="divide-y divide-slate-200 bg-white">
 
 							<?php
 
@@ -118,67 +117,72 @@ try {
 					$is_tidak_aktif = ($data['status'] == 'Tidak Aktif');
                 ?>
 
-							<tr>
-								<td>
+							<tr class="hover:bg-slate-50 transition-colors">
+								<td class="px-4 py-3 text-center">
 									<?php if ($is_tidak_aktif): ?>
-									<input type="checkbox" name="id_riwayat[]" class="checkItem" value="<?php echo $data['id_riwayat']; ?>">
+									<input type="checkbox" name="id_riwayat[]" class="checkItem rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" value="<?php echo $data['id_riwayat']; ?>">
 									<?php else: ?>
-									<input type="checkbox" disabled title="Data Aktif tidak dapat dihapus">
+									<input type="checkbox" disabled class="rounded border-slate-200 bg-slate-100 text-slate-400" title="Data Aktif tidak dapat dihapus">
 									<?php endif; ?>
 								</td>
-								<td>
+								<td class="px-4 py-3 text-center">
 									<?php echo $no++; ?>
 								</td>
-								<td>
+								<td class="px-4 py-3 text-center">
 									<?php 
 									if ($data['jenis'] == 'ST') {
-										echo '<span class="label label-success">Setoran</span>';
+										echo '<span class="badge-pill badge-pill-success">Setoran</span>';
 									} else {
-										echo '<span class="label label-danger">Penarikan</span>';
+										echo '<span class="badge-pill badge-pill-danger">Penarikan</span>';
 									}
 									?>
 								</td>
-								<td>
+								<td class="px-4 py-3 text-center">
 									<?php 
 									if ($data['status'] == 'Aktif') {
-										echo '<span class="label label-primary">Aktif</span>';
+										echo '<span class="badge-pill badge-pill-success">Aktif</span>';
 									} else {
-										echo '<span class="label label-default">Tidak Aktif</span>';
+										echo '<span class="badge-pill badge-pill-danger">Tidak Aktif</span>';
 									}
 									?>
 								</td>
-								<td>
+								<td class="px-4 py-3 font-medium text-slate-900">
 									<?php echo $data['nis']; ?>
 								</td>
-								<td>
+								<td class="px-4 py-3">
 									<?php echo $data['nama_siswa'] ?? 'Siswa tidak ditemukan'; ?>
 								</td>
-								<td>
-									<?php $tgl = $data['tgl']; echo date("d/M/Y", strtotime($tgl)); ?>
+								<td class="px-4 py-3">
+                                    <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        <?php $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl)); ?>
+                                    </span>
 								</td>
-								<td align="right">
+								<td class="px-4 py-3 text-right font-medium text-slate-900">
 									<?php 
 									if ($data['jenis'] == 'ST') {
-										echo rupiah($data['setor']);
+										echo '<span class="text-emerald-600">' . rupiah($data['setor']) . '</span>';
 									} else {
-										echo rupiah($data['tarik']);
+										echo '<span class="text-rose-600">' . rupiah($data['tarik']) . '</span>';
 									}
 									?>
 								</td>
-								<td>
-									<?php echo $data['petugas']; ?>
+								<td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+									    <?php echo $data['petugas']; ?>
+                                    </span>
 								</td>
-								<td>
+								<td class="px-4 py-3">
 									<?php 
 									if ($data['tgl_hapus']) {
 										$tgl_hapus = $data['tgl_hapus']; 
-										echo date("d/M/Y H:i", strtotime($tgl_hapus)); 
+										echo '<span class="text-xs text-slate-500">' . date("d M Y H:i", strtotime($tgl_hapus)) . '</span>'; 
 									} else {
 										echo '-';
 									}
 									?>
 								</td>
-								<td>
+								<td class="px-4 py-3">
 									<?php echo $data['petugas_hapus'] ?? '-'; ?>
 								</td>
 							</tr>
@@ -188,6 +192,10 @@ try {
 						</tbody>
 
 					</table>
+                    <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <span id="datatableInfoText" class="text-[11px] text-slate-500"></span>
+                        <ul id="datatablePagination" class="pagination"></ul>
+                    </div>
 				</form>
 			</div>
 		</div>
@@ -290,4 +298,6 @@ function hapusTerpilih() {
 	});
 }
 </script>
+
+
 

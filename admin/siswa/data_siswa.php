@@ -317,120 +317,122 @@ if (isset($_POST['simpan'])) {
         Master Data
         <small>Siswa</small>
     </h1>
-    <ol class="breadcrumb">
-        <li>
-            <a href="index.php">
-                <i class="fa fa-home"></i>
-                <b>e-TABS</b>
-            </a>
-        </li>
-    </ol>
 </section>
 <!-- Main content -->
 <section class="content">
-    <div class="box box-primary">
-        <div class="box-header with-border">
-            <h3 class="box-title" style="margin-right: 15px;">
-                <i class="fa fa-users"></i> 
-                <span id="infoJumlahSiswa">
-                    <?php
-                    // Hitung total siswa
-                    $query_total = "SELECT COUNT(*) as total FROM tb_siswa";
-                    $result_total = mysqli_query($koneksi, $query_total);
-                    $data_total = mysqli_fetch_assoc($result_total);
-                    $total_siswa = $data_total['total'];
-                    echo "Total: <strong>" . $total_siswa . "</strong> Siswa";
-                    ?>
-                </span>
-            </h3>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
-                <i class="glyphicon glyphicon-plus"></i> Tambah Data
-            </button>
-            <button type="button" id="btnEditTerpilih" class="btn btn-success" onclick="editTerpilih()" disabled>
-                <i class="glyphicon glyphicon-edit"></i> Edit Terpilih
-            </button>
-            <button type="button" id="btnHapusTerpilih" class="btn btn-danger" onclick="hapusTerpilih()" disabled>
-                <i class="glyphicon glyphicon-trash"></i> Hapus Terpilih
-            </button>
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal-impor">
-                <i class="glyphicon glyphicon-upload"></i> Impor Data Siswa
-            </button>
-            <div class="btn-group">
-                <a href="admin/export_handler.php?type=excel&table=siswa" class="btn btn-info" title="Ekspor ke Excel">
-                    <i class="fa fa-file-excel-o"></i> Excel
-                </a>
-                <a href="admin/export_handler.php?type=pdf&table=siswa" class="btn btn-danger" title="Ekspor ke PDF" target="_blank">
-                    <i class="fa fa-file-pdf-o"></i> PDF
-                </a>
-            </div>
-            <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                    <i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-box-tool" data-widget="remove">
-                    <i class="fa fa-remove"></i>
-                </button>
+    <div class="rounded-2xl bg-white shadow-sm">
+        <div class="border-b border-slate-100 px-6 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span id="infoJumlahSiswa" class="text-slate-700">
+                        <?php
+                        // Hitung total siswa
+                        $query_total = "SELECT COUNT(*) as total FROM tb_siswa";
+                        $result_total = mysqli_query($koneksi, $query_total);
+                        $data_total = mysqli_fetch_assoc($result_total);
+                        $total_siswa = $data_total['total'];
+                        echo "Total: <strong>" . $total_siswa . "</strong> Siswa";
+                        ?>
+                    </span>
+                </h3>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="btn btn-dashboard-primary inline-flex items-center gap-2 tw-modal-open" data-target="#addModal">
+                        <i class="fa-solid fa-plus text-xs"></i><span>Tambah Data</span>
+                    </button>
+                    <button type="button" id="btnEditTerpilih" class="btn btn-dashboard-soft inline-flex items-center gap-2 disabled:opacity-50" onclick="editTerpilih()" disabled>
+                        <i class="fa-solid fa-pen-to-square text-xs"></i><span>Edit Terpilih</span>
+                    </button>
+                    <button type="button" id="btnHapusTerpilih" class="btn btn-dash-danger inline-flex items-center gap-2 disabled:opacity-50" onclick="hapusTerpilih()" disabled>
+                        <i class="fa-solid fa-trash text-xs"></i><span>Hapus Terpilih</span>
+                    </button>
+                    <button type="button" class="btn btn-dashboard-soft inline-flex items-center gap-2 tw-modal-open" data-target="#modal-impor">
+                        <i class="fa-solid fa-file-import text-xs"></i><span>Impor Data Siswa</span>
+                    </button>
+                    <div class="inline-flex gap-2">
+                    <a href="admin/export_handler.php?type=excel&table=siswa" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20 hover:bg-emerald-100" title="Ekspor ke Excel">
+                        <i class="fa-solid fa-file-excel text-xs"></i><span>Excel</span>
+                    </a>
+                    <a href="admin/export_handler.php?type=pdf&table=siswa" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20 hover:bg-rose-100" title="Ekspor ke PDF" target="_blank">
+                        <i class="fa-solid fa-file-pdf text-xs"></i><span>PDF</span>
+                    </a>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- /.box-header -->
-        <div class="box-body">
-            <!-- Filter Form -->
-            <div class="row" style="margin-bottom: 15px;">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" style="background-color: #f4f4f4; padding: 10px;">
-                            <h4 class="panel-title" style="margin: 0;">
-                                <i class="fa fa-filter"></i> Filter Data
-                            </h4>
-                        </div>
-                        <div class="panel-body" style="padding: 15px;">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Filter NIS:</label>
-                                        <input type="text" id="filterNIS" class="form-control" placeholder="Cari berdasarkan NIS...">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Filter Nama:</label>
-                                        <input type="text" id="filterNama" class="form-control" placeholder="Cari berdasarkan Nama...">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Filter Tahun Masuk:</label>
-                                        <select id="filterThMasuk" class="form-control">
-                                            <option value="">-- Semua Tahun --</option>
-                                            <?php
-                                            // Ambil daftar tahun masuk yang unik dari database
-                                            $query_tahun = "SELECT DISTINCT th_masuk FROM tb_siswa ORDER BY th_masuk DESC";
-                                            $result_tahun = mysqli_query($koneksi, $query_tahun);
-                                            while ($row_tahun = mysqli_fetch_assoc($result_tahun)) {
-                                                echo '<option value="' . $row_tahun['th_masuk'] . '">' . $row_tahun['th_masuk'] . '</option>';
-                                            }
-                                            ?>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button type="button" id="btnCariFilter" class="btn btn-primary" onclick="executeFilterSiswa(); return false;">
-                                        <i class="fa fa-search"></i> Cari
-                                    </button>
-                                    <button type="button" id="btnResetFilter" class="btn btn-warning" onclick="resetFilterSiswa(); return false;">
-                                        <i class="fa fa-refresh"></i> Reset Filter
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+        <div class="p-6">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 mb-4">
+                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 3H2l8 9v7l4 2v-9l8-9z"/>
+                    </svg>
+                    <span>Filter Data</span>
+                </h4>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="text-xs text-slate-500">Filter NIS:</label>
+                        <input type="text" id="filterNIS" class="auth-input" placeholder="Cari berdasarkan NIS...">
                     </div>
+                    <div>
+                        <label class="text-xs text-slate-500">Filter Nama:</label>
+                        <input type="text" id="filterNama" class="auth-input" placeholder="Cari berdasarkan Nama...">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-500">Filter Kelas:</label>
+                        <select id="filterKelas" class="auth-input">
+                            <option value="">-- Semua Kelas --</option>
+                            <?php
+                            $query_kelas_filter = "SELECT DISTINCT kelas FROM tb_kelas ORDER BY kelas ASC";
+                            $result_kelas_filter = mysqli_query($koneksi, $query_kelas_filter);
+                            while ($row_kelas = mysqli_fetch_assoc($result_kelas_filter)) {
+                                echo '<option value="' . htmlspecialchars($row_kelas['kelas']) . '">' . htmlspecialchars($row_kelas['kelas']) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-500">Filter Tahun Masuk:</label>
+                        <select id="filterThMasuk" class="auth-input">
+                            <option value="">-- Semua Tahun --</option>
+                            <?php
+                            $query_tahun = "SELECT DISTINCT th_masuk FROM tb_siswa ORDER BY th_masuk DESC";
+                            $result_tahun = mysqli_query($koneksi, $query_tahun);
+                            while ($row_tahun = mysqli_fetch_assoc($result_tahun)) {
+                                echo '<option value="' . $row_tahun['th_masuk'] . '">' . $row_tahun['th_masuk'] . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <button type="button" id="btnCariFilter" class="btn btn-dashboard-soft border-indigo-500 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-700" onclick="executeFilterSiswa(); return false;">
+                        <i class="fa fa-search"></i> Cari
+                    </button>
+                    <button type="button" id="btnResetFilter" class="btn btn-dashboard-soft border-amber-500 text-amber-700 hover:bg-amber-50 hover:text-amber-700" onclick="resetFilterSiswa(); return false;">
+                        <i class="fa fa-refresh"></i> Reset Filter
+                    </button>
                 </div>
             </div>
             <div class="table-responsive">
                 <form id="formSiswa" method="post" action="">
-                    <table id="example1" class="table table-bordered table-striped">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <input id="datatableSearch" class="auth-input" placeholder="Cari di tabel...">
+                            <select id="datatablePageSize" class="auth-input">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table id="example1" class="w-full table-dashboard text-xs">
                         <thead>
                             <tr>
                                 <th width="30">
@@ -447,7 +449,7 @@ if (isset($_POST['simpan'])) {
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="datatableUsersBody">
 
                             <?php
                       $no = 1;
@@ -515,11 +517,11 @@ if (isset($_POST['simpan'])) {
                             <?php $warna = $data['status']  ?>
                             <td>
                                 <?php if ($warna == 'Aktif') { ?>
-                                <span class="label label-primary">Aktif</span>
+                                <span class="badge-pill badge-pill-primary">Aktif</span>
                                 <?php } elseif ($warna == 'Lulus') { ?>
-                                <span class="label label-success">Lulus</span>
+                                <span class="badge-pill badge-pill-success">Lulus</span>
                                 <?php } elseif ($warna == 'Pindah') { ?>
-                                <span class="label label-danger">Pindah</span>
+                                <span class="badge-pill badge-pill-danger">Pindah</span>
                             </td>
                             <?php } ?>
 
@@ -528,19 +530,19 @@ if (isset($_POST['simpan'])) {
                             </td>
 
                             <td>
-                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal"
+                                <button type="button" class="btn btn-sm btn-dashboard-success tw-modal-open" data-target="#editModal"
                                     data-nis="<?php echo $data['nis']; ?>"
                                     data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>"
                                     data-jekel="<?php echo $data['jekel']; ?>"
                                     data-id_kelas="<?php echo $data['id_kelas']; ?>"
                                     data-th_masuk="<?php echo $data['th_masuk']; ?>"
                                     title="Ubah">
-                                    <i class="glyphicon glyphicon-edit"></i>
+                                    <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <a href="?page=MyApp/del_siswa&kode=<?php echo $data['nis']; ?>"
                                     onclick="return confirmHapus(event, 'Yakin hapus data siswa <?php echo htmlspecialchars($data['nama_siswa']); ?>?')" title="Hapus"
-                                    class="btn btn-danger">
-                                    <i class="glyphicon glyphicon-trash"></i>
+                                    class="btn btn-sm btn-dashboard-danger">
+                                    <i class="fa-solid fa-trash"></i>
                                     </a>
                             </td>
                         </tr>
@@ -562,6 +564,10 @@ if (isset($_POST['simpan'])) {
                         </tbody>
 
                     </table>
+                    <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <span id="datatableInfoText" class="text-[11px] text-slate-500"></span>
+                        <ul id="datatablePagination" class="pagination"></ul>
+                    </div>
                 </form>
             </div>
         </div>
@@ -569,48 +575,53 @@ if (isset($_POST['simpan'])) {
 </section>
 
 <!-- Modal Edit Multiple -->
-<div class="modal fade" id="modalEditMultiple" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(to right, #605ca8, #9c88ff); color: white;">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 0.8;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title">
-                    <i class="glyphicon glyphicon-edit"></i> Edit Multiple Siswa
-                    <span id="countData" style="font-size: 14px; font-weight: normal;"></span>
-                </h4>
-            </div>
-            <form id="formEditMultiple" method="post" action="?page=MyApp/edit_siswa_multiple">
-                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>NIS</th>
-                                    <th>Nama</th>
-                                    <th>Jenis Kelamin</th>
-                                    <th>Kelas</th>
-                                    <th>Tahun Masuk</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyEditMultiple">
-                                <!-- Data akan diisi via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">
-                        <i class="fa fa-times"></i> Batal
-                    </button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fa fa-save"></i> Simpan Semua
-                    </button>
-                </div>
-            </form>
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="modalEditMultiple">
+    <div class="relative w-full max-w-6xl rounded-2xl bg-white p-6 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-indigo-500"></i>
+                Edit Multiple Siswa
+                <span id="countData" class="ml-2 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-600"></span>
+            </h3>
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 tw-modal-close transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
+        
+        <!-- Body -->
+        <form id="formEditMultiple" method="post" action="?page=MyApp/edit_siswa_multiple" class="flex flex-col flex-1 overflow-hidden">
+            <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-xs uppercase text-slate-500 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-4 py-3 font-medium">NIS</th>
+                                <th class="px-4 py-3 font-medium">Nama</th>
+                                <th class="px-4 py-3 font-medium">Jenis Kelamin</th>
+                                <th class="px-4 py-3 font-medium">Kelas</th>
+                                <th class="px-4 py-3 font-medium">Tahun Masuk</th>
+                                <th class="px-4 py-3 font-medium">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEditMultiple" class="divide-y divide-slate-200  bg-white">
+                            <!-- Data akan diisi via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-5 flex justify-end gap-3 pt-4 border-t border-slate-100  shrink-0">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      tw-modal-close transition-all">
+                    Batal
+                </button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan Semua</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -627,6 +638,7 @@ window.executeFilterSiswa = function() {
     // Ambil nilai dari setiap filter (independen)
     var filterNIS = $('#filterNIS').val() ? $('#filterNIS').val().trim().toLowerCase() : '';
     var filterNama = $('#filterNama').val() ? $('#filterNama').val().trim().toLowerCase() : '';
+    var filterKelas = $('#filterKelas').val() ? $('#filterKelas').val().trim() : '';
     var filterThMasuk = $('#filterThMasuk').val() ? $('#filterThMasuk').val().trim() : '';
     
     // Jika menggunakan DataTable, gunakan DataTable API untuk filter
@@ -639,6 +651,14 @@ window.executeFilterSiswa = function() {
         // Filter NIS dan Nama menggunakan search biasa (partial match)
         table.column(2).search(filterNIS);
         table.column(3).search(filterNama);
+        
+        // Filter Kelas - gunakan exact match
+        if (filterKelas !== '') {
+            var regexKelas = '^' + filterKelas.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$';
+            table.column(6).search(regexKelas, true, false);
+        } else {
+            table.column(6).search('');
+        }
         
         // Filter Tahun Masuk - gunakan exact match dengan regex
         // Escape special characters dan gunakan ^ dan $ untuk exact match
@@ -669,6 +689,7 @@ window.executeFilterSiswa = function() {
             // Kolom: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
             var nis = $row.find('td').eq(2).text().trim().toLowerCase();
             var nama = $row.find('td').eq(3).text().trim().toLowerCase();
+            var kelas = $row.find('td').eq(6).text().trim();
             var thMasuk = $row.find('td').eq(8).text().trim();
             
             var showRow = true;
@@ -680,6 +701,11 @@ window.executeFilterSiswa = function() {
             
             // Filter Nama - hanya aktif jika ada nilai dan cocok
             if (filterNama !== '' && nama.indexOf(filterNama) === -1) {
+                showRow = false;
+            }
+            
+            // Filter Kelas - hanya aktif jika ada nilai dan cocok (exact match)
+            if (filterKelas !== '' && kelas !== filterKelas) {
                 showRow = false;
             }
             
@@ -747,6 +773,7 @@ window.resetFilterSiswa = function() {
     // Reset semua input filter
     $('#filterNIS').val('');
     $('#filterNama').val('');
+    $('#filterKelas').val('');
     $('#filterThMasuk').val('');
     
     // Tampilkan semua baris
@@ -971,19 +998,19 @@ function loadDataForEdit(nisArray) {
             var tr = $('<tr>')
                 .append($('<td>').append($('<input>', {
                     type: 'text',
-                    class: 'form-control',
+                    class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
                     value: nis,
                     readonly: true
                 })))
                 .append($('<td>').append($('<input>', {
                     type: 'text',
-                    class: 'form-control',
+                    class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
                     name: 'nama_siswa[]',
                     value: nama,
                     required: true
                 })))
                 .append($('<td>').append($('<select>', {
-                    class: 'form-control',
+                    class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
                     name: 'jekel[]',
                     required: true
                 }).append($('<option>', {
@@ -995,10 +1022,10 @@ function loadDataForEdit(nisArray) {
                     selected: jekel == 'PR',
                     text: 'PR'
                 }))))
-                .append($('<td>').append(selectKelas))
+                .append($('<td>').append(selectKelas.addClass('block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500')))
                 .append($('<td>').append($('<input>', {
                     type: 'number',
-                    class: 'form-control',
+                    class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
                     name: 'th_masuk[]',
                     value: th_masuk,
                     required: true,
@@ -1006,7 +1033,7 @@ function loadDataForEdit(nisArray) {
                     max: '2099'
                 })))
                 .append($('<td>').append($('<select>', {
-                    class: 'form-control',
+                    class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
                     name: 'status[]',
                     required: true
                 }).append($('<option>', {
@@ -1037,7 +1064,7 @@ function loadDataForEdit(nisArray) {
     
     $('#countData').text(count + ' siswa');
     
-    $('#modalEditMultiple').modal('show');
+    if (typeof $ !== 'undefined') { $('#modalEditMultiple').removeClass('hidden').addClass('flex'); }
 }
 
 function editTerpilih() {
@@ -1125,170 +1152,207 @@ window.handleCheckAllClick = handleCheckAllClick;
 window.toggleButtonsSiswa = toggleButtonsSiswa;
 </script>
 
-<div class="modal fade" id="modal-impor">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title">Upload Data Siswa</h4>
-            </div>
-            <form method="POST" enctype="multipart/form-data" action="">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Pilih File Excel</label>
-                        <a href="../../inc/generate_template_siswa.php" class="btn btn-success btn-sm pull-right" target="_blank">
-                            <i class="glyphicon glyphicon-download"></i> Download Template
-                        </a>
-                        <input type="file" name="file_excel" class="form-control" accept=".xls,.xlsx,.csv" required>
-                        <small class="help-block">Format: Excel (.xls, .xlsx) atau CSV</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" name="simpan" class="btn btn-primary">
-                        <i class="glyphicon glyphicon-upload"></i> Upload
-                    </button>
-                </div>
-            </form>
+<!-- Modal Impor -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="modal-impor">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl  transition-all">
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+                <i class="fa-solid fa-file-import text-emerald-500"></i>
+                Upload Data Siswa
+            </h3>
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700    tw-modal-close transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-        <!-- /.modal-content -->
+        
+        <!-- Body -->
+        <form method="POST" enctype="multipart/form-data" action="">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-slate-700  File Excel</label>"><a href="../../inc/generate_template_siswa.php" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-700   target="_blank">
+                        <i class="fa-solid fa-download"></i>
+                        Download Template
+                    </a>
+                </div>
+                
+                <div class="relative">
+                    <input type="file" name="file_excel" class="block w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     accept=".xls,.xlsx,.csv" required>
+                </div>
+                
+                <p class="text-[11px] text-slate-500">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    Format yang didukung: Excel (.xls, .xlsx) atau CSV
+                </p>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      tw-modal-close transition-all">
+                    Batal
+                </button>
+                <button type="submit" name="simpan" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all">
+                    <i class="fa-solid fa-upload"></i>
+                    <span>Upload</span>
+                </button>
+            </div>
+        </form>
     </div>
-    <!-- /.modal-dialog -->
 </div>
 
 <!-- Add Modal -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addModalLabel">Tambah Siswa</h4>
-      </div>
-      <form action="" method="post">
-      <div class="modal-body">
-        <div class="form-group">
-            <label>NIS</label>
-            <input type="text" name="nis" class="form-control" placeholder="NIS" required>
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="addModal">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl  transition-all">
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-indigo-500"></i>
+                Tambah Siswa
+            </h3>
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700    tw-modal-close transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-        <div class="form-group">
-            <label>Nama Siswa</label>
-            <input type="text" name="nama_siswa" class="form-control" placeholder="Nama Siswa" required>
-        </div>
-        <div class="form-group">
-            <label>Jenis Kelamin</label>
-            <select name="jekel" class="form-control" required>
-                <option value="">-- Pilih --</option>
-                <option value="LK">LK</option>
-                <option value="PR">PR</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Kelas</label>
-            <select name="id_kelas" class="form-control" required>
-                <option value="">-- Pilih --</option>
-                <?php
-                $query_kelas = "select * from tb_kelas";
-                $hasil_kelas = mysqli_query($koneksi, $query_kelas);
-                while ($row_kelas = mysqli_fetch_array($hasil_kelas)) {
-                    echo '<option value="'.$row_kelas['id_kelas'].'">'.$row_kelas['kelas'].'</option>';
-                }
-                ?>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Tahun Masuk</label>
-            <input type="number" name="th_masuk" class="form-control" placeholder="Th Masuk" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-        <input type="submit" name="Simpan" value="Simpan" class="btn btn-primary">
-      </div>
-      </form>
+        
+        <!-- Body -->
+        <form action="" method="post">
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <input type="text" name="nis" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="NIS" required>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Masuk</label>"><input type="number" name="th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="Tahun Masuk" required>
+                    </div>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700  Siswa</label>"><input type="text" name="nama_siswa" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="Nama Lengkap" required>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Kelamin</label>"><select name="jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <option value="LK">Laki-laki</option>
+                            <option value="PR">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <select name="id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <?php
+                            $query_kelas = "select * from tb_kelas";
+                            $hasil_kelas = mysqli_query($koneksi, $query_kelas);
+                            while ($row_kelas = mysqli_fetch_array($hasil_kelas)) {
+                                echo '<option value="'.$row_kelas['id_kelas'].'">'.$row_kelas['kelas'].'</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      tw-modal-close transition-all">
+                    Batal
+                </button>
+                <button type="submit" name="Simpan" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan</span>
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="editModalLabel">Ubah Siswa</h4>
-      </div>
-      <form action="" method="post">
-      <div class="modal-body">
-        <div class="form-group">
-            <label>NIS</label>
-            <input type="text" name="nis" id="edit_nis" class="form-control" readonly>
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="editModal">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl  transition-all">
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+                <i class="fa-solid fa-user-pen text-indigo-500"></i>
+                Ubah Siswa
+            </h3>
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700    tw-modal-close transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-        <div class="form-group">
-            <label>Nama Siswa</label>
-            <input type="text" name="nama_siswa" id="edit_nama_siswa" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label>Jenis Kelamin</label>
-            <select name="jekel" id="edit_jekel" class="form-control" required>
-                <option value="">-- Pilih --</option>
-                <option value="LK">LK</option>
-                <option value="PR">PR</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Kelas</label>
-            <select name="id_kelas" id="edit_id_kelas" class="form-control" required>
-                <option value="">-- Pilih --</option>
-                <?php
-                // Re-query to reset pointer or just use a new query
-                $hasil_kelas_edit = mysqli_query($koneksi, "select * from tb_kelas");
-                while ($row_kelas = mysqli_fetch_array($hasil_kelas_edit)) {
-                    echo '<option value="'.$row_kelas['id_kelas'].'">'.$row_kelas['kelas'].'</option>';
-                }
-                ?>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Tahun Masuk</label>
-            <input type="number" name="th_masuk" id="edit_th_masuk" class="form-control" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-        <input type="submit" name="Ubah" value="Ubah" class="btn btn-success">
-      </div>
-      </form>
+        
+        <!-- Body -->
+        <form action="" method="post">
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <input type="text" name="nis" id="edit_nis" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none    readonly>"></div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Masuk</label>"><input type="number" name="th_masuk" id="edit_th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"></div>
+                </div>">
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700  Siswa</label>"><input type="text" name="nama_siswa" id="edit_nama_siswa" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"></div>">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700  Kelamin</label>"><select name="jekel" id="edit_jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <option value="LK">Laki-laki</option>
+                            <option value="PR">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">
+                        <select name="id_kelas" id="edit_id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                            <?php
+                            $hasil_kelas_edit = mysqli_query($koneksi, "select * from tb_kelas");
+                            while ($row_kelas = mysqli_fetch_array($hasil_kelas_edit)) {
+                                echo '<option value="'.$row_kelas['id_kelas'].'">'.$row_kelas['kelas'].'</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      tw-modal-close transition-all">
+                    Batal
+                </button>
+                <button type="submit" name="Ubah" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan Perubahan</span>
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
 <script>
     // Tunggu sampai jQuery dimuat
-    (function() {
-        var waitForJQuery = setInterval(function() {
-            if (typeof $ !== 'undefined') {
-                clearInterval(waitForJQuery);
-                
-                $('#editModal').on('show.bs.modal', function (event) {
-                    var button = $(event.relatedTarget)
-                    var nis = button.data('nis')
-                    var nama = button.data('nama')
-                    var jekel = button.data('jekel')
-                    var id_kelas = button.data('id_kelas')
-                    var th_masuk = button.data('th_masuk')
-                    
-                    var modal = $(this)
-                    modal.find('#edit_nis').val(nis)
-                    modal.find('#edit_nama_siswa').val(nama)
-                    modal.find('#edit_jekel').val(jekel)
-                    modal.find('#edit_id_kelas').val(id_kelas)
-                    modal.find('#edit_th_masuk').val(th_masuk)
-                });
-            }
-        }, 100);
-    })();
+    $(document).on('click', '.tw-modal-open', function (event) {
+        event.preventDefault();
+        var target = $(this).data('target');
+        if (target === '#editModal') {
+            var nis = $(this).data('nis');
+            var nama = $(this).data('nama');
+            var jekel = $(this).data('jekel');
+            var id_kelas = $(this).data('id_kelas');
+            var th_masuk = $(this).data('th_masuk');
+            $('#edit_nis').val(nis);
+            $('#edit_nama_siswa').val(nama);
+            $('#edit_jekel').val(jekel);
+            $('#edit_id_kelas').val(id_kelas);
+            $('#edit_th_masuk').val(th_masuk);
+        }
+        $(target).removeClass('hidden').addClass('flex');
+    });
+    $(document).on('click', '.tw-modal-close', function () {
+        $(this).closest('.modal').addClass('hidden').removeClass('flex');
+    });
+    $(document).on('click', '.modal', function (e) {
+        if ($(e.target).hasClass('modal')) { $(this).addClass('hidden').removeClass('flex'); }
+    });
 </script>
 
 <script>
@@ -1374,5 +1438,4 @@ window.toggleButtonsSiswa = toggleButtonsSiswa;
     }
 })();
 </script>
-
 

@@ -66,12 +66,20 @@ ob_start();
 			font-family: 'Arial', sans-serif;
 			font-size: 11pt;
 			line-height: 1.5;
-			color: #333;
+			color: #000 !important;
 		}
+        
+        p, div, span, strong, td, th {
+            color: #000 !important;
+        }
+        
+        th {
+            color: #fff !important;
+        }
 		
 		.header {
 			margin-bottom: 20px;
-			border-bottom: 3px solid #4472C4;
+			border-bottom: 3px solid #000;
 			padding-bottom: 15px;
 		}
 		
@@ -97,7 +105,7 @@ ob_start();
 		.header-text h1 {
 			margin: 0;
 			font-size: 18pt;
-			color: #333;
+			color: #000;
 			font-weight: bold;
 			margin-bottom: 5px;
 		}
@@ -105,7 +113,7 @@ ob_start();
 		.header-text p {
 			margin: 3px 0;
 			font-size: 10pt;
-			color: #666;
+			color: #000;
 		}
 		
 		.report-title {
@@ -113,14 +121,14 @@ ob_start();
 			font-size: 14pt;
 			font-weight: bold;
 			margin: 15px 0;
-			color: #333;
+			color: #000;
 		}
 		
 		.period {
 			text-align: center;
 			font-size: 11pt;
 			margin-bottom: 15px;
-			color: #555;
+			color: #000;
 		}
 		
 		table {
@@ -131,25 +139,30 @@ ob_start();
 		}
 		
 		thead {
-			background-color: #4472C4;
-			color: white;
+			background-color: #000 !important;
+			color: #fff !important;
 		}
 		
 		th {
 			padding: 10px 8px;
 			text-align: center;
 			font-weight: bold;
-			border: 1px solid #2d5aa0;
+			border: 1px solid #000 !important;
+			color: #fff !important;
+			background-color: #000 !important;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
 		}
 		
 		td {
 			padding: 8px;
-			border: 1px solid #ddd;
+			border: 1px solid #000 !important;
 			text-align: left;
+			color: #000 !important;
 		}
 		
 		tbody tr:nth-child(even) {
-			background-color: #f9f9f9;
+			background-color: #fff;
 		}
 		
 		.text-right {
@@ -161,20 +174,21 @@ ob_start();
 		}
 		
 		.summary-row {
-			background-color: #e8f4f8;
+			background-color: #fff !important;
 			font-weight: bold;
 		}
 		
 		.summary-row td {
-			border-top: 2px solid #4472C4;
+			border-top: 2px solid #000 !important;
+			color: #000 !important;
 		}
 		
 		.footer {
 			margin-top: 30px;
 			text-align: center;
 			font-size: 9pt;
-			color: #666;
-			border-top: 1px solid #ddd;
+			color: #000 !important;
+			border-top: 1px solid #000 !important;
 			padding-top: 10px;
 		}
         
@@ -258,42 +272,29 @@ ob_start();
 	<div class="footer">
 		<p>Dicetak pada: <?php echo date("d/m/Y H:i:s"); ?></p>
 		<?php if (!empty($nama_bendahara)): ?>
-		<div style="margin-top: 30px; text-align: right; padding-right: 50px;">
-			<p>Bendahara,</p>
-			<br><br><br>
-			<p><strong><?php echo htmlspecialchars($nama_bendahara); ?></strong></p>
+		<div style="margin-top: 20px; text-align: right; padding-right: 50px;">
+			<div style="display: inline-block; text-align: center;">
+				<p>Bendahara,</p>
+				<div style="margin: 10px 0;">
+					<img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<?php echo urlencode($nama_bendahara); ?>" alt="QR Code Signature" style="width: 80px; height: 80px;">
+				</div>
+				<p><strong><?php echo htmlspecialchars($nama_bendahara); ?></strong></p>
+			</div>
 		</div>
 		<?php endif; ?>
 		<p style="margin-top: 10px;">e-TABS System</p>
 	</div>
+	<script>
+		window.onload = function() {
+			setTimeout(function() { window.print(); }, 300);
+		};
+	</script>
 </body>
 </html>
 
 <?php
-// Get content from buffer
+// Get content from buffer and output as HTML for direct browser printing
 $html = ob_get_clean();
-
-try {
-    // Create mPDF instance
-    $mpdf = new \Mpdf\Mpdf([
-        'mode' => 'utf-8',
-        'format' => 'A4',
-        'margin_left' => 15,
-        'margin_right' => 15,
-        'margin_top' => 15,
-        'margin_bottom' => 15
-    ]);
-    
-    // Set title
-    $mpdf->SetTitle('Laporan Tabungan Siswa');
-    
-    // Write HTML
-    $mpdf->WriteHTML($html);
-    
-    // Output PDF
-    $mpdf->Output('Laporan_Tabungan_' . date('Ymd_His') . '.pdf', 'I');
-    
-} catch (\Mpdf\MpdfException $e) {
-    echo $e->getMessage();
-}
+echo $html;
+exit;
 ?>
