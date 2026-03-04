@@ -67,13 +67,28 @@ echo    Target: %backupFile%
 echo    (Menunggu antrian proses file...)
 timeout /t 2 /nobreak >nul
 
-:: Menggunakan PowerShell untuk compress/update zip secara bersih (Tanpa .git dan file sampah)
+:: Menggunakan PowerShell dengan .NET ZipFile untuk hasil ZIP yang lebih standar dan bersih (Menghindari false positive virus)
 powershell -NoProfile -Command ^
     "$backupFile = '%backupFile%';" ^
     "if (Test-Path $backupFile) { Remove-Item $backupFile -Force };" ^
-    "Write-Host '   Membuat file backup bersih (Tanpa .git)...' -ForegroundColor Yellow;" ^
-    "$items = Get-ChildItem -Path . -Exclude $backupFile, '.git', '.vs', '.vscode', '.gitignore', 'node_modules', '*.zip', '*.bat', 'DEPLOY_HOSTING.md';" ^
-    "try { Compress-Archive -Path $items -DestinationPath $backupFile -ErrorAction Stop; Write-Host '   Backup berhasil! (etabs_backup.zip)' -ForegroundColor Green } catch { Write-Error '   Gagal: ' + $_ }"
+    "Write-Host '   Membuat file backup standar (NET ZipFile)...' -ForegroundColor Yellow;" ^
+    "Add-Type -AssemblyName 'System.IO.Compression.FileSystem';" ^
+    "$exclude = @($backupFile, '.git', '.vs', '.vscode', '.gitignore', 'node_modules', '*.zip', '*.bat', 'DEPLOY_HOSTING.md');" ^
+    "$zip = [System.IO.Compression.ZipFile]::Open($backupFile, 'Create');" ^
+    "Get-ChildItem -Path . -Recurse | Where-Object { -not $_.PSIsContainer } | ForEach-Object {" ^
+    "    $filePath = $_.FullName;" ^
+    "    $relPath = Resolve-Path -Path $filePath -Relative;" ^
+    "    $relPath = $relPath.Replace('.\', '').Replace('\', '/');" ^
+    "    $skip = $false;" ^
+    "    foreach ($ex in $exclude) {" ^
+    "        if ($relPath -like $ex -or $relPath -like ($ex + '/*') -or $relPath.StartsWith('.git/')) { $skip = $true; break }" ^
+    "    }" ^
+    "    if (-not $skip) {" ^
+    "        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $filePath, $relPath, 'Optimal')" ^
+    "    }" ^
+    "};" ^
+    "$zip.Dispose();" ^
+    "Write-Host '   Backup berhasil! (etabs_backup.zip)' -ForegroundColor Green"
 
 echo.
 echo ========================================
