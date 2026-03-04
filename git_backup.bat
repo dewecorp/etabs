@@ -50,13 +50,13 @@ if /i not "%confirm%"=="y" (
 
 :: 5. Eksekusi Git
 echo.
-echo [1/3] Menjalankan Git Add & Commit...
+echo [1/3] Menjalankan Git Add ^& Commit...
 git add .
 git commit -m "%msg%"
 
 echo.
-echo [2/3] Menjalankan Git Push...
-git push -u origin main
+echo [2/3] Menjalankan Git Push (Paksa)...
+git push -u origin main --force
 
 :: 6. Eksekusi Backup (via PowerShell wrapper)
 echo.
