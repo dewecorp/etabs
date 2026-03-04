@@ -67,13 +67,13 @@ echo    Target: %backupFile%
 echo    (Menunggu antrian proses file...)
 timeout /t 2 /nobreak >nul
 
-:: Menggunakan PowerShell untuk compress/update zip
+:: Menggunakan PowerShell untuk compress/update zip secara bersih (Tanpa .git dan file sampah)
 powershell -NoProfile -Command ^
     "$backupFile = '%backupFile%';" ^
-    "$exclude = @($backupFile, '.git', '.vs', '.vscode', '.gitignore');" ^
-    "if (Test-Path $backupFile) { Write-Host '   Mengupdate file backup...' -ForegroundColor Yellow } else { Write-Host '   Membuat file backup baru...' -ForegroundColor Yellow };" ^
-    "$items = Get-ChildItem -Path . -Exclude $exclude;" ^
-    "try { Compress-Archive -Path $items -DestinationPath $backupFile -Update -ErrorAction SilentlyContinue; Write-Host '   Backup berhasil!' -ForegroundColor Green } catch { Write-Error '   Gagal: ' + $_ }"
+    "if (Test-Path $backupFile) { Remove-Item $backupFile -Force };" ^
+    "Write-Host '   Membuat file backup bersih (Tanpa .git)...' -ForegroundColor Yellow;" ^
+    "$items = Get-ChildItem -Path . -Exclude $backupFile, '.git', '.vs', '.vscode', '.gitignore', 'node_modules', '*.zip', '*.bat', 'DEPLOY_HOSTING.md';" ^
+    "try { Compress-Archive -Path $items -DestinationPath $backupFile -ErrorAction Stop; Write-Host '   Backup berhasil! (etabs_backup.zip)' -ForegroundColor Green } catch { Write-Error '   Gagal: ' + $_ }"
 
 echo.
 echo ========================================
