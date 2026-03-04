@@ -110,8 +110,15 @@
 		$query_ubah = mysqli_query($koneksi, $sql_ubah);
 		if ($query_ubah) {
 			echo "<script>
-				Swal.fire({title: 'Ubah Data Berhasil', text: '', icon: 'success', confirmButtonText: 'OK'}).then((result) => {
-					if (result.value) { window.location = 'index.php?page=MyApp/data_profil'; }
+				Swal.fire({
+					title: 'Ubah Data Berhasil',
+					text: 'Profil sekolah telah diperbarui',
+					icon: 'success',
+					showConfirmButton: false,
+					timer: 1500,
+					timerProgressBar: true
+				}).then(() => {
+					window.location = 'index.php?page=MyApp/data_profil';
 				});
 			</script>";
 		} else {

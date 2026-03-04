@@ -8,7 +8,7 @@ $data= $sql->fetch_assoc();
 $nama=$data['nama_sekolah'];
 $alamat=$data['alamat'];
 // Handle Logo & Background dynamic
-$logo_path = !empty($data['logo_sekolah']) ? 'uploads/logo/' . $data['logo_sekolah'] : 'images/logo.png';
+$logo_path = (isset($data['logo_sekolah']) && !empty($data['logo_sekolah'])) ? 'uploads/logo/' . $data['logo_sekolah'] : 'images/logo.png';
 $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg/' . $data['bg_login'] : 'images/bg_sf.jpg';
 ?>
 
@@ -33,31 +33,36 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
     
     <style>
         .auth-bg {
-            background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('<?php echo $bg_path; ?>');
+            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.8)), url('<?php echo $bg_path; ?>');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
         .auth-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
-            box-shadow: 0 10px 24px -6px rgba(2, 8, 23, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .auth-input {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            color: #1f2937;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
             padding: 12px 16px;
             border-radius: 12px;
             width: 100%;
             transition: all 0.2s ease;
         }
+        .auth-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
         .auth-input:focus {
             outline: none;
             border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -66,55 +71,46 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
     <div class="w-full max-w-md">
         <div class="auth-card p-6">
             <div class="text-center mb-6">
-                <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 shadow-lg shadow-indigo-500/40 mb-4">
-                    <img src="<?php echo $logo_path; ?>" alt="Logo" class="h-14 w-14 object-contain">
+                <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg shadow-indigo-500/10 mb-4 overflow-hidden p-2">
+                    <img src="<?php echo $logo_path; ?>" alt="Logo" class="h-full w-full object-contain" onerror="this.src='images/logo.png'">
                 </div>
                 <h2 class="text-2xl font-bold text-white tracking-tight">E-Tabungan Siswa</h2>
-                <p class="text-slate-400 text-sm mt-1"><?= $nama ?></p>
-            </div>
+                 <p class="text-emerald-400 text-sm font-bold mt-1 uppercase tracking-wide"><?= $nama ?></p>
+             </div>
 
 
+             <form action="#" method="post" class="space-y-3">
+                 <div class="space-y-1">
+                     <label class="text-xs font-medium text-slate-400 ml-1">Username</label>
+                     <div class="relative">
+                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                             <i class="fa-solid fa-user text-xs"></i>
+                         </span>
+                         <input type="text" class="auth-input pl-10" name="username" placeholder="Masukkan username" required autocomplete="username">
+                     </div>
+                 </div>
 
-            <form action="#" method="post" class="space-y-3">
-                <div class="space-y-1">
-                    <label class="text-xs font-medium text-slate-300 ml-1">Username</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                            <i class="fa-solid fa-user text-xs"></i>
-                        </span>
-                        <input type="text" class="auth-input pl-10" name="username" placeholder="Masukkan username" required>
-                    </div>
-                </div>
+                 <div class="space-y-1">
+                     <label class="text-xs font-medium text-slate-400 ml-1">Password</label>
+                     <div class="relative">
+                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                             <i class="fa-solid fa-lock text-xs"></i>
+                         </span>
+                         <input type="password" class="auth-input pl-10" name="password" placeholder="••••••••" required autocomplete="current-password">
+                     </div>
+                 </div>
 
-                <div class="space-y-1">
-                    <label class="text-xs font-medium text-slate-300 ml-1">Password</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                            <i class="fa-solid fa-lock text-xs"></i>
-                        </span>
-                        <input type="password" class="auth-input pl-10" name="password" placeholder="••••••••" required>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="remember" class="rounded border-slate-700 bg-slate-800 text-indigo-500 focus:ring-indigo-500">
-                        <label for="remember" class="ml-2 text-xs text-slate-400">Ingat saya</label>
-                    </div>
-                    <a href="#" class="text-xs text-indigo-400 hover:text-indigo-300">Lupa password?</a>
-                </div>
-
-                <button type="submit" class="w-full btn-dashboard-primary mt-3 flex items-center justify-center gap-2 py-3" name="btnLogin">
-                    <span>Masuk</span>
-                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
-                </button>
-            </form>
-            
-            <div class="mt-6 pt-6 border-t border-slate-800 text-center">
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
-                    &copy; 2026 e-TABS • <?= $nama ?>
-                </p>
-            </div>
+                 <button type="submit" class="w-full btn-dashboard-primary mt-6 flex items-center justify-center gap-2 py-3" name="btnLogin">
+                     <span>Masuk</span>
+                     <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                 </button>
+             </form>
+             
+             <div class="mt-6 pt-6 border-t border-slate-800 text-center">
+                 <p class="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
+                     &copy; 2026 E-Tabungan Siswa • <?= $nama ?>
+                 </p>
+             </div>
         </div>
     </div>
 
