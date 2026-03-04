@@ -48,14 +48,14 @@ $saldo = $setor - $tarik;
 <!-- Info atas -->
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
     <div>
-        <p class="text-xs font-medium uppercase tracking-[0.18em] text-indigo-600">Ringkasan Dashboard</p>
         <h2 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
             Selamat Datang, Administrator
         </h2>
     </div>
     <div class="flex items-center gap-2 text-[11px] text-slate-500">
-        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/30">
-            <i class="fa-solid fa-circle text-[6px] mr-2"></i> Sistem Stabil
+        <span id="connection-badge" class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/30 transition-all duration-300">
+            <i id="connection-icon" class="fa-solid fa-circle text-[6px] mr-2"></i> 
+            <span id="connection-text">Online</span>
         </span>
     </div>
 </div>

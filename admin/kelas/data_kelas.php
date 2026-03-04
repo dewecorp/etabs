@@ -92,7 +92,7 @@
 </section>
 
 <!-- Add Modal -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="addModal">
+<div class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="addModal">
     <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl transition-all">
         <!-- Header -->
         <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">

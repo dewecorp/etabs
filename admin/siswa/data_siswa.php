@@ -322,45 +322,48 @@ if (isset($_POST['simpan'])) {
 <section class="content">
     <div class="rounded-2xl bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    <span id="infoJumlahSiswa" class="text-slate-700">
-                        <?php
-                        // Hitung total siswa
-                        $query_total = "SELECT COUNT(*) as total FROM tb_siswa";
-                        $result_total = mysqli_query($koneksi, $query_total);
-                        $data_total = mysqli_fetch_assoc($result_total);
-                        $total_siswa = $data_total['total'];
-                        echo "Total: <strong>" . $total_siswa . "</strong> Siswa";
-                        ?>
-                    </span>
-                </h3>
-                <div class="flex flex-wrap items-center gap-2">
-                    <button type="button" class="btn btn-dashboard-primary inline-flex items-center gap-2 tw-modal-open" data-target="#addModal">
-                        <i class="fa-solid fa-plus text-xs"></i><span>Tambah Data</span>
-                    </button>
-                    <button type="button" id="btnEditTerpilih" class="btn btn-dashboard-soft inline-flex items-center gap-2 disabled:opacity-50" onclick="editTerpilih()" disabled>
-                        <i class="fa-solid fa-pen-to-square text-xs"></i><span>Edit Terpilih</span>
-                    </button>
-                    <button type="button" id="btnHapusTerpilih" class="btn btn-dash-danger inline-flex items-center gap-2 disabled:opacity-50" onclick="hapusTerpilih()" disabled>
-                        <i class="fa-solid fa-trash text-xs"></i><span>Hapus Terpilih</span>
-                    </button>
-                    <button type="button" class="btn btn-dashboard-soft inline-flex items-center gap-2 tw-modal-open" data-target="#modal-impor">
-                        <i class="fa-solid fa-file-import text-xs"></i><span>Impor Data Siswa</span>
-                    </button>
-                    <div class="inline-flex gap-2">
-                    <a href="admin/export_handler.php?type=excel&table=siswa" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20 hover:bg-emerald-100" title="Ekspor ke Excel">
-                        <i class="fa-solid fa-file-excel text-xs"></i><span>Excel</span>
-                    </a>
-                    <a href="admin/export_handler.php?type=pdf&table=siswa" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20 hover:bg-rose-100" title="Ekspor ke PDF" target="_blank">
-                        <i class="fa-solid fa-file-pdf text-xs"></i><span>PDF</span>
-                    </a>
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-base font-bold text-slate-900">Master Data Siswa</h3>
+                    <div class="flex items-center gap-2">
+                        <a href="admin/export_handler.php?type=excel&table=siswa" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20 hover:bg-emerald-100 transition-colors" title="Ekspor ke Excel">
+                            <i class="fa-solid fa-file-excel"></i><span>Excel</span>
+                        </a>
+                        <a href="admin/export_handler.php?type=pdf&table=siswa" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20 hover:bg-rose-100 transition-colors" title="Ekspor ke PDF" target="_blank">
+                            <i class="fa-solid fa-file-pdf"></i><span>PDF</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 rounded-2xl p-3 border border-slate-100">
+                    <div class="flex items-center gap-2 text-sm font-medium text-slate-600">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                            <i class="fa-solid fa-users text-xs"></i>
+                        </div>
+                        <span id="infoJumlahSiswa">
+                            <?php
+                            $query_total = "SELECT COUNT(*) as total FROM tb_siswa";
+                            $result_total = mysqli_query($koneksi, $query_total);
+                            $data_total = mysqli_fetch_assoc($result_total);
+                            echo "Total: <strong>" . $data_total['total'] . "</strong> Siswa";
+                            ?>
+                        </span>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" class="btn btn-dashboard-primary tw-modal-open" data-target="#addModal">
+                            <i class="fa-solid fa-plus text-xs"></i><span>Tambah Data</span>
+                        </button>
+                        <button type="button" id="btnEditTerpilih" class="btn btn-dashboard-soft disabled:opacity-50" onclick="editTerpilih()" disabled>
+                            <i class="fa-solid fa-pen-to-square text-xs"></i><span>Edit</span>
+                        </button>
+                        <button type="button" id="btnHapusTerpilih" class="btn btn-dash-danger disabled:opacity-50" onclick="hapusTerpilih()" disabled>
+                            <i class="fa-solid fa-trash text-xs"></i><span>Hapus</span>
+                        </button>
+                        <div class="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+                        <button type="button" class="btn btn-dashboard-soft tw-modal-open" data-target="#modal-impor">
+                            <i class="fa-solid fa-file-import text-xs"></i><span>Impor Data</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -377,15 +380,15 @@ if (isset($_POST['simpan'])) {
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="text-xs text-slate-500">Filter NIS:</label>
-                        <input type="text" id="filterNIS" class="auth-input" placeholder="Cari berdasarkan NIS...">
+                        <input type="text" id="filterNIS" class="auth-input" placeholder="Cari berdasarkan NIS..." onkeyup="executeFilterSiswa()">
                     </div>
                     <div>
                         <label class="text-xs text-slate-500">Filter Nama:</label>
-                        <input type="text" id="filterNama" class="auth-input" placeholder="Cari berdasarkan Nama...">
+                        <input type="text" id="filterNama" class="auth-input" placeholder="Cari berdasarkan Nama..." onkeyup="executeFilterSiswa()">
                     </div>
                     <div>
                         <label class="text-xs text-slate-500">Filter Kelas:</label>
-                        <select id="filterKelas" class="auth-input">
+                        <select id="filterKelas" class="auth-input" onchange="executeFilterSiswa()">
                             <option value="">-- Semua Kelas --</option>
                             <?php
                             $query_kelas_filter = "SELECT DISTINCT kelas FROM tb_kelas ORDER BY kelas ASC";
@@ -398,7 +401,7 @@ if (isset($_POST['simpan'])) {
                     </div>
                     <div>
                         <label class="text-xs text-slate-500">Filter Tahun Masuk:</label>
-                        <select id="filterThMasuk" class="auth-input">
+                        <select id="filterThMasuk" class="auth-input" onchange="executeFilterSiswa()">
                             <option value="">-- Semua Tahun --</option>
                             <?php
                             $query_tahun = "SELECT DISTINCT th_masuk FROM tb_siswa ORDER BY th_masuk DESC";
@@ -409,14 +412,6 @@ if (isset($_POST['simpan'])) {
                             ?>
                         </select>
                     </div>
-                </div>
-                <div class="mt-4 flex gap-2">
-                    <button type="button" id="btnCariFilter" class="btn btn-dashboard-soft border-indigo-500 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-700" onclick="executeFilterSiswa(); return false;">
-                        <i class="fa fa-search"></i> Cari
-                    </button>
-                    <button type="button" id="btnResetFilter" class="btn btn-dashboard-soft border-amber-500 text-amber-700 hover:bg-amber-50 hover:text-amber-700" onclick="resetFilterSiswa(); return false;">
-                        <i class="fa fa-refresh"></i> Reset Filter
-                    </button>
                 </div>
             </div>
             <div class="table-responsive">
@@ -575,7 +570,7 @@ if (isset($_POST['simpan'])) {
 </section>
 
 <!-- Modal Edit Multiple -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="modalEditMultiple">
+<div class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="modalEditMultiple">
     <div class="relative w-full max-w-6xl rounded-2xl bg-white p-6 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Header -->
         <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
@@ -1111,33 +1106,31 @@ function hapusTerpilih() {
             text: 'Pilih data yang akan dihapus!',
             icon: 'warning',
             confirmButtonText: 'OK',
-            confirmButtonColor: '#f39c12'
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl',
+                title: 'text-lg font-semibold text-slate-900',
+                confirmButton: 'rounded-xl px-4 py-2 text-sm font-medium',
+            }
         });
         return;
     }
     
     Swal.fire({
-        title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
-        html: '<div style="text-align: center; padding: 10px;">' +
-              '<h3 style="color: #d33; margin-bottom: 20px; font-weight: bold;">Konfirmasi Hapus</h3>' +
-              '<p style="font-size: 16px; margin-bottom: 20px; color: #495057;">Yakin hapus ' + checked + ' siswa terpilih?</p>' +
-              '<div style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
-              '<p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">' +
-              '<i class="fa fa-warning" style="margin-right: 8px;"></i>' +
-              'PERINGATAN: Data yang dihapus tidak dapat dikembalikan!</p>' +
-              '</div>' +
-              '</div>',
+        title: 'Konfirmasi Hapus',
+        html: `Yakin hapus <strong>${checked}</strong> siswa terpilih?<br><small class='text-red-500'>Data yang dihapus tidak dapat dikembalikan!</small>`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="fa fa-trash"></i> Ya, Hapus!',
-        cancelButtonText: '<i class="fa fa-times"></i> Batal',
+        confirmButtonColor: '#e11d48', // rose-600
+        cancelButtonColor: '#64748b', // slate-500
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
         reverseButtons: true,
-        focusCancel: true,
-        allowOutsideClick: false,
-        allowEscapeKey: true,
-        width: '500px'
+        customClass: {
+            popup: 'rounded-3xl border border-slate-200 shadow-xl',
+            title: 'text-lg font-semibold text-slate-900',
+            confirmButton: 'rounded-xl',
+            cancelButton: 'rounded-xl'
+        }
     }).then((result) => {
         if (result.isConfirmed) {
             $('#formSiswa').attr('action', '?page=MyApp/del_siswa_multiple').submit();

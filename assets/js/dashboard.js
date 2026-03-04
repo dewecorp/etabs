@@ -4,22 +4,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.getElementById("mainContent");
 
-    if (menuToggle && (mobileMenu || sidebar || mainContent)) {
+    if (menuToggle && (mobileMenu || sidebar)) {
         menuToggle.addEventListener("click", function () {
             if (mobileMenu) {
                 const isHidden = mobileMenu.style.display === "none" || mobileMenu.style.display === "";
                 mobileMenu.style.display = isHidden ? "block" : "none";
             }
             if (sidebar) {
-                const willShowSidebar = sidebar.classList.contains("hidden");
                 sidebar.classList.toggle("hidden");
-                if (mainContent) {
-                    if (willShowSidebar) {
-                        mainContent.classList.add("hidden");
-                    } else {
-                        mainContent.classList.remove("hidden");
-                    }
-                }
             }
         });
     }
@@ -364,6 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!modal) return;
         modal.classList.remove("hidden");
         modal.classList.add("flex");
+        document.body.classList.add("modal-open");
         document.body.style.overflow = "hidden"; // Prevent background scrolling
     }
 
@@ -371,6 +364,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!modal) return;
         modal.classList.add("hidden");
         modal.classList.remove("flex");
+        document.body.classList.remove("modal-open");
         document.body.style.overflow = ""; // Restore background scrolling
     }
 
@@ -398,6 +392,64 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // Global logout confirmation using SweetAlert
+    window.confirmLogout = function(event) {
+        event.preventDefault();
+        const href = event.currentTarget.getAttribute("href");
+
+        Swal.fire({
+            title: "Konfirmasi Keluar",
+            text: "Apakah Anda yakin ingin mengakhiri sesi ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e11d48", // rose-600
+            cancelButtonColor: "#64748b", // slate-500
+            confirmButtonText: "Ya, Keluar!",
+            cancelButtonText: "Batal",
+            reverseButtons: true,
+            background: "#ffffff",
+            customClass: {
+                popup: "rounded-3xl border border-slate-200 shadow-xl",
+                title: "text-lg font-semibold text-slate-900",
+                confirmButton: "rounded-xl px-4 py-2 text-sm font-medium",
+                cancelButton: "rounded-xl px-4 py-2 text-sm font-medium"
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = href;
+            }
+        });
+    };
+
+    // Connection Status Indicator Logic
+    const connectionBadge = document.getElementById("connection-badge");
+    const connectionIcon = document.getElementById("connection-icon");
+    const connectionText = document.getElementById("connection-text");
+
+    if (connectionBadge && connectionIcon && connectionText) {
+        function updateConnectionStatus() {
+            if (navigator.onLine) {
+                // Online State
+                connectionBadge.classList.remove("bg-rose-500/10", "text-rose-600", "ring-rose-500/30");
+                connectionBadge.classList.add("bg-emerald-500/10", "text-emerald-600", "ring-emerald-500/30");
+                connectionText.textContent = "Online";
+                connectionIcon.classList.remove("text-rose-600");
+                connectionIcon.classList.add("text-emerald-600");
+            } else {
+                // Offline State
+                connectionBadge.classList.remove("bg-emerald-500/10", "text-emerald-600", "ring-emerald-500/30");
+                connectionBadge.classList.add("bg-rose-500/10", "text-rose-600", "ring-rose-500/30");
+                connectionText.textContent = "Offline";
+                connectionIcon.classList.remove("text-emerald-600");
+                connectionIcon.classList.add("text-rose-600");
+            }
+        }
+
+        window.addEventListener("online", updateConnectionStatus);
+        window.addEventListener("offline", updateConnectionStatus);
+        updateConnectionStatus(); // Initial check
+    }
 
     document.addEventListener("keydown", function(e) {
         if (e.key === "Escape") {

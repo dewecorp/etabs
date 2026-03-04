@@ -139,7 +139,23 @@
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
+body.modal-open #sidebar {
+    display: none;
+}
+
 /* Table Styles */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+}
+
+.table-dashboard {
+    min-width: 800px;
+    width: 100%;
+}
+
 .table-dashboard thead th {
     background-color: #f8fafc;
     color: #475569;

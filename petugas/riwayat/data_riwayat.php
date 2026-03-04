@@ -98,7 +98,7 @@ try {
 								<th class="px-4 py-3 font-medium">NIS</th>
 								<th class="px-4 py-3 font-medium">Nama</th>
 								<th class="px-4 py-3 font-medium">Tanggal Transaksi</th>
-								<th class="px-4 py-3 font-medium text-right">Jumlah</th>
+								<th class="px-4 py-3 font-medium text-left">Jumlah</th>
 								<th class="px-4 py-3 font-medium">Petugas Transaksi</th>
 								<th class="px-4 py-3 font-medium">Tanggal Hapus</th>
 								<th class="px-4 py-3 font-medium">Petugas Hapus</th>
@@ -158,7 +158,7 @@ try {
                                         <?php $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl)); ?>
                                     </span>
 								</td>
-								<td class="px-4 py-3 text-right font-medium text-slate-900">
+								<td class="px-4 py-3 text-left font-medium text-slate-900">
 									<?php 
 									if ($data['jenis'] == 'ST') {
 										echo '<span class="text-emerald-600">' . rupiah($data['setor']) . '</span>';
@@ -264,33 +264,31 @@ function hapusTerpilih() {
 			text: 'Pilih data yang akan dihapus!',
 			icon: 'warning',
 			confirmButtonText: 'OK',
-			confirmButtonColor: '#f39c12'
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl',
+                title: 'text-lg font-semibold text-slate-900',
+                confirmButton: 'rounded-xl px-4 py-2 text-sm font-medium',
+            }
 		});
 		return;
 	}
 	
 	Swal.fire({
-		title: '<i class="fa fa-exclamation-triangle" style="color: #f39c12; font-size: 48px;"></i>',
-		html: '<div style="text-align: center; padding: 10px;">' +
-			  '<h3 style="color: #d33; margin-bottom: 20px; font-weight: bold;">Konfirmasi Hapus</h3>' +
-			  '<p style="font-size: 16px; margin-bottom: 20px; color: #495057;">Yakin hapus ' + checked + ' riwayat transaksi terpilih?</p>' +
-			  '<div style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 15px;">' +
-			  '<p style="margin: 0; color: #856404; font-size: 14px; font-weight: bold;">' +
-			  '<i class="fa fa-warning" style="margin-right: 8px;"></i>' +
-			  'PERINGATAN: Data yang dihapus tidak dapat dikembalikan!</p>' +
-			  '</div>' +
-			  '</div>',
-		icon: 'warning',
-		showCancelButton: true,
-		confirmButtonColor: '#d33',
-		cancelButtonColor: '#6c757d',
-		confirmButtonText: '<i class="fa fa-trash"></i> Ya, Hapus!',
-		cancelButtonText: '<i class="fa fa-times"></i> Batal',
-		reverseButtons: true,
-		focusCancel: true,
-		allowOutsideClick: false,
-		allowEscapeKey: true,
-		width: '500px'
+        title: 'Konfirmasi Hapus',
+        html: `Yakin hapus <strong>${checked}</strong> riwayat transaksi terpilih?<br><small class='text-red-500'>Data yang dihapus tidak dapat dikembalikan!</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48', // rose-600
+        cancelButtonColor: '#64748b', // slate-500
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-3xl border border-slate-200 shadow-xl',
+            title: 'text-lg font-semibold text-slate-900',
+            confirmButton: 'rounded-xl',
+            cancelButton: 'rounded-xl'
+        }
 	}).then((result) => {
 		if (result.isConfirmed) {
 			$('#formRiwayat').submit();

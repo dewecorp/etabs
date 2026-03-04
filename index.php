@@ -141,50 +141,58 @@ $page_title = getPageTitle($current_page);
 
 <body class="min-h-screen bg-slate-50 text-slate-900 flex flex-col transition-colors duration-200">
     <!-- Navbar sticky -->
-    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl">
+    <header class="sticky top-0 z-[100] border-b border-emerald-500 bg-emerald-600/95 backdrop-blur-xl shadow-md">
         <div class="flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 shadow-lg shadow-indigo-500/20">
+                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-lg shadow-emerald-900/20">
                     <img src="images/logo.png" alt="Logo" class="h-6 w-6 object-contain">
                 </div>
                 <div>
-                    <h1 class="text-sm font-medium tracking-tight text-slate-900 sm:text-base">e-TABS Dashboard</h1>
-                    <p class="text-[11px] text-slate-500 sm:text-xs"><?= $nama ?></p>
+                    <h1 class="text-sm font-semibold tracking-tight text-white sm:text-base">e-TABS Dashboard</h1>
+                    <p class="text-[11px] text-emerald-100/80 sm:text-xs"><?= $nama ?></p>
                 </div>
             </div>
 
             <div class="hidden items-center gap-3 md:flex">
-                <div class="text-[11px] text-slate-500 mr-2">
-                    <i class="fa-regular fa-calendar-days mr-1"></i>
+                <div class="text-[11px] text-emerald-50 mr-2">
+                    <i class="fa-regular fa-calendar-days mr-1 text-emerald-200"></i>
                     <?php $date = date('Y-m-d'); echo format_hari_tanggal($date) ?>
                 </div>
                 
                 <div class="relative group">
-                    <button class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all">
-                        <div class="h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                    <button class="flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-700/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700/60 transition-all">
+                        <div class="h-6 w-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-[10px] font-bold">
                             <?= substr($data_nama, 0, 2) ?>
                         </div>
                         <span><?= $data_nama ?></span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-emerald-300 group-hover:rotate-180 transition-transform"></i>
                     </button>
+                    
+                    <!-- User Dropdown Menu -->
+                    <div class="absolute right-0 mt-2 w-48 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110]">
+                        <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Info Akun</p>
+                            <p class="text-xs font-medium text-slate-700 truncate"><?= $data_nama ?></p>
+                            <p class="text-[10px] text-slate-500 italic"><?= $data_level ?></p>
+                        </div>
+                        <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 transition-colors">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Keluar</span>
+                        </a>
+                    </div>
                 </div>
-
-                <a href="logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?')" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-sm hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 transition-all">
-                    <i class="fa-solid fa-right-from-bracket text-rose-500"></i>
-                    Keluar
-                </a>
             </div>
 
-            <button class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 md:hidden" id="menuToggle">
+            <button class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500 bg-emerald-700/40 text-emerald-100 hover:bg-emerald-700/60 md:hidden" id="menuToggle">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </div>
     </header>
 
     <!-- Konten utama -->
-    <main class="flex w-full flex-1 flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:flex-row lg:items-start">
+    <main class="flex w-full flex-1 flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:flex-row lg:items-start relative">
         <!-- Sidebar -->
-        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20">
+        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[110] bg-white lg:bg-transparent absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-2xl lg:shadow-none rounded-b-3xl lg:rounded-none border-x border-b border-slate-100 lg:border-none">
             
 
             <nav class="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm">
@@ -361,11 +369,11 @@ $page_title = getPageTitle($current_page);
                     <?php } ?>
                     
                     <li class="mt-6 border-t border-slate-200 pt-2">
-                        <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+                        <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600 group">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-rose-50 text-rose-600 group-hover:bg-rose-100 transition-colors">
                                 <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i>
                             </span>
-                            Keluar Sistem
+                            <span class="font-medium">Keluar Sistem</span>
                         </a>
                     </li>
                 </ul>
@@ -572,11 +580,6 @@ $page_title = getPageTitle($current_page);
                 $(".select2").select2();
             }
 
-            // Mobile Menu Toggle
-            $('#menuToggle').click(function() {
-                $('#sidebar').toggleClass('hidden');
-            });
-
             // Custom Sidebar Dropdown Toggle
             $('.sidebar-dropdown-toggle').click(function() {
                 const targetId = $(this).data('target');
@@ -584,28 +587,6 @@ $page_title = getPageTitle($current_page);
                 $(this).find('i.fa-chevron-down').toggleClass('rotate-180'); // Optional: rotate icon
             });
         });
-
-        function confirmLogout(event) {
-            event.preventDefault();
-            const url = event.currentTarget.getAttribute('href') || 'logout.php';
-            
-            Swal.fire({
-                title: 'Keluar?',
-                text: "Apakah Anda yakin ingin keluar dari sistem?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#6366f1',
-                cancelButtonColor: '#f43f5e',
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal',
-                background: '#ffffff',
-                color: '#1e293b'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = url;
-                }
-            })
-        }
     </script>
 </body>
 

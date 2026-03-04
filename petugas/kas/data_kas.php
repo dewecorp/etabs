@@ -22,6 +22,7 @@ $saldo=$setor-$tarik;
 ?>
 
 
+<link rel="stylesheet" href="../../assets/css/print.css">
 <section class="content-header">
     <h1>
         Info Kas
@@ -31,12 +32,16 @@ $saldo=$setor-$tarik;
 
 <section class="content">
 
-    <div class="rounded-2xl bg-white shadow-sm">
+    <div class="rounded-2xl bg-white shadow-sm" id="infoKas">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
             <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
                 <i class="fa-solid fa-vault text-indigo-500"></i>
                 Saldo Tabungan (Kas)
             </h3>
+            <a href="report/cetak_kas.php" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-200 transition-colors print:hidden">
+                <i class="fa-solid fa-print"></i>
+                <span>Cetak</span>
+            </a>
         </div>
         <!-- /.box-header -->
         <div class="p-6">
