@@ -1,24 +1,15 @@
 <!-- Content Header (Page header) -->
 <?php
+// Hitung langsung total tanpa filter tanggal
+$sql_setor = $koneksi->query("SELECT SUM(setor) as Tsetor FROM tb_tabungan WHERE jenis='ST'");
+$data_setor = $sql_setor ? $sql_setor->fetch_assoc() : ['Tsetor' => 0];
+$setor = isset($data_setor['Tsetor']) && is_numeric($data_setor['Tsetor']) ? (float)$data_setor['Tsetor'] : 0;
 
-if(isset($_POST["btnCetak"])){
+$sql_tarik = $koneksi->query("SELECT SUM(tarik) as Ttarik FROM tb_tabungan WHERE jenis='TR'");
+$data_tarik = $sql_tarik ? $sql_tarik->fetch_assoc() : ['Ttarik' => 0];
+$tarik = isset($data_tarik['Ttarik']) && is_numeric($data_tarik['Ttarik']) ? (float)$data_tarik['Ttarik'] : 0;
 
-	$dt1 = $_POST["tgl_1"];
-	$dt2 = $_POST["tgl_2"];
-	
-	$sql = $koneksi->query("SELECT SUM(setor) as Tsetor  from tb_tabungan where jenis='ST' and tgl BETWEEN '$dt1' AND '$dt2'");
-}
-while ($data= $sql->fetch_assoc()) {
-	
-	$setor=$data['Tsetor'];
-}
-
-$sql = $koneksi->query("SELECT SUM(tarik) as Ttarik  from tb_tabungan where jenis='TR' and tgl BETWEEN '$dt1' AND '$dt2'");
-while ($data= $sql->fetch_assoc()) {
-	
-	$tarik=$data['Ttarik'];
-}
-$saldo=$setor-$tarik;
+$saldo = $setor - $tarik;
 ?>
 
 

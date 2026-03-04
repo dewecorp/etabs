@@ -522,7 +522,7 @@ $page_title = getPageTitle($current_page);
                             include "petugas/kas/kas_full.php";
                             break;
                             case 'view_kas':
-                            include "petugas/kas/view_kas.php";
+                            include "petugas/kas/data_kas.php";
                             break;
 
 				//laporan

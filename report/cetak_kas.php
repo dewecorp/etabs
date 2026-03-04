@@ -28,25 +28,45 @@ $data_profil = mysqli_fetch_array($query_profil, MYSQLI_BOTH);
             margin-bottom: 30px;
             border-bottom: 3px solid #000;
             padding-bottom: 15px;
-            overflow: auto; /* Clear float */
+            position: relative;
+            min-height: 80px;
         }
         .header h1 {
             margin: 0;
             font-size: 24px;
+            text-align: center;
         }
         .header h2 {
             margin: 5px 0;
             font-size: 20px;
             font-weight: normal;
+            text-align: center;
         }
         .header h3 {
             margin: 5px 0;
             font-size: 14px;
             font-weight: normal;
+            text-align: center;
         }
         .header p {
             margin: 0;
             font-size: 14px;
+            text-align: center;
+        }
+        .header-logo {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 80px;
+            height: 80px;
+        }
+        .header-logo img {
+            width: 80px;
+            height: 80px;
+        }
+        .header-text {
+            text-align: center;
+            width: 100%;
         }
         .content {
             margin-top: 30px;
@@ -97,8 +117,10 @@ $data_profil = mysqli_fetch_array($query_profil, MYSQLI_BOTH);
 <body onload="window.print()">
     <div class="container">
         <div class="header">
-            <img src="../images/logo.png" alt="Logo Sekolah" style="width: 80px; height: 80px; float: left; margin-right: 20px;">
-            <div style="text-align: center;">
+            <div class="header-logo">
+                <img src="../images/logo.png" alt="Logo Sekolah">
+            </div>
+            <div class="header-text">
                 <h1>LAPORAN SALDO KAS TABUNGAN</h1>
                 <h2><?php echo strtoupper($data_profil['nama_sekolah']); ?></h2>
                 <p><?php echo $data_profil['alamat']; ?></p>
