@@ -57,4 +57,5 @@ if (file_exists(__DIR__ . '/config_db.php')) {
     
     // Set timezone
     date_default_timezone_set('Asia/Jakarta');
+    $koneksi->query("SET time_zone = '+07:00'");
 }

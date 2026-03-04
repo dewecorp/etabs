@@ -325,37 +325,6 @@ $activities = getRecentActivities($koneksi, 100);
 }
 </style>
 
-<?php
-/**
- * Fungsi untuk menghitung waktu yang lalu
- */
-function getTimeAgo($datetime) {
-	if (empty($datetime)) return '';
-	$timestamp = strtotime($datetime);
-	if (!$timestamp) return '';
-	$now = time();
-	$diff = $now - $timestamp;
-	
-	// Pastikan diff positif (tidak ada data masa depan)
-	if ($diff < 0) return 'Baru saja';
-	
-	if ($diff < 60) {
-		return 'Baru saja';
-	} elseif ($diff < 3600) {
-		$minutes = floor($diff / 60);
-		return $minutes . ' menit yang lalu';
-	} elseif ($diff < 86400) {
-		$hours = floor($diff / 3600);
-		return $hours . ' jam yang lalu';
-	} elseif ($diff < 604800) {
-		$days = floor($diff / 86400);
-		return $days . ' hari yang lalu';
-	} else {
-		return date('d M Y', $timestamp);
-	}
-}
-?>
-
 <script>
 // Fungsi untuk update waktu aktivitas secara real-time
 (function() {

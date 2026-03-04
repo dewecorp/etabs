@@ -95,8 +95,8 @@ $activity_count = getActivityCount($koneksi);
 				
 				<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
 					<!-- Icon -->
-					<div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white"><?php echo $icon_bg; ?> text-white shadow-sm  md:left-1/2 md:translate-y-0">
-						<i class="fa"><?php echo getActivityIcon($activity['action']); ?> text-sm"></i>
+					<div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white <?php echo $icon_bg; ?> text-white shadow-sm  md:left-1/2 md:translate-y-0">
+						<i class="fa <?php echo getActivityIcon($activity['action']); ?> text-sm"></i>
 					</div>
 					
 					<!-- Card -->
@@ -112,7 +112,7 @@ $activity_count = getActivityCount($koneksi);
 						
 						<div class="group relative">
 							<h3 class="mt-1 text-sm font-semibold leading-6 text-slate-800  flex items-center gap-2 flex-wrap">
-								<span class="inline-flex items-center rounded-md"><?php echo $badge_class; ?> px-2 py-1 text-xs font-medium ring-1 ring-inset">
+								<span class="inline-flex items-center rounded-md <?php echo $badge_class; ?> px-2 py-1 text-xs font-medium ring-1 ring-inset">
 									<?php echo $activity['action']; ?>
 								</span>
 								<?php if (!empty($activity['user_name'])): ?>
@@ -149,29 +149,6 @@ $activity_count = getActivityCount($koneksi);
 		</div>
 	</div>
 </section>
-
-<?php
-/**
- * Fungsi untuk menghitung waktu yang lalu
- */
-function getTimeAgo($datetime) {
-    $timestamp = strtotime($datetime);
-    $diff = time() - $timestamp;
-    
-    if ($diff < 60) {
-        return 'Baru saja';
-    } elseif ($diff < 3600) {
-        $minutes = floor($diff / 60);
-        return $minutes . ' menit yang lalu';
-    } elseif ($diff < 86400) {
-        $hours = floor($diff / 3600);
-        return $hours . ' jam yang lalu';
-    } else {
-        $days = floor($diff / 86400);
-        return $days . ' hari yang lalu';
-    }
-}
-?>
 
 <style>
 .timeline {

@@ -210,20 +210,6 @@ if ($sqlPenarikan) {
         </div>
         <div class="max-h-[500px] overflow-y-auto">
             <?php
-            if (!function_exists('getTimeAgo')) {
-                function getTimeAgo($datetime) {
-                    if (empty($datetime)) return '';
-                    $timestamp = false;
-                    try { $dt = new DateTime($datetime); $timestamp = $dt->getTimestamp(); } catch (Exception $e) { $timestamp = @strtotime($datetime); }
-                    if (!$timestamp || $timestamp <= 0) { $timestamp = @strtotime(str_replace('/', '-', $datetime)); if (!$timestamp || $timestamp <= 0) { return ''; } }
-                    $diff = time() - $timestamp; if ($diff < 0) { return 'Baru saja'; }
-                    if ($diff < 60) return 'Baru saja';
-                    if ($diff < 3600) return floor($diff/60) . ' menit yang lalu';
-                    if ($diff < 86400) return floor($diff/3600) . ' jam yang lalu';
-                    if ($diff < 604800) return floor($diff/86400) . ' hari yang lalu';
-                    return date('d M Y', $timestamp);
-                }
-            }
             $recent_activities = [];
             if (isset($koneksi) && $koneksi) {
                 try {

@@ -258,28 +258,3 @@ $activity_count = getActivityCount($koneksi);
 }
 </style>
 
-<?php
-/**
- * Fungsi untuk menghitung waktu yang lalu
- */
-function getTimeAgo($datetime) {
-	$timestamp = strtotime($datetime);
-	$diff = time() - $timestamp;
-	
-	if ($diff < 60) {
-		return 'Baru saja';
-	} elseif ($diff < 3600) {
-		$mins = floor($diff / 60);
-		return $mins . ' menit yang lalu';
-	} elseif ($diff < 86400) {
-		$hours = floor($diff / 3600);
-		return $hours . ' jam yang lalu';
-	} elseif ($diff < 604800) {
-		$days = floor($diff / 86400);
-		return $days . ' hari yang lalu';
-	} else {
-		return date('d/m/Y H:i', $timestamp);
-	}
-}
-?>
-

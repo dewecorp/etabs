@@ -60,7 +60,7 @@ function logActivity($koneksi, $action, $table, $description, $record_id = null)
         }
         
         // Gunakan prepared statement jika koneksi adalah object mysqli
-        if (is_object($koneksi) && method_exists($koneksi, 'prepare')) {
+        if ($koneksi instanceof mysqli) {
             $sql = "INSERT INTO tb_activity_log (user_id, user_name, user_level, action, table_name, record_id, description, icon, color, created_at) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             
@@ -85,23 +85,36 @@ function logActivity($koneksi, $action, $table, $description, $record_id = null)
             }
         }
         
-        // Fallback: gunakan mysqli_query langsung
-        $user_id = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $user_id) : (is_object($koneksi) ? $koneksi->real_escape_string($user_id) : $user_id);
-        $user_name = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $user_name) : (is_object($koneksi) ? $koneksi->real_escape_string($user_name) : $user_name);
-        $user_level = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $user_level) : (is_object($koneksi) ? $koneksi->real_escape_string($user_level) : $user_level);
-        $action = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $action) : (is_object($koneksi) ? $koneksi->real_escape_string($action) : $action);
-        $table = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $table) : (is_object($koneksi) ? $koneksi->real_escape_string($table) : $table);
-        $record_id = $record_id ? (is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $record_id) : (is_object($koneksi) ? $koneksi->real_escape_string($record_id) : $record_id)) : null;
-        $description = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $description) : (is_object($koneksi) ? $koneksi->real_escape_string($description) : $description);
-        $icon = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $icon) : (is_object($koneksi) ? $koneksi->real_escape_string($icon) : $icon);
-        $color = is_resource($koneksi) ? mysqli_real_escape_string($koneksi, $color) : (is_object($koneksi) ? $koneksi->real_escape_string($color) : $color);
+        // Fallback: gunakan mysqli_query langsung jika bukan mysqli object
+        if ($koneksi instanceof mysqli) {
+            $u_id = $koneksi->real_escape_string($user_id);
+            $u_name = $koneksi->real_escape_string($user_name);
+            $u_level = $koneksi->real_escape_string($user_level);
+            $act = $koneksi->real_escape_string($action);
+            $tbl = $koneksi->real_escape_string($table);
+            $rec_id = $record_id ? "'" . $koneksi->real_escape_string($record_id) . "'" : "NULL";
+            $desc = $koneksi->real_escape_string($description);
+            $icn = $koneksi->real_escape_string($icon);
+            $clr = $koneksi->real_escape_string($color);
+        } else {
+            // Procedural fallback (only if absolutely necessary, but inc/koneksi.php uses mysqli)
+            $u_id = mysqli_real_escape_string($koneksi, $user_id);
+            $u_name = mysqli_real_escape_string($koneksi, $user_name);
+            $u_level = mysqli_real_escape_string($koneksi, $user_level);
+            $act = mysqli_real_escape_string($koneksi, $action);
+            $tbl = mysqli_real_escape_string($koneksi, $table);
+            $rec_id = $record_id ? "'" . mysqli_real_escape_string($koneksi, $record_id) . "'" : "NULL";
+            $desc = mysqli_real_escape_string($koneksi, $description);
+            $icn = mysqli_real_escape_string($koneksi, $icon);
+            $clr = mysqli_real_escape_string($koneksi, $color);
+        }
         
         $sql = "INSERT INTO tb_activity_log (user_id, user_name, user_level, action, table_name, record_id, description, icon, color, created_at) 
-                VALUES ('$user_id', '$user_name', '$user_level', '$action', '$table', " . ($record_id ? "'$record_id'" : "NULL") . ", '$description', '$icon', '$color', NOW())";
+                VALUES ('$u_id', '$u_name', '$u_level', '$act', '$tbl', $rec_id, '$desc', '$icn', '$clr', NOW())";
         
-        if (is_object($koneksi) && method_exists($koneksi, 'query')) {
+        if ($koneksi instanceof mysqli) {
             $koneksi->query($sql);
-        } elseif (is_resource($koneksi)) {
+        } else {
             mysqli_query($koneksi, $sql);
         }
     } catch (Exception $e) {
@@ -132,9 +145,9 @@ function createActivityTable($koneksi) {
             INDEX idx_user_id (user_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
         
-        if (is_object($koneksi) && method_exists($koneksi, 'query')) {
+        if ($koneksi instanceof mysqli) {
             $koneksi->query($sql);
-        } elseif (is_resource($koneksi)) {
+        } else {
             mysqli_query($koneksi, $sql);
         }
     } catch (Exception $e) {
@@ -150,14 +163,23 @@ if (!function_exists('cleanupOldActivities')) {
 function cleanupOldActivities($koneksi) {
     try {
         $sql = "DELETE FROM tb_activity_log WHERE created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)";
-        if (is_object($koneksi) && method_exists($koneksi, 'query')) {
+        if ($koneksi instanceof mysqli) {
             $koneksi->query($sql);
-        } elseif (is_resource($koneksi)) {
+        } else {
             mysqli_query($koneksi, $sql);
         }
     } catch (Exception $e) {
         // Silent fail
     }
+}
+}
+
+/**
+ * Alias untuk cleanupOldActivities agar kompatibel dengan kode lama
+ */
+if (!function_exists('deleteOldActivities')) {
+function deleteOldActivities($koneksi) {
+    cleanupOldActivities($koneksi);
 }
 }
 
@@ -168,14 +190,13 @@ if (!function_exists('getActivityCount')) {
 function getActivityCount($koneksi) {
     try {
         cleanupOldActivities($koneksi);
-        if (is_object($koneksi) && method_exists($koneksi, 'query')) {
-            $sql = "SELECT COUNT(*) as total FROM tb_activity_log";
+        $sql = "SELECT COUNT(*) as total FROM tb_activity_log";
+        if ($koneksi instanceof mysqli) {
             $result = $koneksi->query($sql);
             if ($result && $row = $result->fetch_assoc()) {
                 return (int)$row['total'];
             }
-        } elseif (is_resource($koneksi)) {
-            $sql = "SELECT COUNT(*) as total FROM tb_activity_log";
+        } else {
             $result = mysqli_query($koneksi, $sql);
             if ($result && $row = mysqli_fetch_assoc($result)) {
                 return (int)$row['total'];
@@ -197,17 +218,16 @@ function getRecentActivities($koneksi, $limit = 50) {
         cleanupOldActivities($koneksi);
         $activities = [];
         $limit = (int)$limit;
+        $sql = "SELECT * FROM tb_activity_log ORDER BY created_at DESC LIMIT $limit";
         
-        if (is_object($koneksi) && method_exists($koneksi, 'query')) {
-            $sql = "SELECT * FROM tb_activity_log ORDER BY created_at DESC LIMIT $limit";
+        if ($koneksi instanceof mysqli) {
             $result = $koneksi->query($sql);
             if ($result) {
                 while ($row = $result->fetch_assoc()) {
                     $activities[] = $row;
                 }
             }
-        } elseif (is_resource($koneksi)) {
-            $sql = "SELECT * FROM tb_activity_log ORDER BY created_at DESC LIMIT $limit";
+        } else {
             $result = mysqli_query($koneksi, $sql);
             if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
@@ -219,5 +239,81 @@ function getRecentActivities($koneksi, $limit = 50) {
         // Silent fail
     }
     return $activities;
+}
+}
+
+/**
+ * Fungsi untuk mendapatkan badge color berdasarkan action
+ */
+if (!function_exists('getActivityBadge')) {
+function getActivityBadge($action) {
+    $colors = [
+        'CREATE' => 'success',
+        'UPDATE' => 'warning',
+        'DELETE' => 'danger',
+        'LOGIN' => 'success',
+        'LOGOUT' => 'info',
+        'BACKUP' => 'primary',
+        'RESTORE' => 'warning'
+    ];
+    return isset($colors[$action]) ? $colors[$action] : 'info';
+}
+}
+
+/**
+ * Fungsi untuk mendapatkan icon berdasarkan action
+ */
+if (!function_exists('getActivityIcon')) {
+function getActivityIcon($action) {
+    $icons = [
+        'CREATE' => 'fa-plus-circle',
+        'UPDATE' => 'fa-edit',
+        'DELETE' => 'fa-trash',
+        'LOGIN' => 'fa-sign-in',
+        'LOGOUT' => 'fa-sign-out',
+        'BACKUP' => 'fa-database',
+        'RESTORE' => 'fa-undo'
+    ];
+    return isset($icons[$action]) ? $icons[$action] : 'fa-circle';
+}
+}
+
+/**
+ * Fungsi untuk mendapatkan format waktu "yang lalu"
+ */
+if (!function_exists('getTimeAgo')) {
+function getTimeAgo($datetime) {
+    if (empty($datetime)) return 'Baru saja';
+    
+    // Pastikan timezone sudah Asia/Jakarta
+    if (date_default_timezone_get() != 'Asia/Jakarta') {
+        date_default_timezone_set('Asia/Jakarta');
+    }
+    
+    $timestamp = false;
+    try { 
+        $dt = new DateTime($datetime); 
+        $timestamp = $dt->getTimestamp(); 
+    } catch (Exception $e) { 
+        $timestamp = @strtotime($datetime); 
+    }
+    
+    if (!$timestamp || $timestamp <= 0) { 
+        $timestamp = @strtotime(str_replace('/', '-', $datetime)); 
+        if (!$timestamp || $timestamp <= 0) { 
+            return 'Baru saja'; 
+        } 
+    }
+    
+    $now = time();
+    $diff = $now - $timestamp; 
+    
+    if ($diff < 0) return 'Baru saja';
+    if ($diff < 60) return 'Baru saja';
+    if ($diff < 3600) return floor($diff/60) . ' menit yang lalu';
+    if ($diff < 86400) return floor($diff/3600) . ' jam yang lalu';
+    if ($diff < 604800) return floor($diff/86400) . ' hari yang lalu';
+    
+    return date('d M Y', $timestamp);
 }
 }

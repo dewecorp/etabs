@@ -32,4 +32,6 @@ $koneksi->set_charset("utf8mb4");
 
 // Set timezone
 date_default_timezone_set('Asia/Jakarta');
+$koneksi->query("SET time_zone = '+07:00'");
+?>
 
