@@ -25,7 +25,7 @@ $saldo = $setor - $tarik;
 
     <div class="rounded-2xl bg-white shadow-sm" id="infoKas">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-vault text-indigo-500"></i>
                 Saldo Tabungan (Kas)
             </h3>
@@ -34,49 +34,57 @@ $saldo = $setor - $tarik;
                 <span>Cetak</span>
             </a>
         </div>
-        <!-- /.box-header -->
-        <div class="p-6">
-            <div class="table-responsive">
-                <table class="w-full table-dashboard">
-                    <thead>
-                        <tr>
-                            <th class="px-6 py-4 font-medium">Total Setoran</th>
-                            <th class="px-6 py-4 font-medium">Total Tarikan</th>
-                            <th class="px-6 py-4 font-medium">Saldo Tabungan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <tr class="hover:bg-slate-50  transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <a href="?page=data_setor" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200    transition-colors" title="Detail">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </a>
-                                    <span class="text-lg font-semibold text-emerald-600">
-                                        <?php echo rupiah($setor); ?>
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <a href="?page=data_tarik" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200    transition-colors" title="Detail">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </a>
-                                    <span class="text-lg font-semibold text-rose-600">
-                                        <?php echo rupiah($tarik); ?>
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-2xl font-bold text-slate-900">
-                                    <?php echo rupiah($saldo); ?>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-
-                </table>
+        <div class="p-6 space-y-6">
+            <div class="grid gap-4 sm:grid-cols-3">
+                <a href="?page=data_setor" class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm transition-all hover:border-emerald-500/40 hover:shadow-lg">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium uppercase tracking-wide text-emerald-600">Total Setoran</p>
+                            <p class="mt-2 text-2xl font-bold text-emerald-700"><?= rupiah($setor); ?></p>
+                        </div>
+                        <div class="rounded-xl bg-emerald-500/10 p-3 ring-1 ring-emerald-500/30">
+                            <i class="fa-solid fa-arrow-down-long text-emerald-600 text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 h-1 w-full rounded-full bg-emerald-200/40">
+                        <div class="h-1 rounded-full bg-emerald-500" style="width: 70%"></div>
+                    </div>
+                </a>
+                <a href="?page=data_tarik" class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-rose-50 to-white p-5 shadow-sm transition-all hover:border-rose-500/40 hover:shadow-lg">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium uppercase tracking-wide text-rose-600">Total Penarikan</p>
+                            <p class="mt-2 text-2xl font-bold text-rose-700"><?= rupiah($tarik); ?></p>
+                        </div>
+                        <div class="rounded-xl bg-rose-500/10 p-3 ring-1 ring-rose-500/30">
+                            <i class="fa-solid fa-arrow-up-long text-rose-600 text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 h-1 w-full rounded-full bg-rose-200/40">
+                        <div class="h-1 rounded-full bg-rose-500" style="width: 40%"></div>
+                    </div>
+                </a>
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm transition-all hover:border-amber-500/40 hover:shadow-lg">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium uppercase tracking-wide text-amber-700">Saldo Akhir Kas</p>
+                            <p class="mt-2 text-3xl font-bold text-slate-900 tracking-tight"><?= rupiah($saldo); ?></p>
+                        </div>
+                        <div class="rounded-xl bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
+                            <i class="fa-solid fa-wallet text-amber-600 text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 h-1 w-full rounded-full bg-amber-200/40">
+                        <div class="h-1 rounded-full bg-amber-500" style="width: 55%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500">
+                <span>Terakhir diperbarui: <?= date('d M Y H:i'); ?></span>
+                <span class="inline-flex items-center gap-1">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Klik kartu untuk melihat detail transaksi
+                </span>
             </div>
         </div>
     </div>

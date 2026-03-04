@@ -234,11 +234,11 @@ if (isset($_POST['Ubah'])) {
             </div>
             
 			<div class="flex items-center gap-2">
-				<a href="admin/export_handler.php?type=excel&table=setor" class="btn btn-sm btn-dashboard-soft text-[11px]" title="Ekspor ke Excel">
-					<i class="fa-solid fa-file-excel"></i> Excel
+				<a href="admin/export_handler.php?type=excel&table=setor" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20 hover:bg-emerald-100" title="Ekspor ke Excel">
+					<i class="fa-solid fa-file-excel"></i><span>Excel</span>
 				</a>
-				<a href="admin/export_handler.php?type=pdf&table=setor" class="btn btn-sm btn-dashboard-soft text-[11px]" title="Ekspor ke PDF" target="_blank">
-					<i class="fa-solid fa-file-pdf text-xs"></i><span>PDF</span>
+				<a href="admin/export_handler.php?type=pdf&table=setor" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20 hover:bg-rose-100" title="Ekspor ke PDF" target="_blank">
+					<i class="fa-solid fa-file-pdf"></i><span>PDF</span>
 				</a>
 			</div>
 		</div>
@@ -267,7 +267,7 @@ if (isset($_POST['Ubah'])) {
 								<th class="px-4 py-3 font-medium">NIS</th>
 								<th class="px-4 py-3 font-medium">Nama</th>
 								<th class="px-4 py-3 font-medium">Tanggal</th>
-								<th class="px-4 py-3 font-medium text-right">Setoran</th>
+								<th class="px-4 py-3 font-medium">Setoran</th>
 								<th class="px-4 py-3 font-medium">Petugas</th>
 								<th class="px-4 py-3 font-medium text-center">Aksi</th>
 							</tr>
@@ -297,13 +297,13 @@ if (isset($_POST['Ubah'])) {
 								<?php echo $data['nama_siswa']; ?>
 							</td>
 							<td class="px-4 py-3">
-                                <span class="badge-pill badge-pill-secondary">
+                                <span class="badge-pill badge-pill-secondary inline-flex items-center gap-2">
                                     <i class="fa-regular fa-calendar"></i>
                                     <?php  $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl))?>
                                 </span>
 							</td>
-							<td class="px-4 py-3 font-medium text-right text-slate-900">
-								<?php echo rupiah($data['setor']); ?>
+							<td class="px-4 py-3 font-medium text-left text-slate-900">
+								<span class="whitespace-nowrap"><?php echo rupiah($data['setor']); ?></span>
 							</td>
 							<td class="px-4 py-3">
                                 <span class="badge-pill badge-pill-primary">

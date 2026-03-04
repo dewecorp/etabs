@@ -24,6 +24,29 @@ while ($data= $sql->fetch_assoc()) {
 $saldo=$setor-$tarik;
 ?>
 
+<?php
+// Data grafik bulanan tahun berjalan
+$currentYear = date('Y');
+$currentMonth = (int)date('n');
+$monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+$labels = array_slice($monthLabels, 0, $currentMonth);
+$setoranCounts = array_fill(0, $currentMonth, 0);
+$penarikanCounts = array_fill(0, $currentMonth, 0);
+$sqlSetoran = @$koneksi->query("SELECT MONTH(tgl) AS m, COUNT(*) AS c FROM tb_tabungan WHERE jenis='ST' AND YEAR(tgl)='{$currentYear}' GROUP BY MONTH(tgl)");
+if ($sqlSetoran) {
+    while ($row = $sqlSetoran->fetch_assoc()) {
+        $m = (int)$row['m'];
+        if ($m >= 1 && $m <= $currentMonth) { $setoranCounts[$m - 1] = (int)$row['c']; }
+    }
+}
+$sqlPenarikan = @$koneksi->query("SELECT MONTH(tgl) AS m, COUNT(*) AS c FROM tb_tabungan WHERE jenis='TR' AND YEAR(tgl)='{$currentYear}' GROUP BY MONTH(tgl)");
+if ($sqlPenarikan) {
+    while ($row = $sqlPenarikan->fetch_assoc()) {
+        $m = (int)$row['m'];
+        if ($m >= 1 && $m <= $currentMonth) { $penarikanCounts[$m - 1] = (int)$row['c']; }
+    }
+}
+?>
 <!-- Info atas -->
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
     <div>
@@ -120,7 +143,7 @@ $saldo=$setor-$tarik;
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h3 class="text-sm font-semibold text-slate-900">Statistik Tabungan</h3>
-                <p class="text-[11px] text-slate-500">Monitoring aktivitas harian</p>
+                <p class="text-[11px] text-slate-500">Perbandingan setoran dan penarikan (tahun berjalan)</p>
             </div>
         </div>
         <div class="h-64 w-full">
@@ -151,14 +174,23 @@ $saldo=$setor-$tarik;
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('petugasSavingChart').getContext('2d');
         new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                labels: <?php echo json_encode($labels); ?>,
                 datasets: [{
-                    label: 'Transaksi',
-                    data: [12, 19, 3, 5, 2, 3],
-                    backgroundColor: '#6366f1',
-                    borderRadius: 6
+                    label: 'Setoran',
+                    data: <?php echo json_encode($setoranCounts); ?>,
+                    borderColor: '#6366f1',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                },{
+                    label: 'Penarikan',
+                    data: <?php echo json_encode($penarikanCounts); ?>,
+                    borderColor: '#f43f5e',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(244, 63, 94, 0.1)'
                 }]
             },
             options: {
@@ -183,4 +215,3 @@ $saldo=$setor-$tarik;
     });
 </script>
 <!-- /.content -->
-

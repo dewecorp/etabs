@@ -45,6 +45,38 @@ if ($sql) {
 $saldo = $setor - $tarik;
 ?>
 
+<?php
+// Siapkan data grafik dinamis (jumlah transaksi per bulan di tahun berjalan)
+$currentYear = date('Y');
+$currentMonth = (int)date('n');
+$monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+$labels = array_slice($monthLabels, 0, $currentMonth);
+
+$setoranCounts = array_fill(0, $currentMonth, 0);
+$penarikanCounts = array_fill(0, $currentMonth, 0);
+
+// Ambil jumlah transaksi setoran per bulan
+$sqlSetoran = @$koneksi->query("SELECT MONTH(tgl) AS m, COUNT(*) AS c FROM tb_tabungan WHERE jenis='ST' AND YEAR(tgl)='{$currentYear}' GROUP BY MONTH(tgl)");
+if ($sqlSetoran) {
+    while ($row = $sqlSetoran->fetch_assoc()) {
+        $m = (int)$row['m'];
+        if ($m >= 1 && $m <= $currentMonth) {
+            $setoranCounts[$m - 1] = (int)$row['c'];
+        }
+    }
+}
+// Ambil jumlah transaksi penarikan per bulan
+$sqlPenarikan = @$koneksi->query("SELECT MONTH(tgl) AS m, COUNT(*) AS c FROM tb_tabungan WHERE jenis='TR' AND YEAR(tgl)='{$currentYear}' GROUP BY MONTH(tgl)");
+if ($sqlPenarikan) {
+    while ($row = $sqlPenarikan->fetch_assoc()) {
+        $m = (int)$row['m'];
+        if ($m >= 1 && $m <= $currentMonth) {
+            $penarikanCounts[$m - 1] = (int)$row['c'];
+        }
+    }
+}
+?>
+
 <!-- Info atas -->
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
     <div>
@@ -268,17 +300,17 @@ $saldo = $setor - $tarik;
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: <?php echo json_encode($labels); ?>,
                 datasets: [{
                     label: 'Setoran',
-                    data: [12, 19, 3, 5, 2, 3],
+                    data: <?php echo json_encode($setoranCounts); ?>,
                     borderColor: '#6366f1',
                     tension: 0.4,
                     fill: true,
                     backgroundColor: 'rgba(99, 102, 241, 0.1)'
                 }, {
                     label: 'Penarikan',
-                    data: [7, 11, 5, 8, 3, 6],
+                    data: <?php echo json_encode($penarikanCounts); ?>,
                     borderColor: '#f43f5e',
                     tension: 0.4,
                     fill: true,
@@ -457,4 +489,3 @@ $saldo = $setor - $tarik;
 		}, 3000);
 	})();
 	</script>
-

@@ -5,18 +5,27 @@
 </section>
 
 <!-- Main content -->
+<?php
+$check_col = $koneksi->query("SHOW COLUMNS FROM tb_pengguna LIKE 'foto'");
+if ($check_col && $check_col->num_rows == 0) {
+    $koneksi->query("ALTER TABLE tb_pengguna ADD COLUMN foto varchar(255) DEFAULT NULL AFTER level");
+}
+$upload_dir = dirname(__DIR__, 2) . '/uploads/pengguna';
+if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+?>
 <section class="content">
 	<div class="rounded-2xl bg-white shadow-sm">
+        
 		<div class="border-b border-slate-100 px-6 py-4">
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" class="btn btn-dashboard-primary inline-flex items-center gap-2 tw-modal-open" data-target="#addModal">
                     <i class="fa-solid fa-user-plus text-xs"></i><span>Tambah Data</span>
                 </button>
                 <div class="inline-flex gap-2">
-                    <a href="admin/export_handler.php?type=excel&table=pengguna" class="btn btn-sm btn-dashboard-soft text-[11px]" title="Ekspor ke Excel">
+                    <a href="admin/export_handler.php?type=excel&table=pengguna" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20 hover:bg-emerald-100" title="Ekspor ke Excel">
                         <i class="fa-solid fa-file-excel text-xs"></i><span>Excel</span>
                     </a>
-                    <a href="admin/export_handler.php?type=pdf&table=pengguna" class="btn btn-sm btn-dashboard-soft text-[11px]" title="Ekspor ke PDF" target="_blank">
+                    <a href="admin/export_handler.php?type=pdf&table=pengguna" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20 hover:bg-rose-100" title="Ekspor ke PDF" target="_blank">
                         <i class="fa-solid fa-file-pdf text-xs"></i><span>PDF</span>
                     </a>
                 </div>
@@ -40,6 +49,7 @@
 					<thead>
 						<tr>
 							<th class="text-center" width="30px">No</th>
+							<th class="text-center" width="50px">Foto</th>
 							<th>Nama</th>
 							<th>Username</th>
 							<th>Level</th>
@@ -57,6 +67,22 @@
 						<tr>
 							<td class="text-center">
 								<?php echo $no++; ?>
+							</td>
+							<td class="text-center">
+                                <?php 
+                                $foto = isset($data['foto']) ? $data['foto'] : '';
+                                $path = 'uploads/pengguna/' . $foto;
+                                if (!empty($foto) && file_exists(dirname(__DIR__,2).'/'.$path)) {
+                                    echo '<img src="'.$path.'" alt="Foto" class="h-8 w-8 rounded-full object-cover">';
+                                } else {
+                                    $nama = $data['nama_pengguna'];
+                                    $parts = preg_split('/\s+/', trim($nama));
+                                    $initials = '';
+                                    foreach ($parts as $p) { if ($p !== '') { $initials .= mb_strtoupper(mb_substr($p,0,1)); } }
+                                    $initials = mb_substr($initials,0,2);
+                                    echo '<span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">'.$initials.'</span>';
+                                }
+                                ?>
 							</td>
 							<td class="font-medium">
 								<?php echo $data['nama_pengguna']; ?>
@@ -83,6 +109,7 @@
                                         data-username="<?php echo $data['username']; ?>"
                                         data-password="<?php echo $data['password']; ?>"
                                         data-level="<?php echo $data['level']; ?>"
+                                        data-foto="<?php echo htmlspecialchars($foto); ?>"
                                         title="Ubah">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
@@ -125,7 +152,7 @@
         </div>
         
         <!-- Body -->
-        <form action="" method="post">
+        <form action="" method="post" enctype="multipart/form-data">
             <div class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Nama Pengguna</label>
@@ -148,6 +175,10 @@
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Password</label>
                     <input type="password" name="password" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Password" required>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Foto (opsional)</label>
+                    <input type="file" name="foto" accept="image/*" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                 </div>
             </div>
             
@@ -180,9 +211,10 @@
         </div>
         
         <!-- Body -->
-        <form action="" method="post">
+        <form action="" method="post" enctype="multipart/form-data">
             <div class="space-y-4">
                 <input type="hidden" name="id_pengguna" id="edit_id_pengguna">
+                <input type="hidden" name="foto_lama" id="edit_foto_lama">
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Nama Pengguna</label>
                     <input type="text" name="nama_pengguna" id="edit_nama_pengguna" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
@@ -208,6 +240,13 @@
                         <button type="button" onclick="toggleEditPassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                             <i id="eye_icon" class="fa-solid fa-eye text-xs"></i>
                         </button>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Foto (opsional)</label>
+                    <div class="flex items-center gap-3">
+                        <img id="edit_foto_preview" src="" alt="Foto" class="h-10 w-10 rounded-full object-cover hidden">
+                        <input type="file" name="foto" accept="image/*" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     </div>
                 </div>
             </div>
@@ -237,12 +276,19 @@
             var username = $(this).data('username');
             var password = $(this).data('password');
             var level = $(this).data('level');
+            var foto = $(this).data('foto');
             
             $('#edit_id_pengguna').val(id);
             $('#edit_nama_pengguna').val(nama);
             $('#edit_username').val(username);
             $('#edit_password').val(password);
             $('#edit_level').val(level);
+            $('#edit_foto_lama').val(foto || '');
+            if (foto) {
+                $('#edit_foto_preview').attr('src', 'uploads/pengguna/' + foto).removeClass('hidden');
+            } else {
+                $('#edit_foto_preview').addClass('hidden');
+            }
         }
         $(target).removeClass('hidden').addClass('flex');
     });
@@ -272,11 +318,22 @@
 
 <?php
 if (isset ($_POST['Simpan'])){
-    $sql_simpan = "INSERT INTO tb_pengguna (nama_pengguna,username,password,level) VALUES (
-    '".$_POST['nama_pengguna']."',
-    '".$_POST['username']."',
-    '".$_POST['password']."',
-    '".$_POST['level']."')";
+    $foto_name = null;
+    if (!empty($_FILES['foto']['name'])) {
+        $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+        $safe = preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['username']);
+        $newname = $safe . '_' . time() . '.' . strtolower($ext);
+        $target = $upload_dir . '/' . $newname;
+        if (@move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
+            $foto_name = $newname;
+        }
+    }
+    $sql_simpan = "INSERT INTO tb_pengguna (nama_pengguna,username,password,level,foto) VALUES (
+    '".mysqli_real_escape_string($koneksi, $_POST['nama_pengguna'])."',
+    '".mysqli_real_escape_string($koneksi, $_POST['username'])."',
+    '".mysqli_real_escape_string($koneksi, $_POST['password'])."',
+    '".mysqli_real_escape_string($koneksi, $_POST['level'])."',
+    ".($foto_name ? "'".$foto_name."'" : "NULL").")";
     $query_simpan = mysqli_query($koneksi, $sql_simpan);
     
     if ($query_simpan) {
@@ -344,12 +401,24 @@ if (isset ($_POST['Simpan'])){
 }
 
 if (isset ($_POST['Ubah'])){
+    $foto_update = $_POST['foto_lama'] ?? null;
+    if (!empty($_FILES['foto']['name'])) {
+        $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+        $safe = preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['username']);
+        $newname = $safe . '_' . time() . '.' . strtolower($ext);
+        $target = $upload_dir . '/' . $newname;
+        if (@move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
+            if (!empty($foto_update)) { @unlink($upload_dir . '/' . $foto_update); }
+            $foto_update = $newname;
+        }
+    }
     $sql_ubah = "UPDATE tb_pengguna SET
-        nama_pengguna='".$_POST['nama_pengguna']."',
-        username='".$_POST['username']."',
-        password='".$_POST['password']."',
-        level='".$_POST['level']."'
-        WHERE id_pengguna='".$_POST['id_pengguna']."'";
+        nama_pengguna='".mysqli_real_escape_string($koneksi, $_POST['nama_pengguna'])."',
+        username='".mysqli_real_escape_string($koneksi, $_POST['username'])."',
+        password='".mysqli_real_escape_string($koneksi, $_POST['password'])."',
+        level='".mysqli_real_escape_string($koneksi, $_POST['level'])."',
+        foto=".($foto_update ? "'".$foto_update."'" : "NULL")."
+        WHERE id_pengguna='".mysqli_real_escape_string($koneksi, $_POST['id_pengguna'])."'";
     $query_ubah = mysqli_query($koneksi, $sql_ubah);
 
     if ($query_ubah) {

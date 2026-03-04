@@ -5,6 +5,6 @@ function rupiah($angka){
 	if ($angka === null || $angka === '' || !is_numeric($angka)) {
 		$angka = 0;
 	}
-	$hasil_rupiah = "Rp " . number_format((float)$angka, 2, ',', '.');
+	$hasil_rupiah = "Rp " . number_format((float)$angka, 0, ',', '.');
 	return $hasil_rupiah;
 }

@@ -43,10 +43,7 @@
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium text-slate-700">Jumlah Tabungan</label>
                         <div class="relative">
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                <span class="text-slate-500 font-medium">Rp</span>
-                            </div>
-                            <input type="text" name="saldo" id="saldo" class="auth-input pl-10" placeholder="Saldo" readonly>
+                            <input type="text" name="saldo" id="saldo" class="auth-input" placeholder="Saldo" readonly>
                         </div>
                     </div>
                 </div>

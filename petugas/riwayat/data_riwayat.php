@@ -153,7 +153,7 @@ try {
 									<?php echo $data['nama_siswa'] ?? 'Siswa tidak ditemukan'; ?>
 								</td>
 								<td class="px-4 py-3">
-                                    <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                                    <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 whitespace-nowrap">
                                         <i class="fa-regular fa-calendar"></i>
                                         <?php $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl)); ?>
                                     </span>
@@ -161,9 +161,9 @@ try {
 								<td class="px-4 py-3 text-left font-medium text-slate-900">
 									<?php 
 									if ($data['jenis'] == 'ST') {
-										echo '<span class="text-emerald-600">' . rupiah($data['setor']) . '</span>';
+										echo '<span class="text-emerald-600 whitespace-nowrap">' . rupiah($data['setor']) . '</span>';
 									} else {
-										echo '<span class="text-rose-600">' . rupiah($data['tarik']) . '</span>';
+										echo '<span class="text-rose-600 whitespace-nowrap">' . rupiah($data['tarik']) . '</span>';
 									}
 									?>
 								</td>
