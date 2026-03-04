@@ -262,7 +262,10 @@ if ($sqlPenarikan) {
                     echo '<span class="uppercase tracking-wide text-'.$tw.'-600 ml-1">'.htmlspecialchars($activity['action']).'</span>';
                     if (!empty($activity['user_level'])) { echo ' <span class="text-slate-500">('.htmlspecialchars($activity['user_level']).')</span>'; }
                     echo '</p>';
-                    echo '<span class="text-[11px] text-slate-500">'.$time_ago.'</span>';
+                    echo '<div class="text-right">';
+                    echo '<span class="block text-[11px] text-slate-500 font-medium">'.$time_ago.'</span>';
+                    echo '<span class="block text-[9px] text-slate-400">'.date('d M Y, H:i', strtotime($activity['created_at'])).'</span>';
+                    echo '</div>';
                     echo '</div>';
                     if (!empty($activity['description'])) {
                         echo '<p class="mt-2 text-[12px] text-slate-700">'.htmlspecialchars($activity['description']).'</p>';

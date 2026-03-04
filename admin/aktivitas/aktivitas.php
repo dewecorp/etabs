@@ -105,8 +105,9 @@ $activity_count = getActivityCount($koneksi);
 							<div class="text-xs text-slate-600">
 								<i class="fa-regular fa-clock mr-1"></i> <?php echo $time_ago; ?>
 							</div>
-							<div class="text-xs text-slate-500">
-								<?php echo $activity_time; ?>
+							<div class="text-xs text-slate-500 text-right">
+								<div class="font-medium"><?php echo $activity_time; ?></div>
+								<div class="text-[10px] opacity-70"><?php echo date('d M Y', strtotime($activity['created_at'])); ?></div>
 							</div>
 						</div>
 						
