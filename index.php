@@ -16,7 +16,7 @@ include "inc/koneksi.php";
 
 // Cek koneksi database
 if (!isset($koneksi) || !$koneksi) {
-    die("Koneksi database gagal. Silakan periksa konfigurasi database di inc/koneksi.php atau inc/config_db.php");
+    die("Koneksi database gagal. Silakan periksa konfigurasi database di inc/koneksi.php");
 }
 
 // Cek apakah koneksi masih aktif

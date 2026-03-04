@@ -10,14 +10,14 @@
 
 ### Langkah 1: Konfigurasi Database
 
-Edit file `inc/config_db.php` atau `inc/koneksi.php` dengan informasi database hosting Anda:
+Edit file `inc/koneksi.php` dengan informasi database hosting Anda. File ini sudah otomatis mendeteksi apakah Anda sedang di Local (Laragon) atau di Hosting.
 
 ```php
-// Untuk Hosting (Production)
-define('DB_HOST', 'localhost'); // atau IP server database
-define('DB_USER', 'username_database_hosting');
-define('DB_PASS', 'password_database_hosting');
-define('DB_NAME', 'nama_database_hosting');
+// --- KONFIGURASI HOSTING (SESUAIKAN DI SINI) ---
+$db_host = 'localhost';
+$db_user = 'root';      // Ganti dengan username database hosting
+$db_pass = '';          // Ganti dengan password database hosting
+$db_name = 'db_tabsis'; // Ganti dengan nama database hosting
 ```
 
 ### Langkah 2: Import Database
@@ -69,7 +69,7 @@ Pastikan semua include path benar:
 ## Checklist Sebelum Deploy
 
 - [ ] Database sudah di-import ke hosting
-- [ ] Konfigurasi database sudah diubah di `inc/config_db.php`
+- [ ] Konfigurasi database sudah diubah di `inc/koneksi.php`
 - [ ] File permission sudah benar (folder uploads)
 - [ ] Semua file sudah di-upload ke hosting
 - [ ] Case sensitivity sudah diperhatikan
