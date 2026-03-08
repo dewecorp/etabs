@@ -137,6 +137,38 @@
 	// Fix Logo Path: Gunakan path relatif dari index.php (root)
 	$logo_path = !empty($profil['logo_sekolah']) ? 'uploads/logo/' . $profil['logo_sekolah'] : 'images/logo.png';
 	$bg_path = !empty($profil['bg_login']) ? 'uploads/bg/' . $profil['bg_login'] : 'images/bg_sf.jpg';
+
+    // 4. Handler Reset Tabungan
+    if (isset($_POST['ResetTabungan'])) {
+        $sql_reset_tabungan = "TRUNCATE TABLE tb_tabungan";
+        $query_reset_tabungan = mysqli_query($koneksi, $sql_reset_tabungan);
+        
+        $sql_reset_riwayat = "TRUNCATE TABLE tb_riwayat";
+        $query_reset_riwayat = mysqli_query($koneksi, $sql_reset_riwayat);
+
+        if ($query_reset_tabungan && $query_reset_riwayat) {
+            // Log Aktivitas Reset
+            if (function_exists('logActivity')) {
+                logActivity($koneksi, 'DELETE', 'tb_tabungan', 'Reset Semua Data Tabungan & Riwayat (Pergantian Tahun Ajaran)');
+            }
+            echo "<script>
+                Swal.fire({
+                    title: 'Reset Berhasil',
+                    text: 'Semua data tabungan dan riwayat transaksi telah dihapus.',
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                }).then(() => {
+                    window.location = 'index.php?page=MyApp/data_profil';
+                });
+            </script>";
+        } else {
+            echo "<script>
+                Swal.fire({title: 'Reset Gagal', text: 'Terjadi kesalahan saat menghapus data.', icon: 'error', confirmButtonText: 'OK'});
+            </script>";
+        }
+    }
 	?>
 	
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -256,12 +288,83 @@
 					</p>
 				</div>
 			</div>
+
+            <!-- Maintenance Box -->
+			<div class="rounded-2xl bg-white shadow-sm mt-6">
+				<div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 ">
+					<h3 class="text-lg font-semibold text-rose-600 flex items-center gap-2">
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						Maintenance Area
+					</h3>
+				</div>
+				<div class="p-6">
+                    <div class="rounded-xl border border-rose-100 bg-rose-50 p-4 mb-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold text-rose-800">Reset Data Tabungan (Pergantian Tahun Ajaran)</h4>
+                                <p class="text-xs text-rose-600 mt-1">
+                                    Fitur ini akan <strong>MENGHAPUS SEMUA DATA</strong> tabungan (setoran & penarikan) serta riwayat transaksi secara permanen. 
+                                    Gunakan fitur ini hanya ketika memasuki tahun ajaran baru untuk memulai pencatatan dari awal (nol).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form action="" method="post">
+                        <input type="hidden" name="ResetTabungan" value="1">
+                        <button type="button" onclick="konfirmasiReset()" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/30 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                            <i class="fa-solid fa-trash-can"></i> Reset Data Tabungan
+                        </button>
+                         <button type="submit" id="btnResetReal" class="hidden"></button>
+                    </form>
+				</div>
+			</div>
 		</div>
 	</div>
 </section>
 
-<!-- Script untuk handle modal secara lokal jika dashboard.js gagal load/cache -->
 <script>
+function konfirmasiReset() {
+    Swal.fire({
+        title: 'PERINGATAN KERAS!',
+        html: "Tindakan ini akan <strong>MENGHAPUS SEMUA DATA TABUNGAN & RIWAYAT TRANSAKSI</strong> secara permanen.<br><br>Data yang dihapus <strong>TIDAK DAPAT DIKEMBALIKAN</strong>.<br><br>Apakah Anda yakin ingin melanjutkan?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus Semua Data',
+        cancelButtonText: 'Batal',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Konfirmasi kedua
+            Swal.fire({
+                title: 'Konfirmasi Terakhir',
+                text: "Ketik 'SAYA YAKIN' untuk mengonfirmasi penghapusan data.",
+                input: 'text',
+                icon: 'warning',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Proses Reset',
+                confirmButtonColor: '#e11d48',
+                showLoaderOnConfirm: true,
+                preConfirm: (text) => {
+                    if (text !== 'SAYA YAKIN') {
+                        Swal.showValidationMessage('Konfirmasi salah. Silakan ketik SAYA YAKIN')
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('btnResetReal').click();
+                }
+            })
+        }
+    })
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const editBtn = document.querySelector('[data-target="#editProfilModal"]');
     const editModal = document.getElementById('editProfilModal');
