@@ -468,7 +468,7 @@ if (isset($_POST['simpan'])) {
                           COALESCE(k.kelas, 'Tidak Ada Kelas') as kelas 
                           from tb_siswa s 
                           LEFT JOIN tb_kelas k on s.id_kelas=k.id_kelas 
-                          order by COALESCE(k.kelas, 'ZZZ') asc, s.nis asc");
+                          order by COALESCE(k.kelas, 'ZZZ') asc, s.nama_siswa asc");
                           
                           // Debug: Tampilkan error jika ada
                           if ($sql === false) {
