@@ -5,7 +5,7 @@
  */
 
 // 1. Deteksi Lingkungan
-$is_local = in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1']) || $_SERVER['HTTP_HOST'] == 'localhost';
+$is_local = (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) || (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] == 'localhost') || (php_sapi_name() === 'cli');
 
 // 2. Konfigurasi Error Reporting
 if ($is_local) {

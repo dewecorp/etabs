@@ -364,6 +364,9 @@ if (isset($_POST['simpan'])) {
                         <button type="button" class="btn btn-dashboard-soft tw-modal-open" data-target="#modal-impor">
                             <i class="fa-solid fa-file-import text-xs"></i><span>Impor Data</span>
                         </button>
+                        <button type="button" id="btnSyncSimad" class="btn btn-dashboard-primary bg-indigo-500 hover:bg-indigo-600 border-indigo-500" onclick="syncSimad()">
+                            <i class="fa-solid fa-arrows-rotate text-xs"></i><span>Sync Simad</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1143,6 +1146,63 @@ window.editTerpilih = editTerpilih;
 window.hapusTerpilih = hapusTerpilih;
 window.handleCheckAllClick = handleCheckAllClick;
 window.toggleButtonsSiswa = toggleButtonsSiswa;
+
+function syncSimad() {
+    Swal.fire({
+        title: 'Sinkronisasi Data',
+        text: 'Apakah Anda yakin ingin menyinkronkan data siswa dari Simad?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Sinkronkan!',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return fetch('admin/siswa/sync_siswa_ajax.php')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText)
+                    }
+                    return response.json()
+                })
+                .catch(error => {
+                    Swal.showValidationMessage(`Request failed: ${error}`)
+                })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (result.value.success) {
+                let msg = result.value.message;
+                let icon = 'success';
+                
+                if (result.value.details && result.value.details.error > 0) {
+                    icon = 'warning';
+                    msg += '<br><br><strong>Detail Error:</strong><br><small class="text-left block max-h-40 overflow-y-auto">' + 
+                           result.value.details.errors.join('<br>') + '</small>';
+                }
+
+                Swal.fire({
+                    title: result.value.details.error > 0 ? 'Selesai dengan Peringatan' : 'Berhasil!',
+                    html: msg,
+                    icon: icon,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: result.value.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    })
+}
+window.syncSimad = syncSimad;
 </script>
 
 <!-- Modal Impor -->
