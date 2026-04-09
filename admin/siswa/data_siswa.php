@@ -1,7 +1,6 @@
 <?php
-// Load PhpSpreadsheet library
-require_once dirname(dirname(__DIR__)) . '/vendor/autoload.php';
-use PhpOffice\PhpSpreadsheet\IOFactory;
+// Load PhpSpreadsheet library - Pindahkan ke blok yang memerlukannya agar tidak crash di hosting jika vendor/autoload.php bermasalah
+// use PhpOffice\PhpSpreadsheet\IOFactory;
 
 if (isset($_POST['Simpan'])) {
     $sql_simpan = "INSERT INTO tb_siswa (nis,nama_siswa,jekel,id_kelas,status,th_masuk) VALUES (
@@ -169,8 +168,14 @@ if (isset($_POST['simpan'])) {
             })</script>";
         } else {
             try {
-                // Load file Excel
-                $spreadsheet = IOFactory::load($file_tmp);
+                // Load file Excel - Pindahkan require_once ke sini
+                if (file_exists(dirname(dirname(__DIR__)) . '/vendor/autoload.php')) {
+                    require_once dirname(dirname(__DIR__)) . '/vendor/autoload.php';
+                } else {
+                    throw new Exception("File vendor/autoload.php tidak ditemukan. Jalankan 'composer install' di hosting.");
+                }
+                
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file_tmp);
                 
                 // Skip header row (baris pertama)
                 $success_count = 0;
@@ -1223,14 +1228,15 @@ window.syncSimad = syncSimad;
         <form method="POST" enctype="multipart/form-data" action="">
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                    <label class="text-sm font-medium text-slate-700  File Excel</label>"><a href="../../inc/generate_template_siswa.php" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-700   target="_blank">
+                    <label class="text-sm font-medium text-slate-700">File Excel</label>
+                    <a href="../../inc/generate_template_siswa.php" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-700">
                         <i class="fa-solid fa-download"></i>
                         Download Template
                     </a>
                 </div>
                 
                 <div class="relative">
-                    <input type="file" name="file_excel" class="block w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     accept=".xls,.xlsx,.csv" required>
+                    <input type="file" name="file_excel" class="block w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" accept=".xls,.xlsx,.csv" required>
                 </div>
                 
                 <p class="text-[11px] text-slate-500">
@@ -1272,28 +1278,33 @@ window.syncSimad = syncSimad;
             <div class="space-y-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">
-                        <input type="text" name="nis" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="NIS" required>
+                        <label class="text-sm font-medium text-slate-700">NIS</label>
+                        <input type="text" name="nis" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="NIS" required>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700  Masuk</label>"><input type="number" name="th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="Tahun Masuk" required>
+                        <label class="text-sm font-medium text-slate-700">Tahun Masuk</label>
+                        <input type="number" name="th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Tahun Masuk" required>
                     </div>
                 </div>
                 
                 <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Siswa</label>"><input type="text" name="nama_siswa" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="Nama Lengkap" required>
+                    <label class="text-sm font-medium text-slate-700">Nama Siswa</label>
+                    <input type="text" name="nama_siswa" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Nama Lengkap" required>
                 </div>
                 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700  Kelamin</label>"><select name="jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                        <label class="text-sm font-medium text-slate-700">Jenis Kelamin</label>
+                        <select name="jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                            <option value="">-- Pilih --</option>
                             <option value="LK">Laki-laki</option>
                             <option value="PR">Perempuan</option>
                         </select>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">
-                        <select name="id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                        <label class="text-sm font-medium text-slate-700">Kelas</label>
+                        <select name="id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                            <option value="">-- Pilih --</option>
                             <?php
                             $query_kelas = "select * from tb_kelas";
                             $hasil_kelas = mysqli_query($koneksi, $query_kelas);
@@ -1339,23 +1350,31 @@ window.syncSimad = syncSimad;
             <div class="space-y-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">
-                        <input type="text" name="nis" id="edit_nis" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none    readonly>"></div>
+                        <label class="text-sm font-medium text-slate-700">NIS</label>
+                        <input type="text" name="nis" id="edit_nis" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none" readonly>
+                    </div>
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700  Masuk</label>"><input type="number" name="th_masuk" id="edit_th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"></div>
-                </div>">
+                        <label class="text-sm font-medium text-slate-700">Tahun Masuk</label>
+                        <input type="number" name="th_masuk" id="edit_th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                    </div>
+                </div>
                 <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Siswa</label>"><input type="text" name="nama_siswa" id="edit_nama_siswa" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"></div>">
+                    <label class="text-sm font-medium text-slate-700">Nama Siswa</label>
+                    <input type="text" name="nama_siswa" id="edit_nama_siswa" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700  Kelamin</label>"><select name="jekel" id="edit_jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                        <label class="text-sm font-medium text-slate-700">Jenis Kelamin</label>
+                        <select name="jekel" id="edit_jekel" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                            <option value="">-- Pilih --</option>
                             <option value="LK">Laki-laki</option>
                             <option value="PR">Perempuan</option>
                         </select>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">
-                        <select name="id_kelas" id="edit_id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
+                        <label class="text-sm font-medium text-slate-700">Kelas</label>
+                        <select name="id_kelas" id="edit_id_kelas" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
+                            <option value="">-- Pilih --</option>
                             <?php
                             $hasil_kelas_edit = mysqli_query($koneksi, "select * from tb_kelas");
                             while ($row_kelas = mysqli_fetch_array($hasil_kelas_edit)) {
@@ -1491,4 +1510,3 @@ window.syncSimad = syncSimad;
     }
 })();
 </script>
-
