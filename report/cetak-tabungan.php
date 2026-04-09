@@ -52,7 +52,7 @@ ob_start();
 <html lang="id">
 <head>
 	<meta charset="UTF-8">
-	<title>Cetak Tabungan - <?php echo htmlspecialchars($data_siswa['nama_siswa']); ?></title>
+	<title>Cetak Tabungan</title>
 	<style>
 		body {
 			font-family: 'Arial', sans-serif;
@@ -328,7 +328,7 @@ ob_start();
 			</div>
 		</div>
 		<?php endif; ?>
-		<p style="margin-top: 10px;">e-TABS System</p>
+		<p style="margin-top: 10px;">e-Tabs System</p>
 	</div>
 	<script>
 		window.onload = function() {

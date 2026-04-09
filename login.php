@@ -19,7 +19,7 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Login | e-TABS</title>
+    <title>Login | e-Tabs</title>
     <link rel="icon" href="<?php echo $logo_path; ?>">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">

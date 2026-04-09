@@ -13,7 +13,7 @@ $data_profil = mysqli_fetch_array($query_profil, MYSQLI_BOTH);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Saldo Kas - <?php echo $data_profil['nama_sekolah']; ?> - TA <?php echo $data_profil['tahun_ajaran']; ?></title>
+    <title>Laporan Saldo Kas</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -165,15 +165,9 @@ $data_profil = mysqli_fetch_array($query_profil, MYSQLI_BOTH);
             <div class="signature">
                 <p>Jepara, <?php echo tgl_indo(date('Y-m-d')); ?></p>
                 <p>Bendahara,</p>
-                <?php
-                // Generate QR Code with mPDF
-                require_once dirname(__DIR__) . '/vendor/autoload.php';
-                $qrCode = new \Mpdf\QrCode\QrCode($data_profil['nama_bendahara']);
-                $qrCode->disableBorder();
-                $output = new \Mpdf\QrCode\Output\Png();
-                $qr_code_base64 = base64_encode($output->output($qrCode, 100));
-                ?>
-                <img src="data:image/png;base64,<?php echo $qr_code_base64; ?>" alt="QR Code" style="margin: 0 auto; display: block;">
+                <div style="margin: 10px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<?php echo urlencode($data_profil['nama_bendahara']); ?>" alt="QR Code" style="margin: 0 auto; display: block; width: 80px; height: 80px;">
+                </div>
                 <p><strong><?php echo $data_profil['nama_bendahara']; ?></strong></p>
             </div>
         </div>

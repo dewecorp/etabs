@@ -282,7 +282,7 @@ ob_start();
 			</div>
 		</div>
 		<?php endif; ?>
-		<p style="margin-top: 10px;">e-TABS System</p>
+		<p style="margin-top: 10px;">e-Tabs System</p>
 	</div>
 	<script>
 		window.onload = function() {

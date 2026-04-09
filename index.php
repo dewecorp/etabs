@@ -30,7 +30,7 @@ include "inc/config.php";
 include_once "inc/activity_log.php";
 
 	//Profil Sekolah
-$nama = "e-TABS";
+$nama = "e-Tabs";
 try {
     $sql = @$koneksi->query("SELECT * from tb_profil LIMIT 1");
     if ($sql && $sql->num_rows > 0) {
@@ -41,7 +41,7 @@ try {
 } catch (Exception $e) {
     // Jika error, gunakan default
     error_log("Error loading profil: " . $e->getMessage());
-    $nama = "e-TABS";
+    $nama = "e-Tabs";
 }
 
 // Ambil page title dinamis
@@ -61,7 +61,7 @@ $page_title = getPageTitle($current_page);
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?= htmlspecialchars($page_title) ?> | e-TABS | <?= htmlspecialchars($nama) ?></title>
+    <title><?= htmlspecialchars($page_title) ?> | e-Tabs</title>
     <link rel="icon" href="images/logo.png">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -148,7 +148,7 @@ $page_title = getPageTitle($current_page);
                     <img src="images/logo.png" alt="Logo" class="h-6 w-6 object-contain">
                 </div>
                 <div>
-                    <h1 class="text-sm font-semibold tracking-tight text-white sm:text-base">e-TABS Dashboard</h1>
+                    <h1 class="text-sm font-semibold tracking-tight text-white sm:text-base">e-Tabs Dashboard</h1>
                     <p class="text-[11px] text-emerald-100/80 sm:text-xs"><?= $nama ?></p>
                 </div>
             </div>
@@ -555,7 +555,7 @@ $page_title = getPageTitle($current_page);
     <footer class="border-t border-slate-200 bg-white/80 px-4 py-4 sm:px-6 lg:px-8 mt-auto">
         <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 text-[11px] text-slate-500 sm:flex-row">
             <p class="text-center sm:text-left">
-                © 2026 e-TABS • <?= $nama ?> • All rights reserved.
+                © 2026 e-Tabs • <?= $nama ?> • All rights reserved.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-3">
                 <a href="index.php" class="hover:text-indigo-600">Dashboard</a>

@@ -40,8 +40,8 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                 
                 // Set metadata
                 $mpdf->SetTitle($title);
-                $mpdf->SetAuthor('e-TABS System');
-                $mpdf->SetCreator('e-TABS');
+                $mpdf->SetAuthor('e-Tabs System');
+                $mpdf->SetCreator('e-Tabs');
                 
                 // Ambil path logo dan convert ke base64 untuk mPDF
                 $logo_base64 = '';
@@ -104,7 +104,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                         $html .= '<p>Tahun Ajaran: ' . htmlspecialchars($profil_data['tahun_ajaran']) . '</p>';
                     }
                 } else {
-                    $html .= '<h2>e-TABS System</h2>';
+                    $html .= '<h2>e-Tabs System</h2>';
                 }
                 $html .= '</div>';
                 $html .= '</div>';
@@ -143,7 +143,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
                     $html .= '</div>';
                     $html .= '</div>';
                 }
-                $html .= '<p style="margin-top: 10px;">e-TABS System</p>';
+                $html .= '<p style="margin-top: 10px;">e-Tabs System</p>';
                 $html .= '</div>';
                 
                 // Set JS to trigger print dialog
@@ -280,7 +280,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
             $html .= '<p>Tahun Ajaran: ' . htmlspecialchars($profil_data['tahun_ajaran']) . '</p>';
         }
     } else {
-        $html .= '<h2>e-TABS System</h2>';
+        $html .= '<h2>e-Tabs System</h2>';
     }
     $html .= '</div>
     </div>
@@ -311,7 +311,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         <p>Dicetak pada: ' . date('d/m/Y H:i:s') . '</p>';
     
     if ($profil_data && !empty($profil_data['nama_bendahara'])) {
-        $html .= '<div style="margin-top: 20px; text-align: right; padding-right: 20px;">
+        $html .= '<div style="margin-top: 20px; text-align: right; padding-right: 50px;">
             <div style="display: inline-block; text-align: center;">
                 <p>Bendahara,</p>
                 <div style="margin: 10px 0;">
@@ -322,7 +322,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
         </div>';
     }
     
-    $html .= '<p style="margin-top: 10px;">e-TABS System</p>
+    $html .= '<p style="margin-top: 10px;">e-Tabs System</p>
     </div>
     <script>
         window.onload = function() {

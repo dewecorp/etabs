@@ -18,7 +18,7 @@ $activity_count = getActivityCount($koneksi);
 		<li>
 			<a href="index.php">
 				<i class="fa fa-home"></i>
-				<b>e-TABS</b>
+				<b>e-Tabs</b>
 			</a>
 		</li>
 		<li class="active">Aktivitas Terbaru</li>
