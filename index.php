@@ -192,7 +192,7 @@ $page_title = getPageTitle($current_page);
     <!-- Konten utama -->
     <main class="flex w-full flex-1 flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:flex-row lg:items-start relative">
         <!-- Sidebar -->
-        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[110] bg-white lg:bg-transparent absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-2xl lg:shadow-none rounded-b-3xl lg:rounded-none border-x border-b border-slate-100 lg:border-none">
+        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[50] bg-white lg:bg-transparent absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-2xl lg:shadow-none rounded-b-3xl lg:rounded-none border-x border-b border-slate-100 lg:border-none">
             
 
             <nav class="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm">
@@ -381,14 +381,14 @@ $page_title = getPageTitle($current_page);
         </aside>
 
         <!-- Main Content Wrapper -->
-        <section id="mainContent" class="order-2 flex-1 space-y-4">
+        <section id="mainContent" class="order-2 flex-1 space-y-4 min-w-0">
             <nav class="mb-1 text-[11px] text-slate-500" aria-label="Breadcrumb">
                 <a href="index.php" class="text-slate-500 hover:text-indigo-600">Home</a>
                 <span class="mx-1 text-slate-400">/</span>
                 <span class="text-slate-700"><?= htmlspecialchars($page_title) ?></span>
             </nav>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6 shadow-sm overflow-hidden">
                 <?php 
                     if(isset($_GET['page'])){
                         $hal = $_GET['page'];

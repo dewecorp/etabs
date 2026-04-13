@@ -93,75 +93,75 @@ if ($sqlPenarikan) {
 </div>
 
 <!-- Kartu metrik -->
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Siswa Aktif -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Siswa Aktif</p>
-                <p class="mt-2 text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Siswa Aktif</p>
+                <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
             </div>
-            <div class="rounded-xl bg-indigo-500/10 p-3 ring-1 ring-indigo-500/30">
-                <i class="fa-solid fa-users text-indigo-600 text-lg"></i>
+            <div class="rounded-xl bg-indigo-500/10 p-2.5 sm:p-3 ring-1 ring-indigo-500/30">
+                <i class="fa-solid fa-users text-indigo-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=MyApp/data_siswa" class="text-indigo-600 hover:text-indigo-600 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 
     <!-- Total Setoran -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-emerald-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-emerald-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Setoran</p>
-                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($setor) ? $setor : 0); ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Total Setoran</p>
+                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($setor) ? $setor : 0); ?></p>
             </div>
-            <div class="rounded-xl bg-emerald-500/10 p-3 ring-1 ring-emerald-500/30">
-                <i class="fa-solid fa-arrow-down-long text-emerald-600 text-lg"></i>
+            <div class="rounded-xl bg-emerald-500/10 p-2.5 sm:p-3 ring-1 ring-emerald-500/30">
+                <i class="fa-solid fa-arrow-down-long text-emerald-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=data_setor" class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 
     <!-- Total Penarikan -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-rose-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-rose-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Penarikan</p>
-                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Total Penarikan</p>
+                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
             </div>
-            <div class="rounded-xl bg-rose-500/10 p-3 ring-1 ring-rose-500/30">
-                <i class="fa-solid fa-arrow-up-long text-rose-600 text-lg"></i>
+            <div class="rounded-xl bg-rose-500/10 p-2.5 sm:p-3 ring-1 ring-rose-500/30">
+                <i class="fa-solid fa-arrow-up-long text-rose-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=data_tarik" class="text-rose-600 hover:text-rose-700 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 
     <!-- Saldo Kas -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-amber-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-amber-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Saldo Kas</p>
-                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Saldo Kas</p>
+                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
             </div>
-            <div class="rounded-xl bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
-                <i class="fa-solid fa-wallet text-amber-600 text-lg"></i>
+            <div class="rounded-xl bg-amber-500/10 p-2.5 sm:p-3 ring-1 ring-amber-500/30">
+                <i class="fa-solid fa-wallet text-amber-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=view_kas" class="text-amber-600 hover:text-amber-300 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
@@ -170,8 +170,8 @@ if ($sqlPenarikan) {
 <!-- Visualisasi & Aktivitas -->
 <div class="grid gap-4 lg:grid-cols-1 mt-6">
     <!-- Chart Section -->
-    <div class="lg:col-span-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-        <div class="flex items-center justify-between mb-6">
+    <div class="lg:col-span-1 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xl overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
             <div>
                 <h3 class="text-sm font-semibold text-slate-900">Statistik Tabungan</h3>
                 <p class="text-[11px] text-slate-500">Perbandingan setoran dan penarikan</p>
@@ -185,14 +185,14 @@ if ($sqlPenarikan) {
                 </span>
             </div>
         </div>
-        <div class="h-64 w-full">
+        <div class="h-64 w-full relative">
             <canvas id="savingChart"></canvas>
         </div>
     </div>
 
     <!-- Aktivitas Terbaru (Tailwind Timeline) -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xl overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
             <h3 class="text-sm font-semibold text-slate-900">Aktivitas Terbaru</h3>
             <?php
             $activity_count = 0;
@@ -204,11 +204,11 @@ if ($sqlPenarikan) {
                 } catch (Exception $e) { $activity_count = 0; }
             }
             ?>
-            <span class="inline-flex items-center rounded-full bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-600 ring-1 ring-indigo-500/30">
+            <span class="inline-flex items-center rounded-full bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-600 ring-1 ring-indigo-500/30 w-fit">
                 Total: <?= number_format($activity_count); ?> aktivitas
             </span>
         </div>
-        <div class="max-h-[500px] overflow-y-auto">
+        <div class="max-h-[500px] overflow-y-auto pr-1">
             <?php
             $recent_activities = [];
             if (isset($koneksi) && $koneksi) {
@@ -227,7 +227,7 @@ if ($sqlPenarikan) {
             if (empty($recent_activities)) {
                 echo '<div class="text-[12px] text-slate-500">Belum ada aktivitas yang tercatat.</div>';
             } else {
-                echo '<ol class="relative pl-8">';
+                echo '<ol class="relative pl-6 sm:pl-8">';
                 $total_items = count($recent_activities);
                 $item_index = 0;
                 foreach ($recent_activities as $activity) {
@@ -256,22 +256,22 @@ if ($sqlPenarikan) {
                         // Terakhir: sambungkan ke bullet sebelumnya (garis dari atas sampai tengah bullet)
                         echo '<span class="'.$connectorClass.' top-0 h-6"></span>';
                     }
-                    echo '<div class="p-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50">';
-                    echo '<div class="flex items-center justify-between">';
-                    echo '<p class="text-xs text-slate-700"><span class="font-semibold">'.htmlspecialchars($activity['user_name']).'</span> ';
-                    echo '<span class="uppercase tracking-wide text-'.$tw.'-600 ml-1">'.htmlspecialchars($activity['action']).'</span>';
-                    if (!empty($activity['user_level'])) { echo ' <span class="text-slate-500">('.htmlspecialchars($activity['user_level']).')</span>'; }
+                    echo '<div class="p-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm">';
+                    echo '<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-1">';
+                    echo '<p class="text-xs text-slate-700 leading-relaxed"><span class="font-semibold">'.htmlspecialchars($activity['user_name']).'</span> ';
+                    echo '<span class="uppercase tracking-wide text-'.$tw.'-600 font-medium text-[10px] ml-1">'.htmlspecialchars($activity['action']).'</span>';
+                    if (!empty($activity['user_level'])) { echo ' <span class="text-slate-500 text-[11px]">('.htmlspecialchars($activity['user_level']).')</span>'; }
                     echo '</p>';
-                    echo '<div class="text-right">';
-                    echo '<span class="block text-[11px] text-slate-500 font-medium">'.$time_ago.'</span>';
-                    echo '<span class="block text-[9px] text-slate-400">'.date('d M Y, H:i', strtotime($activity['created_at'])).'</span>';
+                    echo '<div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 mt-1 sm:mt-0">';
+                    echo '<span class="text-[10px] text-slate-500 font-medium">'.$time_ago.'</span>';
+                    echo '<span class="text-[9px] text-slate-400">'.date('d M, H:i', strtotime($activity['created_at'])).'</span>';
                     echo '</div>';
                     echo '</div>';
                     if (!empty($activity['description'])) {
-                        echo '<p class="mt-2 text-[12px] text-slate-700">'.htmlspecialchars($activity['description']).'</p>';
+                        echo '<p class="mt-2 text-[11px] text-slate-600 line-clamp-2">'.htmlspecialchars($activity['description']).'</p>';
                     }
                     if (!empty($activity['table_name'])) {
-                        echo '<p class="mt-1 text-[11px] text-slate-600"><i class="fa fa-table mr-1"></i>'.htmlspecialchars($activity['table_name']).'</p>';
+                        echo '<p class="mt-1 text-[10px] text-slate-400"><i class="fa fa-table mr-1"></i>'.htmlspecialchars($activity['table_name']).'</p>';
                     }
                     echo '</div>';
                     echo '</li>';

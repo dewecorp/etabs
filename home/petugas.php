@@ -64,94 +64,94 @@ if ($sqlPenarikan) {
 </div>
 
 <!-- Kartu metrik -->
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Siswa Aktif -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Siswa Aktif</p>
-                <p class="mt-2 text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Siswa Aktif</p>
+                <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
             </div>
-            <div class="rounded-xl bg-indigo-500/10 p-3 ring-1 ring-indigo-500/30">
-                <i class="fa-solid fa-users text-indigo-600 text-lg"></i>
+            <div class="rounded-xl bg-indigo-500/10 p-2.5 sm:p-3 ring-1 ring-indigo-500/30">
+                <i class="fa-solid fa-users text-indigo-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=petugas" class="text-indigo-600 hover:text-indigo-600 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 
     <!-- Total Setoran -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-emerald-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-emerald-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Setoran</p>
-                <p class="mt-2 text-xl font-bold text-slate-900"><?= rupiah($setor); ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Total Setoran</p>
+                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900"><?= rupiah($setor); ?></p>
             </div>
-            <div class="rounded-xl bg-emerald-500/10 p-3 ring-1 ring-emerald-500/30">
-                <i class="fa-solid fa-arrow-down-long text-emerald-600 text-lg"></i>
+            <div class="rounded-xl bg-emerald-500/10 p-2.5 sm:p-3 ring-1 ring-emerald-500/30">
+                <i class="fa-solid fa-arrow-down-long text-emerald-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=data_setor" class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 
     <!-- Total Penarikan -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-rose-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-rose-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total Penarikan</p>
-                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Total Penarikan</p>
+                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
             </div>
-            <div class="rounded-xl bg-rose-500/10 p-3 ring-1 ring-rose-500/30">
-                <i class="fa-solid fa-arrow-up-long text-rose-600 text-lg"></i>
+            <div class="rounded-xl bg-rose-500/10 p-2.5 sm:p-3 ring-1 ring-rose-500/30">
+                <i class="fa-solid fa-arrow-up-long text-rose-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=data_setor" class="text-rose-600 hover:text-rose-700 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 
     <!-- Saldo Kas -->
-    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl transition-all hover:border-amber-500/50 hover:bg-slate-50">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-amber-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-wide text-slate-500">Saldo Kas</p>
-                <p class="mt-2 text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
+            <div class="min-w-0">
+                <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Saldo Kas</p>
+                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
             </div>
-            <div class="rounded-xl bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
-                <i class="fa-solid fa-wallet text-amber-600 text-lg"></i>
+            <div class="rounded-xl bg-amber-500/10 p-2.5 sm:p-3 ring-1 ring-amber-500/30">
+                <i class="fa-solid fa-wallet text-amber-600 text-base sm:text-lg"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center justify-between text-[11px]">
+        <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-[11px]">
             <a href="?page=view_kas" class="text-amber-600 hover:text-amber-300 font-medium transition-colors">
-                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                Lihat detail <i class="fa-solid fa-arrow-right ml-1 text-[9px] sm:text-[10px]"></i>
             </a>
         </div>
     </div>
 </div>
 
 <div class="grid gap-4 lg:grid-cols-3 mt-6">
-    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-        <div class="flex items-center justify-between mb-6">
+    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xl overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
             <div>
                 <h3 class="text-sm font-semibold text-slate-900">Statistik Tabungan</h3>
                 <p class="text-[11px] text-slate-500">Perbandingan setoran dan penarikan (tahun berjalan)</p>
             </div>
         </div>
-        <div class="h-64 w-full">
+        <div class="h-64 w-full relative">
             <canvas id="petugasSavingChart"></canvas>
         </div>
     </div>
     
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xl overflow-hidden">
         <h3 class="text-sm font-semibold text-slate-900 mb-4">Aksi Cepat</h3>
         <div class="grid gap-3">
             <a href="?page=data_setor" class="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20 transition-all">
