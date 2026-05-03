@@ -63,14 +63,14 @@ if ($sqlPenarikan) {
     </div>
 </div>
 
-<!-- Kartu metrik -->
-<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+<!-- Kartu metrik (2 kolom di mobile, 4 kolom di layar besar) -->
+<div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
     <!-- Siswa Aktif -->
     <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl transition-all hover:border-indigo-500/50 hover:bg-slate-50">
         <div class="relative flex items-start justify-between">
             <div class="min-w-0">
                 <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Siswa Aktif</p>
-                <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-slate-900 metric-value"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
+                <p class="mt-1 sm:mt-2 text-xl sm:text-3xl font-bold text-slate-900 metric-value tabular-nums"><?= is_numeric($siswa) ? $siswa : 0; ?></p>
             </div>
             <div class="rounded-xl bg-indigo-500/10 p-2.5 sm:p-3 ring-1 ring-indigo-500/30">
                 <i class="fa-solid fa-users text-indigo-600 text-base sm:text-lg"></i>
@@ -88,7 +88,7 @@ if ($sqlPenarikan) {
         <div class="relative flex items-start justify-between">
             <div class="min-w-0">
                 <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Total Setoran</p>
-                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900"><?= rupiah($setor); ?></p>
+                <p class="mt-1 sm:mt-2 text-xs sm:text-lg lg:text-xl font-bold text-slate-900 leading-snug break-words"><?= rupiah($setor); ?></p>
             </div>
             <div class="rounded-xl bg-emerald-500/10 p-2.5 sm:p-3 ring-1 ring-emerald-500/30">
                 <i class="fa-solid fa-arrow-down-long text-emerald-600 text-base sm:text-lg"></i>
@@ -106,7 +106,7 @@ if ($sqlPenarikan) {
         <div class="relative flex items-start justify-between">
             <div class="min-w-0">
                 <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Total Penarikan</p>
-                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
+                <p class="mt-1 sm:mt-2 text-xs sm:text-lg lg:text-xl font-bold text-slate-900 metric-value leading-snug break-words"><?= rupiah(is_numeric($tarik) ? $tarik : 0); ?></p>
             </div>
             <div class="rounded-xl bg-rose-500/10 p-2.5 sm:p-3 ring-1 ring-rose-500/30">
                 <i class="fa-solid fa-arrow-up-long text-rose-600 text-base sm:text-lg"></i>
@@ -124,7 +124,7 @@ if ($sqlPenarikan) {
         <div class="relative flex items-start justify-between">
             <div class="min-w-0">
                 <p class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-slate-500 truncate">Saldo Kas</p>
-                <p class="mt-1 sm:mt-2 text-lg sm:text-xl font-bold text-slate-900 metric-value"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
+                <p class="mt-1 sm:mt-2 text-xs sm:text-lg lg:text-xl font-bold text-slate-900 metric-value leading-snug break-words"><?= rupiah(is_numeric($saldo) ? $saldo : 0); ?></p>
             </div>
             <div class="rounded-xl bg-amber-500/10 p-2.5 sm:p-3 ring-1 ring-amber-500/30">
                 <i class="fa-solid fa-wallet text-amber-600 text-base sm:text-lg"></i>
