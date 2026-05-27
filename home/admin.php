@@ -49,7 +49,7 @@ $saldo = $setor - $tarik;
 // Siapkan data grafik dinamis (jumlah transaksi per bulan di tahun berjalan)
 $currentYear = date('Y');
 $currentMonth = (int)date('n');
-$monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+$monthLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 $labels = array_slice($monthLabels, 0, $currentMonth);
 
 $setoranCounts = array_fill(0, $currentMonth, 0);
@@ -264,7 +264,7 @@ if ($sqlPenarikan) {
                     echo '</p>';
                     echo '<div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 mt-1 sm:mt-0">';
                     echo '<span class="text-[10px] text-slate-500 font-medium">'.$time_ago.'</span>';
-                    echo '<span class="text-[9px] text-slate-400">'.date('d M, H:i', strtotime($activity['created_at'])).'</span>';
+                    echo '<span class="text-[9px] text-slate-400">'.tgl_indo_custom($activity['created_at'], 'd M, H:i').'</span>';
                     echo '</div>';
                     echo '</div>';
                     if (!empty($activity['description'])) {

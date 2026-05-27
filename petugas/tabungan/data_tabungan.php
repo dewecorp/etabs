@@ -124,7 +124,7 @@
 							<td class="px-4 py-3">
                                 <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
                                     <i class="fa-regular fa-calendar"></i>
-                                    <?php  $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl))?>
+                                    <?php  $tgl = $data['tgl']; echo tgl_indo_standar($tgl)?>
                                 </span>
 							</td>
 							<td class="px-4 py-3 text-right font-medium text-emerald-600">

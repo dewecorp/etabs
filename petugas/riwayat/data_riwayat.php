@@ -155,7 +155,7 @@ try {
 								<td class="px-4 py-3">
                                     <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 whitespace-nowrap">
                                         <i class="fa-regular fa-calendar"></i>
-                                        <?php $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl)); ?>
+                                        <?php $tgl = $data['tgl']; echo tgl_indo_standar($tgl); ?>
                                     </span>
 								</td>
 								<td class="px-4 py-3 text-left font-medium text-slate-900">
@@ -176,7 +176,7 @@ try {
 									<?php 
 									if ($data['tgl_hapus']) {
 										$tgl_hapus = $data['tgl_hapus']; 
-										echo '<span class="text-xs text-slate-500">' . date("d M Y H:i", strtotime($tgl_hapus)) . '</span>'; 
+										echo '<span class="text-xs text-slate-500">' . tgl_indo_lengkap($tgl_hapus) . '</span>'; 
 									} else {
 										echo '-';
 									}

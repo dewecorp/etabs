@@ -163,7 +163,7 @@ $data_profil = mysqli_fetch_array($query_profil, MYSQLI_BOTH);
                 <!-- Empty for spacing -->
             </div>
             <div class="signature">
-                <p>Jepara, <?php echo tgl_indo(date('Y-m-d')); ?></p>
+                <p>Jepara, <?php echo tgl_indo_standar(date('Y-m-d')); ?></p>
                 <p>Bendahara,</p>
                 <div style="margin: 10px 0;">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<?php echo urlencode($data_profil['nama_bendahara']); ?>" alt="QR Code" style="margin: 0 auto; display: block; width: 80px; height: 80px;">

@@ -21,7 +21,7 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
-                        <select name="nis" id="nis" class="auth-input appearance-none" required>
+                        <select name="nis" id="nis" class="auth-input appearance-none select2" required>
                             <option selected="selected">-- Pilih --</option>
                             <?php
                             // ambil data dari database
@@ -62,6 +62,10 @@
 
 <script>
 	$(document).ready(function() {
+		$('#nis').select2({
+			width: '100%'
+		});
+
 		$('#nis').change(function() {
 			var nis = $(this).val();
 			$.ajax({

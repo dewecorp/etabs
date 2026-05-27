@@ -46,6 +46,90 @@ $jam = date( 'H:i:s', strtotime($waktu));
 return "$hari, $tanggal $bulan $tahun";
 }
 
+function tgl_indo_lengkap($waktu)
+{
+    $bulan_array = array(
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember',
+    );
+    $timestamp = strtotime($waktu);
+    $tanggal = date('d', $timestamp);
+    $bl = date('n', $timestamp);
+    $bulan = $bulan_array[$bl];
+    $tahun = date('Y', $timestamp);
+    $jam = date('H:i', $timestamp);
+
+    return "$tanggal $bulan $tahun $jam";
+}
+
+function tgl_indo_standar($waktu)
+{
+    $bulan_array = array(
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember',
+    );
+    $timestamp = strtotime($waktu);
+    $tanggal = date('d', $timestamp);
+    $bl = date('n', $timestamp);
+    $bulan = $bulan_array[$bl];
+    $tahun = date('Y', $timestamp);
+
+    return "$tanggal $bulan $tahun";
+}
+
+function tgl_indo_custom($waktu, $format)
+{
+    $bulan_array = array(
+        'Jan' => 'Jan',
+        'Feb' => 'Feb',
+        'Mar' => 'Mar',
+        'Apr' => 'Apr',
+        'May' => 'Mei',
+        'Jun' => 'Jun',
+        'Jul' => 'Jul',
+        'Aug' => 'Agu',
+        'Sep' => 'Sep',
+        'Oct' => 'Okt',
+        'Nov' => 'Nov',
+        'Dec' => 'Des',
+        'January' => 'Januari',
+        'February' => 'Februari',
+        'March' => 'Maret',
+        'April' => 'April',
+        'May' => 'Mei',
+        'June' => 'Juni',
+        'July' => 'Juli',
+        'August' => 'Agustus',
+        'September' => 'September',
+        'October' => 'Oktober',
+        'November' => 'November',
+        'December' => 'Desember'
+    );
+    
+    $date = date($format, strtotime($waktu));
+    return strtr($date, $bulan_array);
+}
+
 // Fungsi untuk mendapatkan page title dinamis
 function getPageTitle($page = '') {
     // Mapping title untuk setiap halaman

@@ -28,7 +28,7 @@ $saldo=$setor-$tarik;
 // Data grafik bulanan tahun berjalan
 $currentYear = date('Y');
 $currentMonth = (int)date('n');
-$monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+$monthLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 $labels = array_slice($monthLabels, 0, $currentMonth);
 $setoranCounts = array_fill(0, $currentMonth, 0);
 $penarikanCounts = array_fill(0, $currentMonth, 0);

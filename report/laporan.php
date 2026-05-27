@@ -5,6 +5,7 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 include "../inc/koneksi.php";
 //FUNGSI RUPIAH
 include "../inc/rupiah.php";
+include "../inc/config.php";
 
 $dt1 = $_POST["tgl_1"];
 $dt2 = $_POST["tgl_2"];
@@ -219,7 +220,7 @@ ob_start();
 	<div class="report-title">Laporan Tabungan Siswa</div>
 	
 	<div class="period">
-		Periode: <?php echo date("d-M-Y", strtotime($dt1)); ?> s/d <?php echo date("d-M-Y", strtotime($dt2)); ?>
+		Periode: <?php echo tgl_indo_custom($dt1, 'd-M-Y'); ?> s/d <?php echo tgl_indo_custom($dt2, 'd-M-Y'); ?>
 	</div>
 	
 	<table>
@@ -243,7 +244,7 @@ ob_start();
 			?>
 			<tr>
 				<td class="text-center"><?php echo $no; ?></td>
-				<td><?php echo date("d/M/Y", strtotime($data['tgl'])); ?></td>
+				<td><?php echo tgl_indo_custom($data['tgl'], 'd/M/Y'); ?></td>
 				<td><?php echo htmlspecialchars($data['petugas']); ?></td>
 				<td class="text-right"><?php echo rupiah($data['setor']); ?></td>
 				<td class="text-right"><?php echo rupiah($data['tarik']); ?></td>

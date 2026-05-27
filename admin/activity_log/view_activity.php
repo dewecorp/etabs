@@ -48,7 +48,7 @@ $activities = getRecentActivities($koneksi, 100);
 					// Tampilkan label tanggal jika berbeda dengan sebelumnya
 					if ($current_date != $activity_date):
 						$current_date = $activity_date;
-						$date_label = date('d M Y', strtotime($activity_date));
+						$date_label = tgl_indo_standar($activity_date);
 						if ($activity_date == date('Y-m-d')) {
 							$date_label = 'Hari Ini';
 						} elseif ($activity_date == date('Y-m-d', strtotime('-1 day'))) {

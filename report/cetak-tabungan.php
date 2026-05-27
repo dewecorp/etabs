@@ -5,6 +5,7 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 include "../inc/koneksi.php";
 //FUNGSI RUPIAH
 include "../inc/rupiah.php";
+include "../inc/config.php";
 
 $nis = $_GET['nis'];
 
@@ -276,7 +277,7 @@ ob_start();
 			?>
 			<tr>
 				<td class="text-center"><?php echo $no; ?></td>
-				<td><?php echo date("d/M/Y", strtotime($data['tgl'])); ?></td>
+				<td><?php echo tgl_indo_custom($data['tgl'], 'd/M/Y'); ?></td>
 				<td class="text-right"><?php echo rupiah($data['setor']); ?></td>
 				<td class="text-right"><?php echo rupiah($data['tarik']); ?></td>
 				<td><?php echo htmlspecialchars($data['petugas']); ?></td>

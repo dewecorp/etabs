@@ -100,7 +100,7 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
                      </div>
                  </div>
 
-                 <button type="submit" class="w-full btn-dashboard-primary mt-6 flex items-center justify-center gap-2 py-3" name="btnLogin">
+                 <button type="submit" class="w-full rounded-xl btn-dashboard-primary mt-6 flex items-center justify-center gap-2 py-3" name="btnLogin">
                      <span>Masuk</span>
                      <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
                  </button>

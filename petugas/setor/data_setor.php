@@ -299,7 +299,7 @@ if (isset($_POST['Ubah'])) {
 							<td class="px-4 py-3">
                                 <span class="badge-pill badge-pill-secondary inline-flex items-center gap-2">
                                     <i class="fa-regular fa-calendar"></i>
-                                    <?php  $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl))?>
+                                    <?php  $tgl = $data['tgl']; echo tgl_indo_standar($tgl)?>
                                 </span>
 							</td>
 							<td class="px-4 py-3 font-medium text-left text-slate-900">
@@ -365,7 +365,7 @@ if (isset($_POST['Ubah'])) {
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
                     <div class="relative">
-                        <select name="nis" id="nis_add" class="auth-input appearance-none pr-9" required>
+                        <select name="nis" id="nis_add" class="auth-input appearance-none pr-9 select2" required>
                         <option value="">-- Pilih --</option>
                         <?php
                         $query = "select * from tb_siswa where status='Aktif'";
@@ -432,7 +432,7 @@ if (isset($_POST['Ubah'])) {
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
                     <div class="relative">
-                    <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9" required>
+                    <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9 select2" required>
                         <option value="">-- Pilih --</option>
                         <?php
                         $query = "select * from tb_siswa";
@@ -516,9 +516,20 @@ if (isset($_POST['Ubah'])) {
 
     // Initialize Select2 & Rupiah Formatters
     $(document).ready(function() {
-        // Initialize Select2 with Bootstrap 4 theme if available, otherwise default
-        $('.select2').select2({
-            dropdownParent: $('.modal') // Important for Select2 inside modal
+        // Initialize Select2 per modal agar pencarian stabil di popup
+        $('.select2').each(function () {
+            var $select = $(this);
+            var $modalParent = $select.closest('.modal');
+            if ($modalParent.length) {
+                $select.select2({
+                    dropdownParent: $modalParent,
+                    width: '100%'
+                });
+            } else {
+                $select.select2({
+                    width: '100%'
+                });
+            }
         });
 
         // Helper function for format

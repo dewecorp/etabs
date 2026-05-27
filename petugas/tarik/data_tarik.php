@@ -366,7 +366,7 @@ if (isset($_POST['Ubah'])) {
 							<td class="px-4 py-3">
                                 <span class="badge-pill badge-pill-secondary inline-flex items-center gap-2">
                                     <i class="fa-regular fa-calendar"></i>
-                                    <?php  $tgl = $data['tgl']; echo date("d M Y", strtotime($tgl))?>
+                                    <?php  $tgl = $data['tgl']; echo tgl_indo_standar($tgl)?>
                                 </span>
 							</td>
 							<td class="px-4 py-3 text-left font-medium text-rose-600">
@@ -432,7 +432,7 @@ if (isset($_POST['Ubah'])) {
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
                     <div class="relative">
-                    <select name="nis" id="nis_add" class="auth-input appearance-none pr-9" required>
+                    <select name="nis" id="nis_add" class="auth-input appearance-none pr-9 select2" required>
                         <option value="">-- Pilih --</option>
                         <?php
                         $query = "select * from tb_siswa where status='Aktif'";
@@ -499,7 +499,7 @@ if (isset($_POST['Ubah'])) {
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
                     <div class="relative">
-                    <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9" required>
+                    <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9 select2" required>
                         <option value="">-- Pilih --</option>
                         <?php
                         $query = "select * from tb_siswa";
@@ -626,9 +626,14 @@ function handleCheckAllClick(checkbox) {
                     var $select = $(this);
                     var $modalParent = $select.closest('.modal');
                     if ($modalParent.length) {
-                        $select.select2({ dropdownParent: $modalParent });
+                        $select.select2({
+                            dropdownParent: $modalParent,
+                            width: '100%'
+                        });
                     } else {
-                        $select.select2();
+                        $select.select2({
+                            width: '100%'
+                        });
                     }
                 });
 

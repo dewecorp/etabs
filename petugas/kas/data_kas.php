@@ -80,7 +80,7 @@ $saldo = $setor - $tarik;
                 </div>
             </div>
             <div class="flex items-center justify-between text-[11px] text-slate-500">
-                <span>Terakhir diperbarui: <?= date('d M Y H:i'); ?></span>
+                <span>Terakhir diperbarui: <?= tgl_indo_lengkap(date('Y-m-d H:i:s')); ?></span>
                 <span class="inline-flex items-center gap-1">
                     <i class="fa-solid fa-circle-info"></i>
                     Klik kartu untuk melihat detail transaksi
