@@ -577,7 +577,15 @@ $page_title = getPageTitle($current_page);
         $(function() {
             // Initialize Select2 if available
             if ($.fn.select2) {
-                $(".select2").select2();
+                $(".select2").not(".select2-hidden-accessible").each(function () {
+                    var $select = $(this);
+                    var $modalParent = $select.closest('.modal');
+
+                    $select.select2({
+                        dropdownParent: $modalParent.length ? $modalParent : $(document.body),
+                        width: '100%'
+                    });
+                });
             }
 
             // Custom Sidebar Dropdown Toggle

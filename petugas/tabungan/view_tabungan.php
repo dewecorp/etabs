@@ -7,7 +7,7 @@
 </section>
 
 <section class="content">
-	<div class="rounded-2xl bg-white shadow-sm">
+	<div class="rounded-2xl bg-white shadow-sm tabungan-search-panel">
 		<div class="border-b border-slate-100 px-6 py-4">
 			<h3 class="text-lg font-semibold text-slate-900">
                 <i class="fa-solid fa-magnifying-glass text-indigo-500 mr-2"></i>Cari Siswa
@@ -22,7 +22,7 @@
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
                         <select name="nis" id="nis" class="auth-input appearance-none select2" required>
-                            <option selected="selected">-- Pilih --</option>
+                            <option value="" selected="selected">-- Pilih --</option>
                             <?php
                             // ambil data dari database
                             $query = "select * from tb_siswa where status='Aktif'";
@@ -62,11 +62,17 @@
 
 <script>
 	$(document).ready(function() {
-		$('#nis').select2({
-			width: '100%'
+		var $nis = $('#nis');
+
+		$nis.on('select2:open', function() {
+			$('body').addClass('select2-page-scroll-lock');
 		});
 
-		$('#nis').change(function() {
+		$nis.on('select2:close', function() {
+			$('body').removeClass('select2-page-scroll-lock');
+		});
+
+		$nis.change(function() {
 			var nis = $(this).val();
 			$.ajax({
 				url: "plugins/proses-ajax.php",

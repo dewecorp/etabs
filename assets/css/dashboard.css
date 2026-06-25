@@ -142,6 +142,7 @@
 /* Select2 styled to match auth-input/Tailwind look */
 .select2-container {
     width: 100% !important;
+    max-width: 100% !important;
 }
 
 .select2-container .select2-selection--single {
@@ -178,6 +179,7 @@
     border-radius: 0.75rem !important;
     overflow: hidden !important;
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+    max-width: calc(100vw - 2rem) !important;
 }
 
 .select2-search--dropdown {
@@ -196,6 +198,24 @@
 .select2-results__option {
     padding: 0.625rem 0.875rem !important;
     font-size: 0.875rem !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+.select2-results__options {
+    overflow-x: hidden !important;
+}
+
+body.select2-page-scroll-lock {
+    overflow: hidden !important;
+}
+
+body.select2-page-scroll-lock .select2-dropdown {
+    max-height: min(18rem, calc(100vh - 8rem)) !important;
+}
+
+body.select2-page-scroll-lock .select2-results__options {
+    max-height: min(14rem, calc(100vh - 12rem)) !important;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
