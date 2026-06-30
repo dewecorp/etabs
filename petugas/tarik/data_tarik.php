@@ -5,11 +5,26 @@ $data_nama = $_SESSION["ses_nama"];
 date_default_timezone_set("Asia/Jakarta"); 
 $tanggal = date("Y-m-d");
 
+include_once __DIR__ . '/../../inc/tarik_payment_schema.php';
+include_once __DIR__ . '/../../inc/payment_integration.php';
+ensureTarikPaymentColumns($koneksi);
+
 if (isset($_POST['Simpan'])) {
-    //menangkap post
     $tarik = $_POST['tarik'];
-    //membuang Rp dan Titik
     $tarik_hasil = preg_replace("/[^0-9]/", "", $tarik);
+    $tujuan_tarik = ($_POST['tujuan_tarik'] ?? 'lainnya') === 'pembayaran' ? 'pembayaran' : 'lainnya';
+    $tgl_transaksi = !empty($_POST['tgl_bayar']) ? $_POST['tgl_bayar'] : $tanggal;
+    $jenis_bayar_id = mysqli_real_escape_string($koneksi, $_POST['jenis_bayar_id'] ?? '');
+    $jenis_bayar = mysqli_real_escape_string($koneksi, $_POST['jenis_bayar'] ?? '');
+    $keterangan_tarik = mysqli_real_escape_string($koneksi, $_POST['keterangan_tarik'] ?? '');
+    $payment_detail_raw = $_POST['payment_detail'] ?? '';
+    $payment_detail = mysqli_real_escape_string($koneksi, $payment_detail_raw);
+    $bulan_dipilih = json_decode($payment_detail_raw, true);
+    $bulan_list = is_array($bulan_dipilih) && isset($bulan_dipilih['bulan']) ? $bulan_dipilih['bulan'] : [];
+
+    if ($tujuan_tarik === 'pembayaran' && ($jenis_bayar_id === '' || $tarik_hasil <= 0)) {
+        echo "<script>Swal.fire({title:'Gagal!',text:'Lengkapi jenis pembayaran dan nominal.',icon:'error',confirmButtonText:'OK'});</script>";
+    } else {
     
     // Calculate saldo from DB directly for security
     $sql_saldo_db = "SELECT sum(setor)-sum(tarik) as total FROM tb_tabungan WHERE nis='".$_POST['nis']."'";
@@ -18,13 +33,47 @@ if (isset($_POST['Simpan'])) {
     $saldo_db = $d_saldo_db['total'];
 
     if ($saldo_db >= $tarik_hasil) {
-        $sql_simpan = "INSERT INTO tb_tabungan (nis,setor,tarik,tgl,jenis,petugas) VALUES (
+        $payment_ref = '';
+        $payment_sync = 'none';
+
+        if ($tujuan_tarik === 'pembayaran') {
+            $paymentPayload = [
+                'nis' => $_POST['nis'],
+                'tgl_bayar' => $tgl_transaksi,
+                'jenis_bayar_id' => $jenis_bayar_id,
+                'jenis_bayar' => $jenis_bayar,
+                'nominal' => (int) $tarik_hasil,
+                'bulan' => $bulan_list,
+                'petugas' => $data_nama,
+                'sumber' => 'etabs_tarikan',
+            ];
+            $paymentResult = paymentSubmitTransaksi($paymentPayload);
+
+            if (empty($paymentResult['success'])) {
+                $msg = addslashes($paymentResult['message'] ?? 'Gagal sinkron ke sistem pembayaran.');
+                echo "<script>Swal.fire({title:'Gagal!',text:'".$msg."',icon:'error',confirmButtonText:'OK'});</script>";
+            } else {
+                $payment_ref = mysqli_real_escape_string($koneksi, $paymentResult['ref'] ?? $paymentResult['data']['ref_transaksi'] ?? '');
+                $payment_sync = !empty($paymentResult['mock']) ? 'mock' : 'success';
+            }
+        }
+
+        if ($tujuan_tarik === 'lainnya' || ($payment_sync === 'mock' || $payment_sync === 'success')) {
+        $sql_simpan = "INSERT INTO tb_tabungan (nis,setor,tarik,tgl,jenis,petugas,tujuan_tarik,jenis_bayar,jenis_bayar_id,keterangan_tarik,payment_ref,payment_sync,payment_detail) VALUES (
             '".$_POST['nis']."',
             '0',
             '".$tarik_hasil."',
-            '".$tanggal."',
+            '".$tgl_transaksi."',
             'TR',
-            '".$data_nama."')";
+            '".mysqli_real_escape_string($koneksi, $data_nama)."',
+            '".$tujuan_tarik."',
+            ".($jenis_bayar !== '' ? "'".$jenis_bayar."'" : "NULL").",
+            ".($jenis_bayar_id !== '' ? "'".$jenis_bayar_id."'" : "NULL").",
+            ".($keterangan_tarik !== '' ? "'".$keterangan_tarik."'" : "NULL").",
+            ".($payment_ref !== '' ? "'".$payment_ref."'" : "NULL").",
+            '".$payment_sync."',
+            ".($payment_detail_raw !== '' ? "'".$payment_detail."'" : "NULL")."
+        )";
         $query_simpan = mysqli_query($koneksi, $sql_simpan);
         
         // Ambil ID yang baru saja diinsert
@@ -38,7 +87,7 @@ if (isset($_POST['Simpan'])) {
                                 '".mysqli_real_escape_string($koneksi, $_POST['nis'])."',
                                 '0',
                                 '".$tarik_hasil."',
-                                '".$tanggal."',
+                                '".$tgl_transaksi."',
                                 'TR',
                                 '".mysqli_real_escape_string($koneksi, $data_nama)."',
                                 'Aktif'
@@ -67,12 +116,16 @@ if (isset($_POST['Simpan'])) {
                 logActivity($koneksi, 'CREATE', 'tb_tabungan', 'Menambah penarikan untuk ' . $nama_siswa . ' sebesar Rp ' . number_format($tarik_hasil, 0, ',', '.'), $_POST['nis']);
             }
 
+            $successText = $tujuan_tarik === 'pembayaran'
+                ? 'Penarikan & pembayaran berhasil dicatat'
+                : 'Penarikan berhasil ditambahkan';
+
             echo "<script>
             (function(){
                 if(typeof Swal!=='undefined'){
                     Swal.fire({
                         title:'Berhasil!',
-                        text:'Penarikan berhasil ditambahkan',
+                        text:'".$successText."',
                         icon:'success',
                         confirmButtonText:'OK',
                         confirmButtonColor:'#28a745',
@@ -110,6 +163,7 @@ if (isset($_POST['Simpan'])) {
             })();
             </script>";
         }
+        }
     } else {
         echo "<script>
         (function(){
@@ -126,6 +180,7 @@ if (isset($_POST['Simpan'])) {
             }
         })();
         </script>";
+    }
     }
 }
 
@@ -335,7 +390,10 @@ if (isset($_POST['Ubah'])) {
 								<th class="px-4 py-3 font-medium">NIS</th>
 								<th class="px-4 py-3 font-medium">Nama</th>
 								<th class="px-4 py-3 font-medium">Tanggal</th>
+								<th class="px-4 py-3 font-medium">Tujuan</th>
+								<th class="px-4 py-3 font-medium">Jenis / Keterangan</th>
 								<th class="px-4 py-3 font-medium">Tarikan</th>
+								<th class="px-4 py-3 font-medium">Sync</th>
 								<th class="px-4 py-3 font-medium">Petugas</th>
 								<th class="px-4 py-3 font-medium text-center">Aksi</th>
 							</tr>
@@ -344,7 +402,8 @@ if (isset($_POST['Ubah'])) {
 							<?php
 
                   $no = 1;
-				  $sql = $koneksi->query("select s.nis, s.nama_siswa, t.id_tabungan, t.tarik, t.tgl, t.petugas from 
+				  $sql = $koneksi->query("select s.nis, s.nama_siswa, t.id_tabungan, t.tarik, t.tgl, t.petugas,
+				  t.tujuan_tarik, t.jenis_bayar, t.keterangan_tarik, t.payment_sync, t.payment_ref from 
 				  tb_siswa s join tb_tabungan t on s.nis=t.nis 
 				  where jenis ='TR' order by tgl desc, id_tabungan desc");
                   while ($data= $sql->fetch_assoc()) {
@@ -369,8 +428,40 @@ if (isset($_POST['Ubah'])) {
                                     <?php  $tgl = $data['tgl']; echo tgl_indo_standar($tgl)?>
                                 </span>
 							</td>
+							<td class="px-4 py-3">
+                                <?php if (($data['tujuan_tarik'] ?? 'lainnya') === 'pembayaran') { ?>
+                                <span class="inline-flex rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">Pembayaran</span>
+                                <?php } else { ?>
+                                <span class="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Lainnya</span>
+                                <?php } ?>
+							</td>
+							<td class="px-4 py-3 text-slate-600">
+                                <?php
+                                    if (!empty($data['jenis_bayar'])) {
+                                        echo htmlspecialchars($data['jenis_bayar']);
+                                    } elseif (!empty($data['keterangan_tarik'])) {
+                                        echo htmlspecialchars($data['keterangan_tarik']);
+                                    } else {
+                                        echo '<span class="text-slate-400">—</span>';
+                                    }
+                                ?>
+							</td>
 							<td class="px-4 py-3 text-left font-medium text-rose-600">
 								<span class="whitespace-nowrap"><?php echo rupiah($data['tarik']); ?></span>
+							</td>
+							<td class="px-4 py-3 text-center">
+                                <?php
+                                    $sync = $data['payment_sync'] ?? 'none';
+                                    if ($sync === 'success') {
+                                        echo '<i class="fa-solid fa-circle-check text-emerald-500" title="Tersinkron"></i>';
+                                    } elseif ($sync === 'mock') {
+                                        echo '<i class="fa-solid fa-flask text-amber-500" title="Mock"></i>';
+                                    } elseif ($sync === 'failed') {
+                                        echo '<i class="fa-solid fa-circle-xmark text-rose-500" title="Gagal"></i>';
+                                    } else {
+                                        echo '<span class="text-slate-300">—</span>';
+                                    }
+                                ?>
 							</td>
 							<td class="px-4 py-3">
                                 <span class="badge-pill badge-pill-primary">
@@ -414,64 +505,123 @@ if (isset($_POST['Ubah'])) {
 
 <!-- Modal Tambah -->
 <div class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="addModal">
-    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl  transition-all">
-        <!-- Header -->
+    <div class="relative w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl transition-all max-h-[90vh] overflow-y-auto">
         <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
-            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-circle-minus text-indigo-500"></i>
                 Tambah Penarikan
             </h3>
-            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700    tw-modal-close transition-colors">
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 tw-modal-close transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        
-        <!-- Body -->
-        <form action="" method="post" enctype="multipart/form-data">
+
+        <form action="" method="post" id="formTarikAdd">
+            <input type="hidden" name="tujuan_tarik" id="tujuan_tarik" value="pembayaran">
+            <input type="hidden" name="jenis_bayar_id" id="jenis_bayar_id" value="">
+            <input type="hidden" name="jenis_bayar" id="jenis_bayar" value="">
+            <input type="hidden" name="payment_detail" id="payment_detail" value="">
+
             <div class="space-y-4">
-                <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
-                    <div class="relative">
-                    <select name="nis" id="nis_add" class="auth-input appearance-none pr-9 select2" required>
-                        <option value="">-- Pilih --</option>
-                        <?php
-                        $query = "select * from tb_siswa where status='Aktif'";
-                        $hasil = mysqli_query($koneksi, $query);
-                        while ($row = mysqli_fetch_array($hasil)) {
-                        ?>
-                        <option value="<?php echo $row['nis'] ?>">
-                            <?php echo $row['nis'] ?> - <?php echo $row['nama_siswa'] ?>
-                        </option>
-                        <?php } ?>
-                    </select>
-                    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </span>
+                <!-- Tujuan penarikan -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-700">Tujuan Penarikan</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="tujuan-tab flex flex-col items-center gap-1 rounded-xl border-2 border-indigo-500 bg-indigo-50 px-3 py-2.5 text-center" data-tujuan="pembayaran">
+                            <i class="fa-solid fa-receipt text-indigo-500"></i>
+                            <span class="text-xs font-semibold text-indigo-700">Pembayaran</span>
+                        </button>
+                        <button type="button" class="tujuan-tab flex flex-col items-center gap-1 rounded-xl border-2 border-slate-200 px-3 py-2.5 text-center" data-tujuan="lainnya">
+                            <i class="fa-solid fa-wallet text-slate-400"></i>
+                            <span class="text-xs font-semibold text-slate-600">Lainnya</span>
+                        </button>
                     </div>
                 </div>
-                <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Tabungan</label>">
-                    <input type="text" name="saldo" id="saldo_add" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none    placeholder="Saldo saat ini" readonly>
+
+                <div class="space-y-1.5" id="wrap-tgl-bayar">
+                    <label class="text-sm font-medium text-slate-700">Tanggal Bayar</label>
+                    <input type="date" name="tgl_bayar" id="tgl_bayar" class="auth-input" value="<?php echo $tanggal; ?>">
                 </div>
+
                 <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Penarikan</label>">
+                    <label class="text-sm font-medium text-slate-700">Nama Siswa</label>
                     <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <span class="text-slate-500">
+                        <select name="nis" id="nis_add" class="auth-input appearance-none pr-9 select2" required>
+                            <option value="">-- Pilih --</option>
+                            <?php
+                            $query = "select * from tb_siswa where status='Aktif'";
+                            $hasil = mysqli_query($koneksi, $query);
+                            while ($row = mysqli_fetch_array($hasil)) {
+                            ?>
+                            <option value="<?php echo $row['nis'] ?>">
+                                <?php echo $row['nama_siswa'] ?> - <?php echo $row['nis'] ?>
+                            </option>
+                            <?php } ?>
+                        </select>
+                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-slate-700">Saldo Tabungan</label>
+                    <input type="text" name="saldo" id="saldo_add" class="auth-input bg-slate-50 text-slate-600" placeholder="Saldo saat ini" readonly>
+                </div>
+
+                <!-- Panel Pembayaran (mirip sistem bayar) -->
+                <div id="panel-pembayaran" class="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                    <p class="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-link"></i> Sistem Pembayaran
+                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">Mode demo</span>
+                    </p>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Jenis Bayar</label>
+                        <select id="jenis_bayar_select" class="auth-input" disabled>
+                            <option value="">-- Pilih siswa terlebih dahulu --</option>
+                        </select>
+                    </div>
+
+                    <div id="panel-detail-bayar" class="hidden space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                        <p id="detail-judul" class="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2"></p>
+
+                        <div id="wrap-bulan-bayar" class="hidden space-y-2">
+                            <label class="text-sm font-medium text-slate-700" id="label-bulan-bayar">Bayar Bulan</label>
+                            <div id="bulan-bayar-list" class="flex flex-wrap gap-2"></div>
                         </div>
-                        <input type="text" name="tarik" id="tarik_add" class="block w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="0" required>
+
+                        <div id="wrap-info-sekali" class="hidden rounded-lg bg-slate-50 p-3 text-xs text-slate-600 space-y-1">
+                            <div class="flex justify-between"><span>Sisa tagihan</span><span id="info-sisa" class="font-semibold text-slate-900"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Nominal Bayar</label>
+                        <input type="text" name="tarik" id="tarik_add" class="auth-input font-medium" placeholder="Rp 0">
+                    </div>
+                </div>
+
+                <!-- Panel Lainnya -->
+                <div id="panel-lainnya" class="hidden space-y-3">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Keterangan</label>
+                        <input type="text" name="keterangan_tarik" id="keterangan_tarik" class="auth-input" placeholder="Contoh: Penarikan tunai">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-slate-700">Nominal Penarikan</label>
+                        <input type="text" id="tarik_lainnya" class="auth-input" placeholder="Rp 0">
                     </div>
                 </div>
             </div>
-            
-            <!-- Footer -->
-            <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      tw-modal-close transition-all">
+
+            <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 tw-modal-close transition-all">
                     Batal
                 </button>
-                <button type="submit" name="Simpan" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                <button type="submit" name="Simpan" id="btn_simpan_tarik" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-all">
                     <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Simpan</span>
+                    <span id="label_simpan_tarik">Simpan &amp; Bayar</span>
                 </button>
             </div>
         </form>
@@ -648,7 +798,136 @@ function handleCheckAllClick(checkbox) {
                             $('#saldo_add').val(data);
                         }
                     });
+                    if ($('#tujuan_tarik').val() === 'pembayaran') {
+                        loadJenisBayar(nis);
+                    }
                 });
+
+                // --- Integrasi pembayaran ---
+                var paymentDetailCache = null;
+
+                function formatRupiahNum(num) {
+                    var n = parseInt(String(num).replace(/[^0-9]/g, ''), 10) || 0;
+                    return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                }
+
+                function setTujuanTarik(tujuan) {
+                    $('#tujuan_tarik').val(tujuan);
+                    $('.tujuan-tab').each(function() {
+                        var active = $(this).data('tujuan') === tujuan;
+                        $(this).toggleClass('border-indigo-500 bg-indigo-50', active);
+                        $(this).toggleClass('border-slate-200 bg-white', !active);
+                    });
+                    $('#panel-pembayaran').toggleClass('hidden', tujuan !== 'pembayaran');
+                    $('#panel-lainnya').toggleClass('hidden', tujuan !== 'lainnya');
+                    $('#wrap-tgl-bayar').toggleClass('hidden', tujuan !== 'pembayaran');
+                    $('#label_simpan_tarik').text(tujuan === 'pembayaran' ? 'Simpan & Bayar' : 'Simpan');
+                    $('#tarik_add').prop('required', tujuan === 'pembayaran');
+                    $('#tarik_lainnya').prop('required', tujuan === 'lainnya');
+                }
+
+                $('.tujuan-tab').on('click', function() {
+                    setTujuanTarik($(this).data('tujuan'));
+                });
+
+                function loadJenisBayar(nis) {
+                    var $sel = $('#jenis_bayar_select');
+                    $sel.prop('disabled', true).html('<option value="">Memuat...</option>');
+                    $('#panel-detail-bayar').addClass('hidden');
+                    $('#jenis_bayar_id, #jenis_bayar, #payment_detail').val('');
+
+                    if (!nis) {
+                        $sel.html('<option value="">-- Pilih siswa terlebih dahulu --</option>');
+                        return;
+                    }
+
+                    $.post('plugins/payment-ajax.php', { action: 'jenis_bayar', nis: nis }, function(res) {
+                        if (!res.success) {
+                            $sel.html('<option value="">Gagal memuat data</option>');
+                            return;
+                        }
+                        var html = '<option value="">-- Pilih jenis bayar --</option>';
+                        (res.data || []).forEach(function(item) {
+                            html += '<option value="' + item.id + '" data-nama="' + item.nama + '">' + item.nama + '</option>';
+                        });
+                        $sel.html(html).prop('disabled', false);
+                    }, 'json');
+                }
+
+                function renderBulanTags(bulanList) {
+                    var html = '';
+                    (bulanList || []).forEach(function(b) {
+                        if (b.lunas) return;
+                        html += '<label class="bulan-tag inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 transition-colors">' +
+                            '<input type="checkbox" class="bulan-check sr-only" value="' + b.id + '" data-nama="' + b.nama + '">' +
+                            '<span>' + b.nama + '</span></label>';
+                    });
+                    $('#bulan-bayar-list').html(html || '<span class="text-xs text-slate-500">Tidak ada bulan tersedia</span>');
+                }
+
+                function hitungNominalBayar() {
+                    if (!paymentDetailCache) return;
+                    var nominal = 0;
+                    if (paymentDetailCache.tipe === 'bulanan') {
+                        var jumlah = $('.bulan-check:checked').length;
+                        nominal = (paymentDetailCache.nominal_per_bulan || 0) * jumlah;
+                        var bulan = [];
+                        $('.bulan-check:checked').each(function() {
+                            bulan.push({ id: $(this).val(), nama: $(this).data('nama') });
+                        });
+                        $('#payment_detail').val(JSON.stringify({ bulan: bulan }));
+                    } else {
+                        nominal = paymentDetailCache.sisa || paymentDetailCache.nominal || 0;
+                        $('#payment_detail').val(JSON.stringify({ tipe: 'sekali' }));
+                    }
+                    $('#tarik_add').val(formatRupiahNum(nominal));
+                }
+
+                $('#jenis_bayar_select').on('change', function() {
+                    var jenisId = $(this).val();
+                    var jenisNama = $(this).find('option:selected').data('nama') || '';
+                    var nis = $('#nis_add').val();
+                    $('#jenis_bayar_id').val(jenisId);
+                    $('#jenis_bayar').val(jenisNama);
+                    paymentDetailCache = null;
+                    $('#panel-detail-bayar').addClass('hidden');
+
+                    if (!jenisId || !nis) return;
+
+                    $.post('plugins/payment-ajax.php', { action: 'jenis_detail', nis: nis, jenis_id: jenisId }, function(res) {
+                        if (!res.success || !res.data) return;
+                        paymentDetailCache = res.data;
+                        $('#detail-judul').text(res.data.judul_panel || res.data.nama);
+                        $('#panel-detail-bayar').removeClass('hidden');
+
+                        if (res.data.field_bulan) {
+                            $('#wrap-bulan-bayar').removeClass('hidden');
+                            $('#label-bulan-bayar').text(res.data.label_bulan || 'Bayar Bulan');
+                            renderBulanTags(res.data.bulan);
+                            $('#wrap-info-sekali').addClass('hidden');
+                        } else {
+                            $('#wrap-bulan-bayar').addClass('hidden');
+                            $('#wrap-info-sekali').removeClass('hidden');
+                            $('#info-sisa').text(formatRupiahNum(res.data.sisa || res.data.nominal || 0));
+                        }
+                        hitungNominalBayar();
+                    }, 'json');
+                });
+
+                $(document).on('change', '.bulan-check', function() {
+                    $(this).closest('.bulan-tag').toggleClass('bg-emerald-600 text-white border-emerald-600', this.checked);
+                    $(this).closest('.bulan-tag').toggleClass('bg-emerald-50 text-emerald-800 border-emerald-200', !this.checked);
+                    hitungNominalBayar();
+                });
+
+                $('#formTarikAdd').on('submit', function() {
+                    if ($('#tujuan_tarik').val() === 'lainnya') {
+                        $('#tarik_add').val($('#tarik_lainnya').val());
+                        $('#jenis_bayar_id, #jenis_bayar, #payment_detail').val('');
+                    }
+                });
+
+                setTujuanTarik('pembayaran');
 
                 // Helper function for format
                 function formatRupiah(angka, prefix) {
@@ -700,6 +979,12 @@ function handleCheckAllClick(checkbox) {
                 if(tarik_add){
                     tarik_add.addEventListener('keyup', function(e) {
                         tarik_add.value = formatRupiah(this.value, 'Rp ');
+                    });
+                }
+                var tarik_lainnya = document.getElementById('tarik_lainnya');
+                if(tarik_lainnya){
+                    tarik_lainnya.addEventListener('keyup', function(e) {
+                        tarik_lainnya.value = formatRupiah(this.value, 'Rp ');
                     });
                 }
 
