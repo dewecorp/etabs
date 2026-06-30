@@ -39,7 +39,7 @@ if (isset($_POST['Simpan'])) {
 
         if ($tujuan_tarik === 'pembayaran') {
             $paymentPayload = [
-                'nis' => $_POST['nis'],
+                'nisn' => $_POST['nis'],
                 'tgl_bayar' => $tgl_transaksi,
                 'jenis_bayar_id' => $jenis_bayar_id,
                 'jenis_bayar' => $jenis_bayar,

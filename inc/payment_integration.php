@@ -58,6 +58,7 @@ paymentDefine('PAYMENT_API_ACTION_TRANSAKSI', (string) paymentEnv('SPP_API_ACTIO
 paymentDefine('PAYMENT_API_ACTION_BAYAR', (string) paymentEnv('SPP_API_ACTION_BAYAR', 'simpan_pembayaran'));
 paymentDefine('PAYMENT_API_ACTION_BAYAR_FALLBACK', (string) paymentEnv('SPP_API_ACTION_BAYAR_FALLBACK', 'simpan_pembayaran'));
 paymentDefine('PAYMENT_API_ACTION_BAYAR_FALLBACK_2', (string) paymentEnv('SPP_API_ACTION_BAYAR_FALLBACK_2', 'potongan_tabungan'));
+paymentDefine('PAYMENT_API_DEFAULT_PETUGAS_ID', (int) paymentEnv('SPP_API_DEFAULT_PETUGAS_ID', paymentEnv('PAYMENT_API_DEFAULT_PETUGAS_ID', '0')));
 
 /**
  * Daftar jenis pembayaran siswa (mock / API)
@@ -69,7 +70,7 @@ function paymentGetJenisBayar($nis, $kelasSiswa = '')
         $jenis = paymentNormalizeJenisBayar($response, ['source' => 'master']);
 
         if ($nis !== '') {
-            $tagihan = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nis, 'nis' => $nis]);
+            $tagihan = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nis]);
             $jenisFromTagihan = paymentNormalizeJenisBayar($tagihan, ['source' => 'tagihan']);
             if (!empty($jenisFromTagihan['success']) && !empty($jenisFromTagihan['data'])) {
                 if (!paymentJenisBayarNeedsTagihanFallback($jenis)) {
@@ -131,7 +132,7 @@ function paymentDebugWrite($nis, array $payload, $prefix = 'spp_debug_')
 function paymentGetJenisDetail($nis, $jenisId, $kelasSiswa = '')
 {
     if (PAYMENT_API_ENABLED && PAYMENT_API_BASE_URL !== '') {
-        $response = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nis, 'nis' => $nis]);
+        $response = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nis]);
         return paymentNormalizeJenisDetail($response, $jenisId, $kelasSiswa);
     }
 
@@ -174,6 +175,7 @@ function paymentSubmitPayloads(array $originalPayload, array $submitPayloads)
 
     foreach ($submitPayloads as $submitPayload) {
         $beforeSnapshot = PAYMENT_API_VERIFY_SUBMIT ? paymentGetSubmitTransactionSnapshot($submitPayload) : ['count' => 0, 'sum' => 0, 'refs' => []];
+        $beforeTagihan = paymentGetSubmitTagihanSnapshot($submitPayload);
         $actions = array_values(array_unique(array_filter([
             PAYMENT_API_ACTION_BAYAR,
             PAYMENT_API_ACTION_BAYAR_FALLBACK,
@@ -209,16 +211,35 @@ function paymentSubmitPayloads(array $originalPayload, array $submitPayloads)
             }
 
             $lastResult = $result;
+            if (paymentResultHasSnisBug($result) && paymentVerifyTagihanReduced($submitPayload, $beforeTagihan)) {
+                $normalized = paymentNormalizeSubmitResponse([
+                    'success' => true,
+                    'message' => 'Sibayar menyimpan pembayaran, tetapi respons API masih error query siswa.',
+                ], $submitPayload, $action);
+                $refs[] = $normalized['ref'] ?? '';
+                $results[] = $normalized;
+                $lastResult = $normalized;
+                continue 2;
+            }
+
             if (!paymentSubmitShouldTryFallback($result)) {
                 break;
             }
         }
 
-        paymentDebugWrite($originalPayload['nis'] ?? '', [
+        paymentDebugWrite($originalPayload['nisn'] ?? $originalPayload['nis'] ?? '', [
             'submit_payload' => paymentRedactSubmitPayload($submitPayload),
             'submit_response' => $lastResult,
             'attempts' => $attempts,
         ], 'spp_submit_');
+
+        if (paymentResultHasSnisBug($lastResult)) {
+            return [
+                'success' => false,
+                'message' => 'Endpoint simpan pembayaran Sibayar masih mengembalikan error query siswa. ETAB sudah mengirim nisn saja dan tagihan tidak berubah, jadi transaksi belum tersinkron.',
+                'raw' => $lastResult,
+            ];
+        }
 
         return $lastResult ?: ['success' => false, 'message' => 'Gagal sinkron transaksi ke SPP.'];
     }
@@ -234,7 +255,7 @@ function paymentSubmitPayloads(array $originalPayload, array $submitPayloads)
         ],
     ];
 
-    paymentDebugWrite($originalPayload['nis'] ?? '', [
+    paymentDebugWrite($originalPayload['nisn'] ?? $originalPayload['nis'] ?? '', [
         'submit_payloads' => array_map('paymentRedactSubmitPayload', $submitPayloads),
         'submit_response' => $success,
         'verified' => true,
@@ -286,6 +307,7 @@ function paymentBuildSubmitPayload(array $payload)
     $ref = 'ETAB-' . date('YmdHis') . '-' . substr(md5($nisn . $tanggal . json_encode($detail)), 0, 8);
     $jenisBayarId = (string) paymentFirstValue($payload, ['jenis_bayar_id', 'id_jenis_bayar'], '');
     $jenisBayar = (string) paymentFirstValue($payload, ['jenis_bayar', 'nama_jenis_bayar'], '');
+    $jenisBayarId = paymentResolveSubmitJenisId($jenisBayarId, $jenisBayar);
 
     return [
         'ref' => $ref,
@@ -311,6 +333,7 @@ function paymentBuildSubmitPayload(array $payload)
         'metode_bayar' => 'potong_tabungan',
         'cara_bayar' => 'potong_tabungan',
         'sumber' => 'etabs_tarikan',
+        'id_petugas' => (int) paymentFirstValue($payload, ['id_petugas'], PAYMENT_API_DEFAULT_PETUGAS_ID),
         'petugas' => (string) paymentFirstValue($payload, ['petugas', 'operator'], ''),
         'keterangan' => 'Pembayaran dari potongan tabungan ETAB',
         'items' => $detail,
@@ -322,6 +345,65 @@ function paymentBuildSubmitPayload(array $payload)
         'bulan' => paymentSubmitFlattenMonths($detail),
         'bulan_json' => json_encode(paymentSubmitFlattenMonths($detail), JSON_UNESCAPED_UNICODE),
     ];
+}
+
+function paymentResolveSubmitJenisId($currentId, $jenisBayar)
+{
+    $jenisBayar = trim((string) $jenisBayar);
+    if ($jenisBayar === '' || !PAYMENT_API_ENABLED || PAYMENT_API_BASE_URL === '') {
+        return (string) $currentId;
+    }
+
+    static $jenisCache = null;
+    if ($jenisCache === null) {
+        $response = paymentSppRequest(PAYMENT_API_ACTION_JENIS);
+        $jenisCache = paymentNormalizeJenisBayar($response, ['source' => 'master']);
+    }
+
+    if (empty($jenisCache['success']) || empty($jenisCache['data'])) {
+        return (string) $currentId;
+    }
+
+    $target = paymentNormalizeNameKey($jenisBayar);
+    foreach ($jenisCache['data'] as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+
+        $name = paymentNormalizeNameKey((string) paymentFirstValue($item, ['nama', 'jenis_bayar', 'nama_pembayaran'], ''));
+        if ($name !== '' && ($name === $target || paymentSubmitJenisNameMatches($jenisBayar, (string) paymentFirstValue($item, ['nama', 'jenis_bayar', 'nama_pembayaran'], '')))) {
+            return (string) paymentFirstValue($item, ['id', 'id_jenis_bayar', 'jenis_bayar_id', 'kode_jenis_bayar'], $currentId);
+        }
+    }
+
+    return (string) $currentId;
+}
+
+function paymentSubmitJenisNameMatches($storedName, $masterName)
+{
+    $stored = strtolower((string) $storedName);
+    $master = strtolower((string) $masterName);
+    if ($stored === '' || $master === '') {
+        return false;
+    }
+
+    $storedKey = paymentNormalizeNameKey(str_replace('kelas', '', $stored));
+    $masterKey = paymentNormalizeNameKey(str_replace('kelas', '', $master));
+    if ($storedKey !== '' && $storedKey === $masterKey) {
+        return true;
+    }
+
+    foreach (['lks', 'ujian', 'rekreasi', 'ekstra'] as $needle) {
+        if (strpos($stored, $needle) !== false && strpos($master, $needle) !== false) {
+            preg_match_all('/\d+/', $stored, $storedNums);
+            preg_match_all('/\d+/', $master, $masterNums);
+            $storedNums = $storedNums[0] ?? [];
+            $masterNums = $masterNums[0] ?? [];
+            return $storedNums === [] || $masterNums === [] || $storedNums === $masterNums;
+        }
+    }
+
+    return false;
 }
 
 function paymentSubmitFlattenMonths(array $items)
@@ -528,6 +610,63 @@ function paymentSubmitShouldTryFallback($result)
     return false;
 }
 
+function paymentResultHasSnisBug($result)
+{
+    $message = strtolower((string) ($result['message'] ?? ''));
+    return strpos($message, 's.nis') !== false || strpos($message, "unknown column 's.nis'") !== false;
+}
+
+function paymentGetSubmitTagihanSnapshot(array $payload)
+{
+    $nisn = (string) paymentFirstValue($payload, ['nisn', 'nis'], '');
+    if ($nisn === '') {
+        return ['total' => 0, 'item' => 0];
+    }
+
+    $response = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nisn]);
+    $tagihan = paymentNormalizeJenisBayar($response, ['source' => 'tagihan']);
+    if (empty($tagihan['success']) || empty($tagihan['data'])) {
+        $tagihan = paymentFallbackTagihanFromRaw($response);
+    }
+
+    $targetId = (string) paymentFirstValue($payload, ['id_jenis_bayar', 'jenis_bayar_id', 'kode_jenis_bayar'], '');
+    $targetName = paymentNormalizeNameKey((string) paymentFirstValue($payload, ['jenis_bayar', 'nama_pembayaran'], ''));
+    $snapshot = ['total' => 0, 'item' => 0];
+
+    foreach (($tagihan['data'] ?? []) as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+
+        $sisa = paymentMoneyValue($item, ['sisa', 'sisa_tagihan', 'nominal'], 0);
+        $snapshot['total'] += $sisa;
+
+        $itemId = (string) paymentFirstValue($item, ['id', 'id_jenis_bayar', 'jenis_bayar_id', 'kode_jenis_bayar'], '');
+        $itemName = paymentNormalizeNameKey((string) paymentFirstValue($item, ['nama', 'jenis_bayar', 'nama_pembayaran'], ''));
+        if (($targetId !== '' && $itemId === $targetId) || ($targetName !== '' && $itemName === $targetName)) {
+            $snapshot['item'] += $sisa;
+        }
+    }
+
+    return $snapshot;
+}
+
+function paymentVerifyTagihanReduced(array $payload, array $beforeSnapshot)
+{
+    $nominal = paymentMoneyValue($payload, ['nominal', 'jumlah', 'total', 'nominal_bayar'], 0);
+    if ($nominal <= 0) {
+        return false;
+    }
+
+    $afterSnapshot = paymentGetSubmitTagihanSnapshot($payload);
+    $itemBefore = (int) ($beforeSnapshot['item'] ?? 0);
+    $itemAfter = (int) ($afterSnapshot['item'] ?? 0);
+    $totalBefore = (int) ($beforeSnapshot['total'] ?? 0);
+    $totalAfter = (int) ($afterSnapshot['total'] ?? 0);
+
+    return ($itemBefore > 0 && $itemAfter < $itemBefore) || ($totalBefore > 0 && ($totalBefore - $totalAfter) >= $nominal);
+}
+
 function paymentRedactSubmitPayload(array $payload)
 {
     if (isset($payload['api_key'])) {
@@ -560,7 +699,7 @@ function paymentResyncTarik($koneksi, $idTabungan, $petugas = '')
     }
 
     $payload = [
-        'nis' => $row['nis'],
+        'nisn' => $row['nis'],
         'tgl_bayar' => $row['tgl'],
         'jenis_bayar_id' => $row['jenis_bayar_id'],
         'jenis_bayar' => $row['jenis_bayar'],
@@ -588,7 +727,7 @@ function paymentResyncTarik($koneksi, $idTabungan, $petugas = '')
 
     return [
         'success' => true,
-        'message' => 'Transaksi lama berhasil disinkronkan ke Sibayar.',
+        'message' => 'Transaksi berhasil disinkronkan ke Sibayar.',
         'ref' => $ref,
         'data' => $result,
     ];
@@ -621,11 +760,9 @@ function paymentSppRequest($action, array $params = [], $method = 'GET', $body =
 {
     $params = array_merge(['action' => $action], $params);
     $actionLower = strtolower((string) $action);
-    if ($actionLower === strtolower((string) PAYMENT_API_ACTION_TRANSAKSI)) {
-        unset($params['nis']);
-    }
+    unset($params['nis']);
 
-    if (in_array($actionLower, [strtolower((string) PAYMENT_API_ACTION_BAYAR), strtolower((string) PAYMENT_API_ACTION_BAYAR_FALLBACK)], true) && is_array($body)) {
+    if (is_array($body)) {
         unset($body['nis']);
     }
 
@@ -682,6 +819,8 @@ function paymentApiRequest($method, $path, $body = null, $absoluteUrl = false)
         CURLOPT_USERAGENT => 'ETABS-SPP-Integration/1.0',
         CURLOPT_SSL_VERIFYPEER => PAYMENT_API_SSL_VERIFY,
         CURLOPT_SSL_VERIFYHOST => PAYMENT_API_SSL_VERIFY ? 2 : 0,
+        CURLOPT_PROXY => '',
+        CURLOPT_NOPROXY => '*',
     ]);
 
     if ($body !== null) {
@@ -1774,13 +1913,13 @@ function paymentNormalizeTransaksi(array $response)
         }
 
         $normalized[] = [
-            'id' => (string) paymentFirstValue($row, ['id', 'id_transaksi', 'ref', 'ref_transaksi'], ''),
-            'ref' => (string) paymentFirstValue($row, ['ref', 'ref_transaksi', 'kode_transaksi', 'id_transaksi'], ''),
+            'id' => (string) paymentFirstValue($row, ['id', 'id_pembayaran', 'id_transaksi', 'ref', 'ref_transaksi', 'no_transaksi'], ''),
+            'ref' => (string) paymentFirstValue($row, ['ref', 'ref_transaksi', 'kode_transaksi', 'no_transaksi', 'id_transaksi'], ''),
             'nisn' => (string) paymentFirstValue($row, ['nisn', 'nis'], ''),
             'nama' => (string) paymentFirstValue($row, ['nama', 'nama_siswa'], ''),
-            'jenis_bayar' => (string) paymentFirstValue($row, ['jenis_bayar', 'nama_bayar', 'jenis', 'nama_jenis'], ''),
-            'tanggal' => (string) paymentFirstValue($row, ['tanggal', 'tgl', 'tgl_bayar', 'created_at'], ''),
-            'nominal' => (int) paymentFirstValue($row, ['nominal', 'jumlah', 'bayar', 'total'], 0),
+            'jenis_bayar' => (string) paymentFirstValue($row, ['jenis_bayar', 'nama_pembayaran', 'nama_bayar', 'jenis', 'nama_jenis'], ''),
+            'tanggal' => (string) paymentFirstValue($row, ['tanggal', 'tgl', 'tgl_bayar', 'tanggal_bayar', 'created_at'], ''),
+            'nominal' => (int) paymentFirstValue($row, ['nominal', 'jumlah', 'jumlah_bayar', 'bayar', 'total', 'total_nominal'], 0),
             'status' => (string) paymentFirstValue($row, ['status', 'status_bayar'], ''),
             'raw' => $row,
         ];
