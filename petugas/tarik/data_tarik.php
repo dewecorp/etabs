@@ -505,8 +505,8 @@ if (isset($_POST['Ubah'])) {
 
 <!-- Modal Tambah -->
 <div class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="addModal">
-    <div class="relative w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl transition-all max-h-[90vh] overflow-y-auto">
-        <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+    <div class="tarik-add-dialog relative flex max-h-[calc(100vh-3rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+        <div class="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 py-5">
             <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-circle-minus text-indigo-500"></i>
                 Tambah Penarikan
@@ -516,13 +516,13 @@ if (isset($_POST['Ubah'])) {
             </button>
         </div>
 
-        <form action="" method="post" id="formTarikAdd">
+        <form action="" method="post" id="formTarikAdd" class="tarik-add-form flex flex-col overflow-hidden">
             <input type="hidden" name="tujuan_tarik" id="tujuan_tarik" value="pembayaran">
             <input type="hidden" name="jenis_bayar_id" id="jenis_bayar_id" value="">
             <input type="hidden" name="jenis_bayar" id="jenis_bayar" value="">
             <input type="hidden" name="payment_detail" id="payment_detail" value="">
 
-            <div class="space-y-4">
+            <div id="addModalBody" class="tarik-add-body max-h-[calc(100vh-13rem)] space-y-4 overflow-y-auto px-6 py-5 custom-scrollbar">
                 <!-- Tujuan penarikan -->
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-slate-700">Tujuan Penarikan</label>
@@ -615,7 +615,7 @@ if (isset($_POST['Ubah'])) {
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <div class="flex shrink-0 justify-end gap-3 border-t border-slate-100 bg-white px-6 py-4">
                 <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 tw-modal-close transition-all">
                     Batal
                 </button>
@@ -788,6 +788,13 @@ function handleCheckAllClick(checkbox) {
                 });
 
                 // AJAX for Saldo in Add Modal
+                var addModalScrollTopBeforeSelect = 0;
+                $('#nis_add').on('select2:open', function() {
+                    addModalScrollTopBeforeSelect = $('#addModalBody').scrollTop();
+                }).on('select2:close', function() {
+                    $('#addModalBody').scrollTop(addModalScrollTopBeforeSelect);
+                });
+
                 $('#nis_add').change(function(){
                     var nis = $(this).val();
                     $.ajax({
@@ -858,9 +865,8 @@ function handleCheckAllClick(checkbox) {
                     var html = '';
                     (bulanList || []).forEach(function(b) {
                         if (b.lunas) return;
-                        html += '<label class="bulan-tag inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 transition-colors">' +
-                            '<input type="checkbox" class="bulan-check sr-only" value="' + b.id + '" data-nama="' + b.nama + '">' +
-                            '<span>' + b.nama + '</span></label>';
+                        html += '<button type="button" class="bulan-tag inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 transition-colors" data-id="' + b.id + '" data-nama="' + b.nama + '" data-selected="0">' +
+                            '<span>' + b.nama + '</span></button>';
                     });
                     $('#bulan-bayar-list').html(html || '<span class="text-xs text-slate-500">Tidak ada bulan tersedia</span>');
                 }
@@ -869,11 +875,12 @@ function handleCheckAllClick(checkbox) {
                     if (!paymentDetailCache) return;
                     var nominal = 0;
                     if (paymentDetailCache.tipe === 'bulanan') {
-                        var jumlah = $('.bulan-check:checked').length;
+                        var $bulanDipilih = $('.bulan-tag[data-selected="1"]');
+                        var jumlah = $bulanDipilih.length;
                         nominal = (paymentDetailCache.nominal_per_bulan || 0) * jumlah;
                         var bulan = [];
-                        $('.bulan-check:checked').each(function() {
-                            bulan.push({ id: $(this).val(), nama: $(this).data('nama') });
+                        $bulanDipilih.each(function() {
+                            bulan.push({ id: $(this).data('id'), nama: $(this).data('nama') });
                         });
                         $('#payment_detail').val(JSON.stringify({ bulan: bulan }));
                     } else {
@@ -914,10 +921,17 @@ function handleCheckAllClick(checkbox) {
                     }, 'json');
                 });
 
-                $(document).on('change', '.bulan-check', function() {
-                    $(this).closest('.bulan-tag').toggleClass('bg-emerald-600 text-white border-emerald-600', this.checked);
-                    $(this).closest('.bulan-tag').toggleClass('bg-emerald-50 text-emerald-800 border-emerald-200', !this.checked);
+                $(document).on('click', '.bulan-tag', function(event) {
+                    event.preventDefault();
+                    var $body = $('#addModalBody');
+                    var scrollTop = $body.scrollTop();
+                    var selected = $(this).attr('data-selected') === '1';
+                    $(this).attr('data-selected', selected ? '0' : '1');
+                    $(this).toggleClass('bg-emerald-600 text-white border-emerald-600', !selected);
+                    $(this).toggleClass('bg-emerald-50 text-emerald-800 border-emerald-200', selected);
                     hitungNominalBayar();
+                    $body.scrollTop(scrollTop);
+                    $(this).blur();
                 });
 
                 $('#formTarikAdd').on('submit', function() {
@@ -962,6 +976,9 @@ function handleCheckAllClick(checkbox) {
                     }
 
                     $(target).removeClass('hidden').addClass('flex');
+                    if (target === '#addModal') {
+                        $('#addModalBody').scrollTop(0);
+                    }
                 });
 
                 $(document).on('click', '.tw-modal-close', function () {
