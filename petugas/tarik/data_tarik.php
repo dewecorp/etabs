@@ -21,6 +21,7 @@ if (isset($_POST['Simpan'])) {
     $payment_detail = mysqli_real_escape_string($koneksi, $payment_detail_raw);
     $bulan_dipilih = json_decode($payment_detail_raw, true);
     $bulan_list = is_array($bulan_dipilih) && isset($bulan_dipilih['bulan']) ? $bulan_dipilih['bulan'] : [];
+    $payment_items = is_array($bulan_dipilih) && isset($bulan_dipilih['items']) && is_array($bulan_dipilih['items']) ? $bulan_dipilih['items'] : [];
 
     if ($tujuan_tarik === 'pembayaran' && ($jenis_bayar_id === '' || $tarik_hasil <= 0)) {
         echo "<script>Swal.fire({title:'Gagal!',text:'Lengkapi jenis pembayaran dan nominal.',icon:'error',confirmButtonText:'OK'});</script>";
@@ -44,6 +45,7 @@ if (isset($_POST['Simpan'])) {
                 'jenis_bayar' => $jenis_bayar,
                 'nominal' => (int) $tarik_hasil,
                 'bulan' => $bulan_list,
+                'items' => $payment_items,
                 'petugas' => $data_nama,
                 'sumber' => 'etabs_tarikan',
             ];
@@ -455,9 +457,9 @@ if (isset($_POST['Ubah'])) {
                                     if ($sync === 'success') {
                                         echo '<i class="fa-solid fa-circle-check text-emerald-500" title="Tersinkron"></i>';
                                     } elseif ($sync === 'mock') {
-                                        echo '<i class="fa-solid fa-flask text-amber-500" title="Mock"></i>';
+                                        echo '<button type="button" class="js-payment-resync inline-flex h-9 w-9 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100" data-id="'.(int)$data['id_tabungan'].'" title="Sinkron ulang ke Sibayar"><i class="fa-solid fa-rotate"></i></button>';
                                     } elseif ($sync === 'failed') {
-                                        echo '<i class="fa-solid fa-circle-xmark text-rose-500" title="Gagal"></i>';
+                                        echo '<button type="button" class="js-payment-resync inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100" data-id="'.(int)$data['id_tabungan'].'" title="Coba sinkron ulang"><i class="fa-solid fa-rotate"></i></button>';
                                     } else {
                                         echo '<span class="text-slate-300">—</span>';
                                     }
@@ -573,18 +575,29 @@ if (isset($_POST['Ubah'])) {
                 <div id="panel-pembayaran" class="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                     <p class="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">
                         <i class="fa-solid fa-link"></i> Sistem Pembayaran
-                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">Mode demo</span>
+                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">SPP API</span>
                     </p>
 
-                    <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">Jenis Bayar</label>
-                        <select id="jenis_bayar_select" class="auth-input" disabled>
-                            <option value="">-- Pilih siswa terlebih dahulu --</option>
-                        </select>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="text-sm font-medium text-slate-700">Tagihan SPP</label>
+                            <span id="tagihan-count" class="text-[11px] font-medium text-slate-400"></span>
+                        </div>
+                        <div id="jenis_bayar_list" class="space-y-2 rounded-xl border border-slate-200 bg-white p-2">
+                            <div class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-500">Pilih siswa terlebih dahulu</div>
+                        </div>
                     </div>
 
                     <div id="panel-detail-bayar" class="hidden space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-                        <p id="detail-judul" class="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2"></p>
+                        <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-2">
+                            <div>
+                                <p id="detail-judul" class="text-sm font-semibold text-slate-800">Rincian Tagihan</p>
+                                <p id="detail-subjudul" class="mt-0.5 text-xs text-slate-500"></p>
+                            </div>
+                            <span id="detail-total" class="shrink-0 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">Rp 0</span>
+                        </div>
+
+                        <div id="rincian-tagihan-list" class="space-y-2"></div>
 
                         <div id="wrap-bulan-bayar" class="hidden space-y-2">
                             <label class="text-sm font-medium text-slate-700" id="label-bulan-bayar">Bayar Bulan</label>
@@ -812,6 +825,17 @@ function handleCheckAllClick(checkbox) {
 
                 // --- Integrasi pembayaran ---
                 var paymentDetailCache = null;
+                var paymentJenisCache = [];
+                var selectedPayments = {};
+
+                function escapeHtml(value) {
+                    return String(value == null ? '' : value)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                }
 
                 function formatRupiahNum(num) {
                     var n = parseInt(String(num).replace(/[^0-9]/g, ''), 10) || 0;
@@ -838,27 +862,86 @@ function handleCheckAllClick(checkbox) {
                 });
 
                 function loadJenisBayar(nis) {
-                    var $sel = $('#jenis_bayar_select');
-                    $sel.prop('disabled', true).html('<option value="">Memuat...</option>');
+                    var $list = $('#jenis_bayar_list');
+                    $('#tagihan-count').text('');
+                    $list.html('<div class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-500">Memuat tagihan...</div>');
                     $('#panel-detail-bayar').addClass('hidden');
                     $('#jenis_bayar_id, #jenis_bayar, #payment_detail').val('');
+                    $('#tarik_add').val('');
+                    paymentJenisCache = [];
+                    selectedPayments = {};
+                    paymentDetailCache = null;
 
                     if (!nis) {
-                        $sel.html('<option value="">-- Pilih siswa terlebih dahulu --</option>');
+                        $list.html('<div class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-500">Pilih siswa terlebih dahulu</div>');
                         return;
                     }
 
                     $.post('plugins/payment-ajax.php', { action: 'jenis_bayar', nis: nis }, function(res) {
+                        if (window.console && (!res.data || !res.data.length)) {
+                            console.warn('SPP jenis_bayar kosong untuk NIS', nis, res);
+                        }
+                        if (window.console && res.fallback) {
+                            console.info('SPP tagihan memakai fallback raw extractor', res);
+                        }
                         if (!res.success) {
-                            $sel.html('<option value="">Gagal memuat data</option>');
+                            var message = res.message || 'Gagal memuat data';
+                            $list.html('<div class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">' + escapeHtml(message) + '</div>');
                             return;
                         }
-                        var html = '<option value="">-- Pilih jenis bayar --</option>';
-                        (res.data || []).forEach(function(item) {
-                            html += '<option value="' + item.id + '" data-nama="' + item.nama + '">' + item.nama + '</option>';
-                        });
-                        $sel.html(html).prop('disabled', false);
-                    }, 'json');
+                        if (!res.data || !res.data.length) {
+                            $list.html('<div class="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">Tidak ada tagihan</div>');
+                            return;
+                        }
+                        paymentJenisCache = res.data || [];
+                        renderJenisBayarList();
+                    }, 'json').fail(function(xhr) {
+                        var message = 'Gagal menghubungi SPP';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+                        $list.html('<div class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">' + escapeHtml(message) + '</div>');
+                    });
+                }
+
+                function renderJenisBayarList() {
+                    var html = '';
+                    var payableCount = 0;
+
+                    paymentJenisCache.forEach(function(item) {
+                        var id = String(item.id || item.nama || '');
+                        var disabled = !!item.disabled || !!item.lunas || !item.has_tagihan || !(parseInt(item.sisa || 0, 10) > 0);
+                        var selected = !!selectedPayments[id];
+                        if (!disabled) payableCount++;
+
+                        var cardClass = disabled
+                            ? 'border-slate-200 bg-slate-50 opacity-75'
+                            : (selected ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white hover:border-indigo-300');
+                        var checkClass = selected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-white border-slate-300';
+                        var badge = item.lunas
+                            ? '<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Lunas</span>'
+                            : (disabled ? '<span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Tidak tersedia</span>' : '<span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Ada tagihan</span>');
+                        var meta = [];
+                        if (item.tipe) meta.push(item.tipe === 'bulanan' ? 'Bulanan' : (item.tipe === 'cicilan' ? 'Cicilan' : 'Sekali bayar'));
+                        if (item.kelas) meta.push('Kelas ' + item.kelas);
+                        if (item.fallback_master) meta.push('Estimasi dari master SPP');
+
+                        html += '<button type="button" class="payment-option w-full rounded-xl border p-3 text-left transition-all ' + cardClass + '" data-id="' + escapeHtml(id) + '" ' + (disabled ? 'disabled' : '') + '>' +
+                            '<div class="flex items-start gap-3">' +
+                                '<span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[10px] ' + checkClass + '"><i class="fa-solid fa-check"></i></span>' +
+                                '<span class="min-w-0 flex-1">' +
+                                    '<span class="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-800">' + escapeHtml(item.nama || 'Pembayaran') + badge + '</span>' +
+                                    '<span class="mt-1 block text-xs text-slate-500">' + escapeHtml(meta.join(' · ') || (item.disabled_reason || 'Tagihan pembayaran')) + '</span>' +
+                                    (disabled ? '<span class="mt-1 block text-xs font-medium text-slate-500">' + escapeHtml(item.disabled_reason || 'Tidak ada tagihan') + '</span>' : '') +
+                                '</span>' +
+                                '<span class="shrink-0 text-sm font-bold ' + (disabled ? 'text-slate-400' : 'text-indigo-700') + '">' + formatRupiahNum(item.sisa || item.nominal || 0) + '</span>' +
+                            '</div>' +
+                        '</button>';
+                    });
+
+                    $('#tagihan-count').text(payableCount ? payableCount + ' bisa dibayar' : 'Tidak ada tagihan');
+                    $('#jenis_bayar_list').html(html || '<div class="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">Tidak ada tagihan</div>');
+                    updatePaymentSummary();
                 }
 
                 function renderBulanTags(bulanList) {
@@ -872,53 +955,98 @@ function handleCheckAllClick(checkbox) {
                 }
 
                 function hitungNominalBayar() {
-                    if (!paymentDetailCache) return;
-                    var nominal = 0;
-                    if (paymentDetailCache.tipe === 'bulanan') {
-                        var $bulanDipilih = $('.bulan-tag[data-selected="1"]');
-                        var jumlah = $bulanDipilih.length;
-                        nominal = (paymentDetailCache.nominal_per_bulan || 0) * jumlah;
-                        var bulan = [];
-                        $bulanDipilih.each(function() {
-                            bulan.push({ id: $(this).data('id'), nama: $(this).data('nama') });
-                        });
-                        $('#payment_detail').val(JSON.stringify({ bulan: bulan }));
-                    } else {
-                        nominal = paymentDetailCache.sisa || paymentDetailCache.nominal || 0;
-                        $('#payment_detail').val(JSON.stringify({ tipe: 'sekali' }));
-                    }
-                    $('#tarik_add').val(formatRupiahNum(nominal));
+                    updatePaymentSummary();
                 }
 
-                $('#jenis_bayar_select').on('change', function() {
-                    var jenisId = $(this).val();
-                    var jenisNama = $(this).find('option:selected').data('nama') || '';
-                    var nis = $('#nis_add').val();
-                    $('#jenis_bayar_id').val(jenisId);
-                    $('#jenis_bayar').val(jenisNama);
-                    paymentDetailCache = null;
-                    $('#panel-detail-bayar').addClass('hidden');
+                function updatePaymentSummary() {
+                    var selectedItems = Object.keys(selectedPayments).map(function(id) { return selectedPayments[id]; });
+                    var nominal = 0;
+                    var ids = [];
+                    var names = [];
+                    var detailHtml = '';
 
-                    if (!jenisId || !nis) return;
+                    selectedItems.forEach(function(item) {
+                        var itemNominal = parseInt(item.sisa || item.nominal || 0, 10) || 0;
+                        nominal += itemNominal;
+                        ids.push(item.id);
+                        names.push(item.nama);
 
-                    $.post('plugins/payment-ajax.php', { action: 'jenis_detail', nis: nis, jenis_id: jenisId }, function(res) {
-                        if (!res.success || !res.data) return;
-                        paymentDetailCache = res.data;
-                        $('#detail-judul').text(res.data.judul_panel || res.data.nama);
-                        $('#panel-detail-bayar').removeClass('hidden');
+                        detailHtml += '<div class="rounded-xl border border-slate-200 bg-slate-50 p-3">' +
+                            '<div class="flex items-start justify-between gap-3">' +
+                                '<div>' +
+                                    '<p class="text-sm font-semibold text-slate-800">' + escapeHtml(item.nama || 'Pembayaran') + '</p>' +
+                                    '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '')) + '</p>' +
+                                '</div>' +
+                                '<span class="text-sm font-bold text-indigo-700">' + formatRupiahNum(itemNominal) + '</span>' +
+                            '</div>';
 
-                        if (res.data.field_bulan) {
-                            $('#wrap-bulan-bayar').removeClass('hidden');
-                            $('#label-bulan-bayar').text(res.data.label_bulan || 'Bayar Bulan');
-                            renderBulanTags(res.data.bulan);
-                            $('#wrap-info-sekali').addClass('hidden');
+                        if (item.rincian && item.rincian.length) {
+                            detailHtml += '<div class="mt-3 space-y-1.5">';
+                            item.rincian.forEach(function(row) {
+                                var rowSisa = parseInt(row.sisa || 0, 10) || 0;
+                                detailHtml += '<div class="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-xs">' +
+                                    '<span class="min-w-0 text-slate-600">' + escapeHtml(row.label || 'Rincian') + (row.lunas ? ' <span class="font-semibold text-emerald-600">(lunas)</span>' : '') + '</span>' +
+                                    '<span class="shrink-0 font-semibold ' + (row.lunas ? 'text-slate-400' : 'text-slate-800') + '">' + formatRupiahNum(rowSisa) + '</span>' +
+                                '</div>';
+                            });
+                            detailHtml += '</div>';
                         } else {
-                            $('#wrap-bulan-bayar').addClass('hidden');
-                            $('#wrap-info-sekali').removeClass('hidden');
-                            $('#info-sisa').text(formatRupiahNum(res.data.sisa || res.data.nominal || 0));
+                            detailHtml += '<p class="mt-2 text-xs text-slate-500">Rincian tagihan tidak tersedia dari SPP.</p>';
                         }
-                        hitungNominalBayar();
-                    }, 'json');
+
+                        detailHtml += '</div>';
+                    });
+
+                    $('#tarik_add').val(nominal > 0 ? formatRupiahNum(nominal) : '');
+                    $('#jenis_bayar_id').val(ids.join(','));
+                    $('#jenis_bayar').val(names.join(', '));
+                    $('#payment_detail').val(selectedItems.length ? JSON.stringify({ items: selectedItems }) : '');
+                    $('#detail-total').text(formatRupiahNum(nominal));
+
+                    if (selectedItems.length) {
+                        $('#detail-judul').text('Rincian Tagihan Dipilih');
+                        $('#detail-subjudul').text(selectedItems.length + ' jenis pembayaran');
+                        $('#rincian-tagihan-list').html(detailHtml);
+                        $('#panel-detail-bayar').removeClass('hidden');
+                    } else {
+                        var payable = paymentJenisCache.some(function(item) { return item.has_tagihan && !item.disabled && !item.lunas; });
+                        $('#detail-judul').text(payable ? 'Rincian Tagihan' : 'Tidak ada tagihan');
+                        $('#detail-subjudul').text(payable ? 'Centang satu atau beberapa tagihan untuk dibayar.' : 'Semua tagihan siswa sudah lunas atau tidak tersedia untuk kelas siswa ini.');
+                        if (payable) {
+                            var previewHtml = '';
+                            paymentJenisCache.forEach(function(item) {
+                                if (!item.has_tagihan || item.disabled || item.lunas) return;
+                                previewHtml += '<div class="rounded-xl border border-slate-200 bg-slate-50 p-3">' +
+                                    '<div class="flex items-start justify-between gap-3">' +
+                                        '<div>' +
+                                            '<p class="text-sm font-semibold text-slate-800">' + escapeHtml(item.nama || 'Pembayaran') + '</p>' +
+                                            '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '')) + '</p>' +
+                                        '</div>' +
+                                        '<span class="text-sm font-bold text-indigo-700">' + formatRupiahNum(item.sisa || item.nominal || 0) + '</span>' +
+                                    '</div>' +
+                                '</div>';
+                            });
+                            $('#rincian-tagihan-list').html(previewHtml || '<div class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-500">Belum ada tagihan dipilih</div>');
+                        } else {
+                            $('#rincian-tagihan-list').html('<div class="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">Tidak ada tagihan</div>');
+                        }
+                        $('#panel-detail-bayar').removeClass('hidden');
+                    }
+                }
+
+                $(document).on('click', '.payment-option', function() {
+                    if (this.disabled) return;
+                    var id = String($(this).data('id') || '');
+                    var item = paymentJenisCache.find(function(row) { return String(row.id || row.nama || '') === id; });
+                    if (!item) return;
+
+                    if (selectedPayments[id]) {
+                        delete selectedPayments[id];
+                    } else {
+                        selectedPayments[id] = item;
+                    }
+
+                    renderJenisBayarList();
                 });
 
                 $(document).on('click', '.bulan-tag', function(event) {
@@ -939,6 +1067,53 @@ function handleCheckAllClick(checkbox) {
                         $('#tarik_add').val($('#tarik_lainnya').val());
                         $('#jenis_bayar_id, #jenis_bayar, #payment_detail').val('');
                     }
+                });
+
+                $(document).on('click', '.js-payment-resync', function() {
+                    var id = $(this).data('id');
+                    var $btn = $(this);
+                    var runSync = function() {
+                        $btn.prop('disabled', true).addClass('opacity-60');
+                        $.post('plugins/payment-ajax.php', { action: 'resync_tarik', id_tabungan: id }, function(res) {
+                            if (res && res.success) {
+                                Swal.fire({
+                                    title: 'Berhasil!',
+                                    text: res.message || 'Transaksi berhasil disinkronkan ke Sibayar.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(function() { window.location.reload(); });
+                                return;
+                            }
+
+                            Swal.fire({
+                                title: 'Gagal!',
+                                text: (res && res.message) ? res.message : 'Sinkron ulang ke Sibayar gagal.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                            $btn.prop('disabled', false).removeClass('opacity-60');
+                        }, 'json').fail(function(xhr) {
+                            var message = 'Gagal menghubungi server sinkronisasi.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            Swal.fire({ title: 'Gagal!', text: message, icon: 'error', confirmButtonText: 'OK' });
+                            $btn.prop('disabled', false).removeClass('opacity-60');
+                        });
+                    };
+
+                    Swal.fire({
+                        title: 'Sinkron ulang?',
+                        text: 'Transaksi pembayaran lama akan dikirim ke Sibayar tanpa membuat penarikan baru.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sinkronkan',
+                        cancelButtonText: 'Batal'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            runSync();
+                        }
+                    });
                 });
 
                 setTujuanTarik('pembayaran');
