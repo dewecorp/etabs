@@ -474,112 +474,6 @@ if (isset($_POST['Ubah'])) {
     </div>
 </div>
 
-<script>
-    $(document).on('click', '.tw-modal-open', function (event) {
-        event.preventDefault();
-        var target = $(this).data('target');
-        
-        if (target === '#editModal') {
-            var id = $(this).data('id');
-            var nis = $(this).data('nis');
-            var setor = $(this).data('setor');
-            
-            $('#id_tabungan_edit').val(id);
-            // Untuk Select2, kita perlu trigger change event setelah set value
-            $('#nis_edit').val(nis).trigger('change');
-            
-            // Format Rupiah manually for edit modal
-            var number_string = setor.toString().replace(/[^,\d]/g, ''),
-                split = number_string.split(','),
-                sisa = split[0].length % 3,
-                rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
-            if (ribuan) {
-                separator = sisa ? '.' : '';
-                rupiah += separator + ribuan.join('.');
-            }
-            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-            $('#setor_edit').val('Rp ' + rupiah);
-        }
-        
-        $(target).removeClass('hidden').addClass('flex');
-    });
-
-    $(document).on('click', '.tw-modal-close', function () {
-        $(this).closest('.modal').addClass('hidden').removeClass('flex');
-    });
-
-    $(document).on('click', '.modal', function (e) {
-        if ($(e.target).hasClass('modal')) { $(this).addClass('hidden').removeClass('flex'); }
-    });
-
-    // Initialize Select2 & Rupiah Formatters
-    $(document).ready(function() {
-        // Initialize Select2 per modal agar pencarian stabil di popup
-        $('.select2').each(function () {
-            var $select = $(this);
-            var $modalParent = $select.closest('.modal');
-            if ($modalParent.length) {
-                $select.select2({
-                    dropdownParent: $modalParent,
-                    width: '100%'
-                });
-            } else {
-                $select.select2({
-                    width: '100%'
-                });
-            }
-        });
-
-        // Helper function for format
-        function formatRupiah(angka, prefix) {
-            var number_string = angka.replace(/[^,\d]/g, '').toString(),
-                split = number_string.split(','),
-                sisa = split[0].length % 3,
-                rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
-            if (ribuan) {
-                separator = sisa ? '.' : '';
-                rupiah += separator + ribuan.join('.');
-            }
-
-            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-            return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
-        }
-
-        // AJAX for Saldo in Add Modal
-        $('#nis_add').change(function(){
-            var nis = $(this).val();
-            $.ajax({
-                url:"plugins/proses-ajax.php",
-                method:"POST",
-                data:{nis:nis},
-                success:function(data){
-                    $('#saldo_add').val(data);
-                }
-            });
-        });
-
-        // Format Rupiah for Add Modal
-        var setor_add = document.getElementById('setor_add');
-        if(setor_add){
-            setor_add.addEventListener('keyup', function(e) {
-                setor_add.value = formatRupiah(this.value, 'Rp ');
-            });
-        }
-
-        // Format Rupiah for Edit Modal
-        var setor_edit = document.getElementById('setor_edit');
-        if(setor_edit){
-            setor_edit.addEventListener('keyup', function(e) {
-                setor_edit.value = formatRupiah(this.value, 'Rp ');
-            });
-        }
-    });
-</script>
-
 <!-- Modal Edit Multiple -->
 <div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="modalEditMultiple">
     <div class="relative w-full max-w-4xl rounded-2xl bg-white p-6 shadow-xl  transition-all">
@@ -623,14 +517,8 @@ if (isset($_POST['Ubah'])) {
 </div>
 
 <script>
-// Fungsi global untuk handle check all
-function handleCheckAllClick(checkbox) {
-	var isChecked = checkbox.checked;
-	$('.checkItem').each(function() {
-		this.checked = isChecked;
-	});
-	
-	// Toggle tombol
+// Fungsi global untuk toggle tombol
+function toggleButtonsSetor() {
 	var checkedCount = $('.checkItem:checked').length;
 	if (checkedCount > 0) {
 		$('#btnEditTerpilih').prop('disabled', false).removeClass('disabled');
@@ -641,49 +529,158 @@ function handleCheckAllClick(checkbox) {
 	}
 }
 
+// Fungsi global untuk handle check all
+function handleCheckAllClick(checkbox) {
+	var isChecked = checkbox.checked;
+	$('.checkItem').each(function() {
+		this.checked = isChecked;
+	});
+	
+	// Toggle tombol menggunakan fungsi global
+	toggleButtonsSetor();
+}
+
 // Checkbox untuk pilih semua
-$(document).ready(function() {
-	// Fungsi untuk toggle tombol
-	function toggleButtons() {
-		var checkedCount = $('.checkItem:checked').length;
-		if (checkedCount > 0) {
-			$('#btnEditTerpilih').prop('disabled', false).removeClass('disabled');
-			$('#btnHapusTerpilih').prop('disabled', false).removeClass('disabled');
-		} else {
-			$('#btnEditTerpilih').prop('disabled', true).addClass('disabled');
-			$('#btnHapusTerpilih').prop('disabled', true).addClass('disabled');
-		}
-	}
-	
-	// Checkbox pilih semua
-	$(document).on('click', '#checkAll', function() {
-		var isChecked = $(this).prop('checked');
-		$('.checkItem').prop('checked', isChecked);
-		toggleButtons();
-	});
-	
-	// Pastikan checkbox all sync dengan checkbox individual (menggunakan event delegation)
-	$(document).on('change', '.checkItem', function() {
-		var totalCheckbox = $('.checkItem').length;
-		var checkedCount = $('.checkItem:checked').length;
-		$('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
-		toggleButtons();
-	});
-	
-	// Handle checkbox all di DataTable (jika menggunakan DataTable)
-	$('#example1').on('draw.dt', function() {
-		// Re-initialize checkAll handler setelah DataTable draw
-		$(document).off('click', '#checkAll').on('click', '#checkAll', function() {
-			var isChecked = $(this).prop('checked');
-			$('.checkItem').prop('checked', isChecked);
-			toggleButtons();
-		});
-	});
-	
-	
-	// Inisialisasi: disable tombol di awal
-	toggleButtons();
-});
+(function() {
+    var waitForJQuery = setInterval(function() {
+        if (typeof $ !== 'undefined') {
+            clearInterval(waitForJQuery);
+
+            $(document).ready(function() {
+                // Initialize Select2
+                $('.select2').each(function () {
+                    var $select = $(this);
+                    var $modalParent = $select.closest('.modal');
+                    if ($modalParent.length) {
+                        $select.select2({
+                            dropdownParent: $modalParent,
+                            width: '100%'
+                        });
+                    } else {
+                        $select.select2({
+                            width: '100%'
+                        });
+                    }
+                });
+
+                // AJAX for Saldo in Add Modal
+                $('#nis_add').change(function(){
+                    var nis = $(this).val();
+                    $.ajax({
+                        url:"plugins/proses-ajax.php",
+                        method:"POST",
+                        data:{nis:nis},
+                        success:function(data){
+                            $('#saldo_add').val(data);
+                        }
+                    });
+                });
+
+                // Helper function for format
+                function formatRupiah(angka, prefix) {
+                    var number_string = angka.replace(/[^,\d]/g, '').toString(),
+                        split = number_string.split(','),
+                        sisa = split[0].length % 3,
+                        rupiah = split[0].substr(0, sisa),
+                        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                    if (ribuan) {
+                        separator = sisa ? '.' : '';
+                        rupiah += separator + ribuan.join('.');
+                    }
+
+                    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+                    return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+                }
+
+                $(document).on('click', '.tw-modal-open', function (event) {
+                    event.preventDefault();
+                    var target = $(this).data('target');
+                    if (!target) return;
+
+                    if (target === '#editModal') {
+                        var id = $(this).data('id');
+                        var nis = $(this).data('nis');
+                        var setor = $(this).data('setor');
+
+                        $('#id_tabungan_edit').val(id);
+                        $('#nis_edit').val(nis).trigger('change');
+                        $('#setor_edit').val(formatRupiah(String(setor == null ? '' : setor), 'Rp '));
+                    }
+
+                    $(target).removeClass('hidden').addClass('flex');
+                });
+
+                $(document).on('click', '.tw-modal-close', function () {
+                    $(this).closest('.modal').addClass('hidden').removeClass('flex');
+                });
+
+                $(document).on('click', '.modal', function (e) {
+                    if ($(e.target).hasClass('modal')) {
+                        $(this).addClass('hidden').removeClass('flex');
+                    }
+                });
+
+                // Format Rupiah for Add Modal
+                var setor_add = document.getElementById('setor_add');
+                if(setor_add){
+                    setor_add.addEventListener('keyup', function(e) {
+                        setor_add.value = formatRupiah(this.value, 'Rp ');
+                    });
+                }
+
+                // Format Rupiah for Edit Modal
+                var setor_edit = document.getElementById('setor_edit');
+                if(setor_edit){
+                    setor_edit.addEventListener('keyup', function(e) {
+                        setor_edit.value = formatRupiah(this.value, 'Rp ');
+                    });
+                }
+
+                // Fungsi untuk toggle tombol (local untuk kompatibilitas)
+                function toggleButtons() {
+                    toggleButtonsSetor();
+                }
+                
+                // Pastikan checkbox all sync dengan checkbox individual (menggunakan event delegation)
+                $(document).on('change click', '.checkItem', function() {
+                    var totalCheckbox = $('.checkItem').length;
+                    var checkedCount = $('.checkItem:checked').length;
+                    $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                    toggleButtonsSetor();
+                });
+                
+                // Setup handler langsung pada elemen setelah DOM ready sebagai backup
+                setTimeout(function() {
+                    $('.checkItem').off('change click').on('change click', function() {
+                        var totalCheckbox = $('.checkItem').length;
+                        var checkedCount = $('.checkItem:checked').length;
+                        $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                        toggleButtonsSetor();
+                    });
+                }, 200);
+                
+                // Handle checkbox all di DataTable (jika menggunakan DataTable)
+                $('#example1').on('draw.dt', function() {
+                    var totalCheckbox = $('.checkItem').length;
+                    var checkedCount = $('.checkItem:checked').length;
+                    $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                    $('#checkAll').attr('onclick', 'handleCheckAllClick(this)');
+                    $('.checkItem').off('change click').on('change click', function() {
+                        var totalCheckbox = $('.checkItem').length;
+                        var checkedCount = $('.checkItem:checked').length;
+                        $('#checkAll').prop('checked', (totalCheckbox > 0 && checkedCount === totalCheckbox));
+                        toggleButtonsSetor();
+                    });
+                    toggleButtonsSetor();
+                });
+                
+                // Inisialisasi: disable tombol di awal
+                toggleButtonsSetor();
+            });
+        }
+    }, 100);
+})();
 
 // Expose fungsi ke global scope
 window.handleCheckAllClick = handleCheckAllClick;

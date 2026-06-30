@@ -160,7 +160,7 @@ $page_title = getPageTitle($current_page);
                 </div>
                 
                 <div class="relative group">
-                    <button class="flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-700/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700/60 transition-all">
+                    <button type="button" class="flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-700/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700/60 transition-all">
                         <div class="h-6 w-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-[10px] font-bold">
                             <?= substr($data_nama, 0, 2) ?>
                         </div>
@@ -169,16 +169,24 @@ $page_title = getPageTitle($current_page);
                     </button>
                     
                     <!-- User Dropdown Menu -->
-                    <div class="absolute right-0 mt-2 w-48 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110]">
+                    <div class="absolute right-0 top-full z-[110] w-48 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        <div class="rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
                         <div class="px-3 py-2 border-b border-slate-100 mb-1">
                             <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Info Akun</p>
                             <p class="text-xs font-medium text-slate-700 truncate"><?= $data_nama ?></p>
                             <p class="text-[10px] text-slate-500 italic"><?= $data_level ?></p>
                         </div>
+                        <?php if ($data_level == "Administrator") { ?>
+                        <button type="button" id="btnUpdateSistem" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-indigo-600 hover:bg-indigo-50 transition-colors">
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                            <span>Update Sistem</span>
+                        </button>
+                        <?php } ?>
                         <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 transition-colors">
                             <i class="fa-solid fa-right-from-bracket"></i>
                             <span>Keluar</span>
                         </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -571,7 +579,7 @@ $page_title = getPageTitle($current_page);
     <!-- Select2 -->
     <script src="plugins/select2/select2.full.min.js"></script>
     <!-- Custom Dashboard JS -->
-    <script src="assets/js/dashboard.js"></script>
+    <script src="assets/js/dashboard.js?v=<?php echo time(); ?>"></script>
 
     <script>
         $(function() {

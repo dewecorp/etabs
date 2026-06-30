@@ -422,6 +422,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
+    const btnUpdateSistem = document.getElementById("btnUpdateSistem");
+    if (btnUpdateSistem) {
+        btnUpdateSistem.addEventListener("click", function(event) {
+            window.confirmSystemUpdate(event);
+        });
+    }
+
     // Connection Status Indicator Logic
     const connectionBadge = document.getElementById("connection-badge");
     const connectionIcon = document.getElementById("connection-icon");
@@ -464,3 +471,130 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.style.overflow = "hidden";
     }
 });
+
+// Global system update from GitHub (ZIP) — di luar DOMContentLoaded agar selalu tersedia
+window.confirmSystemUpdate = function(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (typeof Swal === "undefined") {
+        alert("SweetAlert belum dimuat. Silakan refresh halaman.");
+        return;
+    }
+
+    Swal.fire({
+        title: "Update Sistem?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#4f46e5",
+        cancelButtonColor: "#64748b",
+        confirmButtonText: "Ya, Update",
+        cancelButtonText: "Batal",
+        reverseButtons: true,
+        focusCancel: true,
+        allowOutsideClick: false,
+        background: "#ffffff",
+        customClass: {
+            popup: "rounded-3xl border border-slate-200 shadow-xl",
+            title: "text-lg font-semibold text-slate-900",
+            confirmButton: "rounded-xl px-4 py-2 text-sm font-medium",
+            cancelButton: "rounded-xl px-4 py-2 text-sm font-medium"
+        }
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            window.runSystemUpdate();
+        }
+    });
+};
+
+window.runSystemUpdate = async function() {
+    const steps = [
+        { action: "download", label: "Mengunduh update dari GitHub..." },
+        { action: "extract", label: "Mengekstrak file update..." },
+        { action: "apply", label: "Menerapkan update ke sistem..." },
+        { action: "cleanup", label: "Membersihkan file sementara..." }
+    ];
+
+    Swal.fire({
+        title: "Memperbarui Sistem",
+        html: '<p id="update-status" class="text-sm text-slate-600 mb-3">Memulai proses update...</p>' +
+              '<div class="w-full rounded-full bg-slate-200 h-2 overflow-hidden">' +
+              '<div id="update-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div>' +
+              '</div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: function() {
+            Swal.showLoading();
+        },
+        background: "#ffffff",
+        customClass: {
+            popup: "rounded-3xl border border-slate-200 shadow-xl"
+        }
+    });
+
+    const statusEl = document.getElementById("update-status");
+    const barEl = document.getElementById("update-bar");
+    let lastMessage = "";
+
+    try {
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            if (statusEl) {
+                statusEl.textContent = step.label;
+            }
+            if (barEl) {
+                barEl.style.width = Math.round(((i + 0.25) / steps.length) * 100) + "%";
+            }
+
+            const response = await fetch("admin/update/update_sistem.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "action=" + encodeURIComponent(step.action)
+            });
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || "Proses update gagal pada tahap " + step.action + ".");
+            }
+
+            lastMessage = data.message || "Berhasil.";
+            if (barEl) {
+                barEl.style.width = Math.round(((i + 1) / steps.length) * 100) + "%";
+            }
+        }
+
+        Swal.fire({
+            title: "Update Berhasil!",
+            text: lastMessage,
+            icon: "success",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#4f46e5",
+            allowOutsideClick: false
+        }).then(function() {
+            window.location.reload();
+        });
+    } catch (error) {
+        try {
+            await fetch("admin/update/update_sistem.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "action=cleanup"
+            });
+        } catch (cleanupError) {}
+
+        Swal.fire({
+            title: "Update Gagal!",
+            text: error.message || "Terjadi kesalahan saat memperbarui sistem.",
+            icon: "error",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#e11d48"
+        });
+    }
+};
