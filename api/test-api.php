@@ -7,7 +7,8 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { padding: 20px; max-width: 1200px; margin: 0 auto; }
-        h1 { color: #2d3748; margin-bottom: 20px; }
+        h1 { color: #2d3748; margin-bottom: 10px; }
+        .info { color: #718096; margin-bottom: 20px; font-size: 14px; }
         .container { background: #f7fafc; padding: 20px; border-radius: 8px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: #4a5568; }
@@ -22,6 +23,7 @@
 <body>
     <div class="container">
         <h1>Test API SIMAD</h1>
+        <p class="info">Base URL Produksi: https://etabs.misultanfattah.sch.id/api/simad.php</p>
         
         <div class="form-group">
             <label for="api_key">API Key</label>

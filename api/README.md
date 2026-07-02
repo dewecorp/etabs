@@ -28,7 +28,7 @@ Mendapatkan ringkasan tabungan siswa (total setoran, total tarikan, saldo).
 
 **Contoh Request:**
 ```http
-GET /api/simad.php?action=tabungan&nis=12345
+GET https://etabs.misultanfattah.sch.id/api/simad.php?action=tabungan&nis=12345
 X-API-KEY: SIMAD_SECRET_KEY_2026
 ```
 
@@ -61,7 +61,7 @@ Mendapatkan riwayat transaksi tabungan siswa.
 
 **Contoh Request:**
 ```http
-GET /api/simad.php?action=riwayat&nis=12345&page=1&limit=10
+GET https://etabs.misultanfattah.sch.id/api/simad.php?action=riwayat&nis=12345&page=1&limit=10
 X-API-KEY: SIMAD_SECRET_KEY_2026
 ```
 

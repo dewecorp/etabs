@@ -13,6 +13,7 @@ if (!defined('PAYMENT_API_SSL_VERIFY')) define('PAYMENT_API_SSL_VERIFY', false);
 if (!defined('PAYMENT_API_DEFAULT_PETUGAS_ID')) define('PAYMENT_API_DEFAULT_PETUGAS_ID', 1);
 
 // Konfigurasi integrasi SIMAD -> ETAB (API Tabungan)
+if (!defined('SIMAD_API_BASE_URL')) define('SIMAD_API_BASE_URL', 'https://etabs.misultanfattah.sch.id/api/simad.php');
 if (!defined('SIMAD_API_KEY')) define('SIMAD_API_KEY', 'SIMAD_SECRET_KEY_2026');
 if (!defined('SIMAD_API_KEY_HEADER')) define('SIMAD_API_KEY_HEADER', 'X-API-KEY');
 if (!defined('SIMAD_API_ENABLED')) define('SIMAD_API_ENABLED', true);
