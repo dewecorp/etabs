@@ -11,3 +11,8 @@ if (!defined('PAYMENT_API_SUBMIT_FORMAT')) define('PAYMENT_API_SUBMIT_FORMAT', '
 if (!defined('PAYMENT_API_VERIFY_SUBMIT')) define('PAYMENT_API_VERIFY_SUBMIT', true);
 if (!defined('PAYMENT_API_SSL_VERIFY')) define('PAYMENT_API_SSL_VERIFY', false);
 if (!defined('PAYMENT_API_DEFAULT_PETUGAS_ID')) define('PAYMENT_API_DEFAULT_PETUGAS_ID', 1);
+
+// Konfigurasi integrasi SIMAD -> ETAB (API Tabungan)
+if (!defined('SIMAD_API_KEY')) define('SIMAD_API_KEY', 'SIMAD_SECRET_KEY_2026');
+if (!defined('SIMAD_API_KEY_HEADER')) define('SIMAD_API_KEY_HEADER', 'X-API-KEY');
+if (!defined('SIMAD_API_ENABLED')) define('SIMAD_API_ENABLED', true);
