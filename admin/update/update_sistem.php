@@ -281,6 +281,25 @@ switch ($action) {
             }
         }
 
+        // Increment versi setiap kali update
+        $versionFile = $rootDir . '/inc/version.json';
+        $currentVersion = ['v' => date('y') . (int)date('n') . '01'];
+        if (is_file($versionFile)) {
+            $vData = json_decode(file_get_contents($versionFile), true);
+            if ($vData && isset($vData['v']) && preg_match('/^(\d{2})(\d{1,2})(\d{2})$/', $vData['v'], $vm)) {
+                $vy = (int)$vm[1]; $vmM = (int)$vm[2]; $vs = (int)$vm[3];
+                $cy = (int)date('y'); $cm = (int)date('n');
+                if ($vy === $cy && $vmM === $cm) {
+                    $currentVersion['v'] = $vy . $cm . str_pad($vs + 1, 2, '0', STR_PAD_LEFT);
+                } else {
+                    $currentVersion['v'] = $cy . $cm . '01';
+                }
+            } else {
+                $currentVersion['v'] = date('y') . (int)date('n') . '01';
+            }
+        }
+        @file_put_contents($versionFile, json_encode($currentVersion));
+
         updateJsonResponse(true, 'Update berhasil diterapkan (' . $copied . ' file diperbarui).', [
             'files_updated' => $copied,
         ]);

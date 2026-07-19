@@ -32,17 +32,29 @@ include_once "inc/activity_log.php";
 
 	//Profil Sekolah
 $nama = "e-Tabs";
+$tahunAjaran = '';
 try {
     $sql = @$koneksi->query("SELECT * from tb_profil LIMIT 1");
     if ($sql && $sql->num_rows > 0) {
         while ($data = $sql->fetch_assoc()) {
             $nama = $data['nama_sekolah'];
+            $tahunAjaran = $data['tahun_ajaran'] ?? '';
         }
     }
 } catch (Exception $e) {
     // Jika error, gunakan default
     error_log("Error loading profil: " . $e->getMessage());
     $nama = "e-Tabs";
+}
+
+// Version: v{YY}{M}{SEQ} — berubah setiap ada update dari github
+$appVersion = 'v-dev';
+$versionFile = __DIR__ . '/inc/version.json';
+if (is_file($versionFile)) {
+    $vData = json_decode(file_get_contents($versionFile), true);
+    if ($vData && isset($vData['v'])) {
+        $appVersion = 'v' . $vData['v'];
+    }
 }
 
 // Ambil page title dinamis
@@ -159,6 +171,12 @@ $page_title = getPageTitle($current_page);
                     <i class="fa-regular fa-calendar-days mr-1 text-emerald-200"></i>
                     <?php $date = date('Y-m-d'); echo format_hari_tanggal($date) ?>
                 </div>
+                <?php if ($tahunAjaran !== ''): ?>
+                <div class="text-[11px] text-emerald-100/80">
+                    <i class="fa-regular fa-calendar mr-1 text-emerald-200"></i>
+                    T.A <?= htmlspecialchars($tahunAjaran) ?>
+                </div>
+                <?php endif; ?>
                 
                 <div class="relative group">
                     <button type="button" class="flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-700/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700/60 transition-all">
@@ -569,7 +587,7 @@ $page_title = getPageTitle($current_page);
             <div class="flex flex-wrap items-center justify-center gap-3">
                 <a href="index.php" class="hover:text-indigo-600">Dashboard</a>
                 <span class="text-slate-300">|</span>
-                <span class="text-slate-500">v2.0-modern</span>
+                <span class="text-slate-500"><?= $appVersion ?></span>
             </div>
         </div>
     </footer>
