@@ -533,6 +533,7 @@ if (isset($_POST['simpan'])) {
                             </td>
 
                             <td>
+                                <div class="flex items-center gap-1.5">
                                 <button type="button" class="btn btn-sm btn-dashboard-success tw-modal-open" data-target="#editModal"
                                     data-nis="<?php echo $data['nis']; ?>"
                                     data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>"
@@ -547,6 +548,7 @@ if (isset($_POST['simpan'])) {
                                     class="btn btn-sm btn-dashboard-danger">
                                     <i class="fa-solid fa-trash"></i>
                                     </a>
+                                </div>
                             </td>
                         </tr>
                         <?php
