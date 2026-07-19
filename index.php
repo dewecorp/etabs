@@ -585,8 +585,6 @@ $page_title = getPageTitle($current_page);
                 © 2026 e-Tabs • <?= $nama ?> • All rights reserved.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-3">
-                <a href="index.php" class="hover:text-indigo-600">Dashboard</a>
-                <span class="text-slate-300">|</span>
                 <span class="text-slate-500"><?= $appVersion ?></span>
             </div>
         </div>
