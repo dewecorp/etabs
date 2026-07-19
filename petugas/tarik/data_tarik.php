@@ -9,6 +9,46 @@ include_once __DIR__ . '/../../inc/tarik_payment_schema.php';
 include_once __DIR__ . '/../../inc/payment_integration.php';
 ensureTarikPaymentColumns($koneksi);
 
+// Tampilkan SweetAlert dari redirect (del_tarik, edit, dll)
+$urlStatus = $_GET['status'] ?? '';
+$urlMsg = $_GET['msg'] ?? '';
+if ($urlStatus === 'success' && $urlMsg !== '') {
+    echo "<script>
+    (function(){
+        if(typeof Swal!=='undefined'){
+            Swal.fire({
+                title:'Berhasil!',
+                text:'" . addslashes(urldecode($urlMsg)) . "',
+                icon:'success',
+                timer:2500,
+                timerProgressBar:true,
+                showConfirmButton:false,
+                allowOutsideClick:false,
+                allowEscapeKey:false
+            });
+        }else{
+            alert('" . addslashes(urldecode($urlMsg)) . "');
+        }
+    })();
+    </script>";
+} elseif ($urlStatus === 'error' && $urlMsg !== '') {
+    echo "<script>
+    (function(){
+        if(typeof Swal!=='undefined'){
+            Swal.fire({
+                title:'Gagal!',
+                text:'" . addslashes(urldecode($urlMsg)) . "',
+                icon:'error',
+                confirmButtonText:'OK',
+                confirmButtonColor:'#d33'
+            });
+        }else{
+            alert('" . addslashes(urldecode($urlMsg)) . "');
+        }
+    })();
+    </script>";
+}
+
 if (isset($_POST['Simpan'])) {
     $tarik = $_POST['tarik'];
     $tarik_hasil = preg_replace("/[^0-9]/", "", $tarik);
@@ -24,7 +64,7 @@ if (isset($_POST['Simpan'])) {
     $payment_items = is_array($bulan_dipilih) && isset($bulan_dipilih['items']) && is_array($bulan_dipilih['items']) ? $bulan_dipilih['items'] : [];
 
     if ($tujuan_tarik === 'pembayaran' && ($jenis_bayar_id === '' || $tarik_hasil <= 0)) {
-        echo "<script>Swal.fire({title:'Gagal!',text:'Lengkapi jenis pembayaran dan nominal.',icon:'error',confirmButtonText:'OK'});</script>";
+        echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Lengkapi jenis pembayaran dan nominal.') . "';</script>";
     } else {
     
     // Calculate saldo from DB directly for security
@@ -52,8 +92,8 @@ if (isset($_POST['Simpan'])) {
             $paymentResult = paymentSubmitTransaksi($paymentPayload);
 
             if (empty($paymentResult['success'])) {
-                $msg = addslashes($paymentResult['message'] ?? 'Gagal sinkron ke sistem pembayaran.');
-                echo "<script>Swal.fire({title:'Gagal!',text:'".$msg."',icon:'error',confirmButtonText:'OK'});</script>";
+                $msg = $paymentResult['message'] ?? 'Gagal sinkron ke sistem pembayaran.';
+                echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode($msg) . "';</script>";
             } else {
                 $payment_ref = mysqli_real_escape_string($koneksi, $paymentResult['ref'] ?? $paymentResult['data']['ref_transaksi'] ?? '');
                 $payment_sync = !empty($paymentResult['mock']) ? 'mock' : 'success';
@@ -122,66 +162,14 @@ if (isset($_POST['Simpan'])) {
                 ? 'Penarikan & pembayaran berhasil dicatat'
                 : 'Penarikan berhasil ditambahkan';
 
-            echo "<script>
-            (function(){
-                if(typeof Swal!=='undefined'){
-                    Swal.fire({
-                        title:'Berhasil!',
-                        text:'".$successText."',
-                        icon:'success',
-                        confirmButtonText:'OK',
-                        confirmButtonColor:'#28a745',
-                        allowOutsideClick:false,
-                        allowEscapeKey:false,
-                        timer:2500,
-                        timerProgressBar:true
-                    }).then(function(){
-                        window.location.href='index.php?page=data_tarik';
-                    });
-                    
-                    setTimeout(function(){
-                        window.location.href='index.php?page=data_tarik';
-                    }, 2500);
-                } else {
-                    alert('Penarikan berhasil ditambahkan');
-                    window.location.href='index.php?page=data_tarik';
-                }
-            })();
-            </script>";
+            $redirectMsg = rawurlencode($successText);
+            echo "<script>window.location.href='index.php?page=data_tarik&status=success&msg={$redirectMsg}';</script>";
         } else {
-            echo "<script>
-            (function(){
-                if(typeof Swal!=='undefined'){
-                    Swal.fire({
-                        title:'Gagal!',
-                        text:'Penarikan gagal ditambahkan',
-                        icon:'error',
-                        confirmButtonText:'OK',
-                        confirmButtonColor:'#d33'
-                    });
-                } else {
-                    alert('Penarikan gagal ditambahkan');
-                }
-            })();
-            </script>";
+            echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Penarikan gagal ditambahkan') . "';</script>";
         }
         }
     } else {
-        echo "<script>
-        (function(){
-            if(typeof Swal!=='undefined'){
-                Swal.fire({
-                    title:'Gagal!',
-                    text:'Saldo tidak mencukupi',
-                    icon:'error',
-                    confirmButtonText:'OK',
-                    confirmButtonColor:'#d33'
-                });
-            } else {
-                alert('Saldo tidak mencukupi');
-            }
-        })();
-        </script>";
+        echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Saldo tidak mencukupi') . "';</script>";
     }
     }
 }
@@ -249,65 +237,12 @@ if (isset($_POST['Ubah'])) {
                 logActivity($koneksi, 'UPDATE', 'tb_tabungan', 'Mengubah penarikan untuk ' . $nama_siswa . ' menjadi Rp ' . number_format($tarik_hasil, 0, ',', '.'), $_POST['nis']);
             }
             
-            echo "<script>
-            (function(){
-                if(typeof Swal!=='undefined'){
-                    Swal.fire({
-                        title:'Berhasil!',
-                        text:'Penarikan berhasil diubah',
-                        icon:'success',
-                        confirmButtonText:'OK',
-                        confirmButtonColor:'#28a745',
-                        allowOutsideClick:false,
-                        allowEscapeKey:false,
-                        timer:2500,
-                        timerProgressBar:true
-                    }).then(function(){
-                        window.location.href='index.php?page=data_tarik';
-                    });
-                    
-                    setTimeout(function(){
-                        window.location.href='index.php?page=data_tarik';
-                    }, 2500);
-                } else {
-                    alert('Penarikan berhasil diubah');
-                    window.location.href='index.php?page=data_tarik';
-                }
-            })();
-            </script>";
+            echo "<script>window.location.href='index.php?page=data_tarik&status=success&msg=" . rawurlencode('Penarikan berhasil diubah') . "';</script>";
         } else {
-            echo "<script>
-            (function(){
-                if(typeof Swal!=='undefined'){
-                    Swal.fire({
-                        title:'Gagal!',
-                        text:'Penarikan gagal diubah',
-                        icon:'error',
-                        confirmButtonText:'OK',
-                        confirmButtonColor:'#d33'
-                    });
-                } else {
-                    alert('Penarikan gagal diubah');
-                }
-            })();
-            </script>";
+            echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Penarikan gagal diubah') . "';</script>";
         }
     } else {
-        echo "<script>
-        (function(){
-            if(typeof Swal!=='undefined'){
-                Swal.fire({
-                    title:'Gagal!',
-                    text:'Saldo tidak mencukupi untuk perubahan ini',
-                    icon:'error',
-                    confirmButtonText:'OK',
-                    confirmButtonColor:'#d33'
-                });
-            } else {
-                alert('Saldo tidak mencukupi untuk perubahan ini');
-            }
-        })();
-        </script>";
+        echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Saldo tidak mencukupi untuk perubahan ini') . "';</script>";
     }
 }
 ?>
@@ -910,8 +845,9 @@ function handleCheckAllClick(checkbox) {
 
                     paymentJenisCache.forEach(function(item) {
                         var id = String(item.id || item.nama || '');
+                        var key = id + (item.tahun_ajaran ? '__' + String(item.tahun_ajaran).replace(/[^0-9A-Za-z_-]/g, '_') : '');
                         var disabled = !!item.disabled || !!item.lunas || !item.has_tagihan || !(parseInt(item.sisa || 0, 10) > 0);
-                        var selected = !!selectedPayments[id];
+                        var selected = !!selectedPayments[key];
                         if (!disabled) payableCount++;
 
                         var cardClass = disabled
@@ -923,10 +859,11 @@ function handleCheckAllClick(checkbox) {
                             : (disabled ? '<span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Tidak tersedia</span>' : '<span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Ada tagihan</span>');
                         var meta = [];
                         if (item.tipe) meta.push(item.tipe === 'bulanan' ? 'Bulanan' : (item.tipe === 'cicilan' ? 'Cicilan' : 'Sekali bayar'));
+                        if (item.tahun_ajaran) meta.push('T.A ' + item.tahun_ajaran);
                         if (item.kelas) meta.push('Kelas ' + item.kelas);
                         if (item.fallback_master) meta.push('Estimasi dari master SPP');
 
-                        html += '<button type="button" class="payment-option w-full rounded-xl border p-3 text-left transition-all ' + cardClass + '" data-id="' + escapeHtml(id) + '" ' + (disabled ? 'disabled' : '') + '>' +
+                        html += '<button type="button" class="payment-option w-full rounded-xl border p-3 text-left transition-all ' + cardClass + '" data-key="' + escapeHtml(key) + '" ' + (disabled ? 'disabled' : '') + '>' +
                             '<div class="flex items-start gap-3">' +
                                 '<span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[10px] ' + checkClass + '"><i class="fa-solid fa-check"></i></span>' +
                                 '<span class="min-w-0 flex-1">' +
@@ -975,7 +912,7 @@ function handleCheckAllClick(checkbox) {
                             '<div class="flex items-start justify-between gap-3">' +
                                 '<div>' +
                                     '<p class="text-sm font-semibold text-slate-800">' + escapeHtml(item.nama || 'Pembayaran') + '</p>' +
-                                    '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '')) + '</p>' +
+                                    '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '') + (item.tahun_ajaran ? ' · T.A ' + item.tahun_ajaran : '')) + '</p>' +
                                 '</div>' +
                                 '<span class="text-sm font-bold text-indigo-700">' + formatRupiahNum(itemNominal) + '</span>' +
                             '</div>';
@@ -1020,7 +957,7 @@ function handleCheckAllClick(checkbox) {
                                     '<div class="flex items-start justify-between gap-3">' +
                                         '<div>' +
                                             '<p class="text-sm font-semibold text-slate-800">' + escapeHtml(item.nama || 'Pembayaran') + '</p>' +
-                                            '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '')) + '</p>' +
+                                            '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '') + (item.tahun_ajaran ? ' · T.A ' + item.tahun_ajaran : '')) + '</p>' +
                                         '</div>' +
                                         '<span class="text-sm font-bold text-indigo-700">' + formatRupiahNum(item.sisa || item.nominal || 0) + '</span>' +
                                     '</div>' +
@@ -1036,14 +973,17 @@ function handleCheckAllClick(checkbox) {
 
                 $(document).on('click', '.payment-option', function() {
                     if (this.disabled) return;
-                    var id = String($(this).data('id') || '');
-                    var item = paymentJenisCache.find(function(row) { return String(row.id || row.nama || '') === id; });
+                    var key = String($(this).data('key') || '');
+                    var item = paymentJenisCache.find(function(row) {
+                        var rowKey = String(row.id || row.nama || '') + (row.tahun_ajaran ? '__' + String(row.tahun_ajaran).replace(/[^0-9A-Za-z_-]/g, '_') : '');
+                        return rowKey === key;
+                    });
                     if (!item) return;
 
-                    if (selectedPayments[id]) {
-                        delete selectedPayments[id];
+                    if (selectedPayments[key]) {
+                        delete selectedPayments[key];
                     } else {
-                        selectedPayments[id] = item;
+                        selectedPayments[key] = item;
                     }
 
                     renderJenisBayarList();
@@ -1062,11 +1002,101 @@ function handleCheckAllClick(checkbox) {
                     $(this).blur();
                 });
 
-                $('#formTarikAdd').on('submit', function() {
+                $('#formTarikAdd').on('submit', function(e) {
                     if ($('#tujuan_tarik').val() === 'lainnya') {
                         $('#tarik_add').val($('#tarik_lainnya').val());
                         $('#jenis_bayar_id, #jenis_bayar, #payment_detail').val('');
+                        return;
                     }
+
+                    // Validasi: tunggakan harus dibayar dulu sebelum tagihan aktif
+                    var hasTunggakanTerpilih = false;
+                    var hasAktifTerpilih = false;
+                    Object.keys(selectedPayments).forEach(function(key) {
+                        var item = selectedPayments[key];
+                        if (item.tahun_ajaran) {
+                            hasTunggakanTerpilih = true;
+                        } else {
+                            hasAktifTerpilih = true;
+                        }
+                    });
+
+                    // Cek apakah ada tunggakan yang tersedia (belum dibayar)
+                    var adaTunggakan = paymentJenisCache.some(function(item) {
+                        return item.tahun_ajaran && !item.disabled && !item.lunas && (parseInt(item.sisa || 0, 10) > 0);
+                    });
+
+                    if (hasAktifTerpilih && !hasTunggakanTerpilih && adaTunggakan) {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Prioritas Tunggakan!',
+                            text: 'Bayar tunggakan tahun ajaran sebelumnya terlebih dahulu sebelum membayar tagihan tahun ajaran aktif.',
+                            icon: 'warning',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#f59e0b'
+                        });
+                        return false;
+                    }
+
+                    // Submit via AJAX agar loading overlay tidak hilang saat proses
+                    e.preventDefault();
+                    showLoadingOverlay('Memproses Pembayaran', 'Harap tunggu, sedang sinkron ke Sibayar...');
+
+                    var form = this;
+                    var formData = new FormData(form);
+                    formData.set('tarik', $('#tarik_add').val().replace(/[^0-9]/g, ''));
+                    formData.append('Simpan', 'Simpan');
+
+                    $.ajax({
+                        url: form.action || window.location.href,
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(responseText) {
+                            if (typeof responseText === 'string') {
+                                var match = responseText.match(/window\.location\.href\s*=\s*'([^']+)'/);
+                                if (match) {
+                                    window.location.href = match[1];
+                                    return;
+                                }
+                            }
+                            // Jika tidak ada redirect, reload halaman
+                            window.location.reload();
+                        },
+                        error: function() {
+                            window.location.reload();
+                        }
+                    });
+                });
+
+                // Loading overlay untuk semua proses simpan/ubah/hapus
+                function showLoadingOverlay(title, message) {
+                    $('body').append(
+                        '<div class="loading-overlay" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:sans-serif;">' +
+                            '<div class="spinner" style="width:48px;height:48px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>' +
+                            '<div style="font-size:18px;font-weight:600;">' + (title || 'Memproses') + '</div>' +
+                            '<div style="font-size:14px;margin-top:8px;opacity:0.8;">' + (message || 'Harap tunggu...') + '</div>' +
+                            '<style>@keyframes spin{to{transform:rotate(360deg)}}</style>' +
+                        '</div>'
+                    );
+                }
+
+                // Loading overlay untuk form ubah
+                $('#editModal form').on('submit', function() {
+                    showLoadingOverlay('Memperbarui Data', 'Harap tunggu...');
+                });
+
+                // Loading overlay untuk hapus multiple via form
+                $('#formTarik').on('submit', function() {
+                    var checked = $('.checkItem:checked').length;
+                    if (checked > 0 && $(this).attr('action').indexOf('del_tarik_multiple') !== -1) {
+                        showLoadingOverlay('Menghapus Data', 'Harap tunggu...');
+                    }
+                });
+                // Loading overlay untuk edit multiple via form
+                $('#formEditMultiple').on('submit', function() {
+                    showLoadingOverlay('Memperbarui Data', 'Harap tunggu...');
                 });
 
                 $(document).on('click', '.js-payment-resync', function() {
@@ -1457,7 +1487,8 @@ function confirmHapusTarik(event, nis, nama, tarik) {
                 heightAuto: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = url;
+                    showOverlayHapus();
+                    setTimeout(function() { window.location.href = url; }, 100);
                 }
             });
             return true;
@@ -1482,12 +1513,20 @@ function confirmHapusTarik(event, nis, nama, tarik) {
             // Fallback ke confirm biasa
             var message = 'Yakin hapus tarikan untuk NIS ' + nis + '?\n\nPERINGATAN: Data yang dihapus tidak dapat dikembalikan!';
             if (confirm(message)) {
-                window.location.href = url;
+                showOverlayHapus();
+                setTimeout(function() { window.location.href = url; }, 100);
             }
         }
     }, 50);
     
     return false;
+}
+
+function showOverlayHapus() {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:sans-serif;';
+    d.innerHTML = '<div style="width:48px;height:48px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div><div style="font-size:18px;font-weight:600;">Menghapus Data</div><div style="font-size:14px;margin-top:8px;opacity:0.8;">Harap tunggu...</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(d);
 }
 
 // Ekspos fungsi ke global scope

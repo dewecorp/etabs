@@ -7,7 +7,6 @@ if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_PO
     }, $ids);
     $ids_string = implode(',', $ids_escaped);
     
-    // Ambil data penarikan yang akan dihapus
     $sql_get = "SELECT t.*, s.nama_siswa FROM tb_tabungan t 
                 JOIN tb_siswa s ON t.nis = s.nis 
                 WHERE t.id_tabungan IN ($ids_string) AND t.jenis='TR'";
@@ -16,7 +15,6 @@ if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_PO
     
     $tgl_hapus = date('Y-m-d H:i:s');
     
-    // Update status di riwayat menjadi Tidak Aktif untuk semua data terpilih
     $sql_update_riwayat = "UPDATE tb_riwayat 
                            SET status = 'Tidak Aktif', 
                                tgl_hapus = '".$tgl_hapus."', 
@@ -24,12 +22,10 @@ if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_PO
                            WHERE id_tabungan_asli IN ($ids_string) AND jenis = 'TR'";
     mysqli_query($koneksi, $sql_update_riwayat);
     
-    // Hapus dari tabel asli
     $sql_hapus = "DELETE FROM tb_tabungan WHERE id_tabungan IN ($ids_string) AND jenis = 'TR'";
     $query_hapus = mysqli_query($koneksi, $sql_hapus);
 
     if ($query_hapus) {
-        // Log aktivitas
         if (!function_exists('logActivity')) {
             $paths = [
                 dirname(dirname(__DIR__)) . '/inc/activity_log.php',
@@ -48,48 +44,15 @@ if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_PO
             logActivity($koneksi, 'DELETE', 'tb_tabungan', 'Menghapus ' . $jumlah_hapus . ' penarikan terpilih');
         }
         
-        echo '<section class="content"><div class="row"><div class="col-md-12"><div class="box"><div class="box-body"><p>Memproses...</p></div></div></div></div></section>';
-        echo "<script>
-        (function(){
-            Swal.fire({
-                title:'Berhasil!',
-                text:'Berhasil menghapus " . $jumlah_hapus . " penarikan',
-                icon:'success',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false
-            }).then(function(){
-                window.location.href='index.php?page=data_tarik';
-            });
-        })();
-        </script>";
+        echo "<script>window.location.href='index.php?page=data_tarik&status=success&msg=" . rawurlencode('Berhasil menghapus ' . $jumlah_hapus . ' penarikan') . "';</script>";
         return;
     } else {
-        echo '<section class="content"><div class="row"><div class="col-md-12"><div class="box"><div class="box-body"><p>Memproses...</p></div></div></div></div></section>';
-        echo "<script>
-        (function(){
-            Swal.fire({
-                title:'Gagal!',
-                text:'Gagal menghapus penarikan',
-                icon:'error',
-                confirmButtonText:'OK',
-                confirmButtonColor:'#dc3545',
-                allowOutsideClick:false,
-                allowEscapeKey:false
-            }).then(function(){
-                window.location.href='index.php?page=data_tarik';
-            });
-        })();
-        </script>";
+        echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Gagal menghapus penarikan') . "';</script>";
         return;
     }
 } else {
-    echo '<section class="content"><div class="row"><div class="col-md-12"><div class="box"><div class="box-body"><p>Memproses...</p></div></div></div></div></section>';
     echo "<script>window.location.href='index.php?page=data_tarik';</script>";
     return;
 }
 
 ?>
-

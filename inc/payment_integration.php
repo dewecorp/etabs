@@ -42,7 +42,7 @@ function paymentDefine($name, $value)
     }
 }
 
-paymentDefine('PAYMENT_API_BASE_URL', rtrim((string) paymentEnv('SPP_API_BASE_URL', paymentEnv('PAYMENT_API_BASE_URL', 'https://sibayar.misultanfattah.sch.id/api/etab')), '/'));
+paymentDefine('PAYMENT_API_BASE_URL', rtrim((string) paymentEnv('SPP_API_BASE_URL', paymentEnv('PAYMENT_API_BASE_URL', 'https://sibayar.misultanfattah.sch.id/api/etab.php')), '/'));
 paymentDefine('PAYMENT_API_KEY', (string) paymentEnv('SPP_API_KEY', paymentEnv('PAYMENT_API_KEY', 'SPP_SECRET_KEY_2026')));
 paymentDefine('PAYMENT_API_ENABLED', paymentBool(paymentEnv('SPP_API_ENABLED', paymentEnv('PAYMENT_API_ENABLED', PAYMENT_API_BASE_URL !== '' && PAYMENT_API_KEY !== '' ? 'true' : 'false'))));
 paymentDefine('PAYMENT_API_KEY_HEADER', (string) paymentEnv('SPP_API_KEY_HEADER', 'X-API-KEY'));
@@ -71,6 +71,7 @@ function paymentGetJenisBayar($nis, $kelasSiswa = '')
 
         if ($nis !== '') {
             $tagihan = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nis]);
+            $tagihan = paymentMergeTunggakanData($tagihan);
             $jenisFromTagihan = paymentNormalizeJenisBayar($tagihan, ['source' => 'tagihan']);
             if (!empty($jenisFromTagihan['success']) && !empty($jenisFromTagihan['data'])) {
                 if (!paymentJenisBayarNeedsTagihanFallback($jenis)) {
@@ -133,6 +134,7 @@ function paymentGetJenisDetail($nis, $jenisId, $kelasSiswa = '')
 {
     if (PAYMENT_API_ENABLED && PAYMENT_API_BASE_URL !== '') {
         $response = paymentSppRequest(PAYMENT_API_ACTION_TAGIHAN, ['nisn' => $nis]);
+        $response = paymentMergeTunggakanData($response);
         return paymentNormalizeJenisDetail($response, $jenisId, $kelasSiswa);
     }
 
@@ -284,6 +286,7 @@ function paymentBuildSubmitPayloads(array $payload)
         $splitPayload['jenis_bayar_id'] = $itemId;
         $splitPayload['jenis_bayar'] = $itemName;
         $splitPayload['nominal'] = $itemAmount;
+        $splitPayload['tahun_ajaran'] = (string) paymentFirstValue($item, ['tahun_ajaran', 'ta', 'tahun_pelajaran'], '');
         $splitPayload['items'] = [$item];
         $payloads[] = paymentBuildSubmitPayload($splitPayload);
     }
@@ -309,6 +312,11 @@ function paymentBuildSubmitPayload(array $payload)
     $jenisBayar = (string) paymentFirstValue($payload, ['jenis_bayar', 'nama_jenis_bayar'], '');
     $jenisBayarId = paymentResolveSubmitJenisId($jenisBayarId, $jenisBayar);
 
+    $tahunAjaran = (string) paymentFirstValue($payload, ['tahun_ajaran', 'ta', 'tahun_pelajaran'], '');
+    if ($tahunAjaran === '' && $detail !== []) {
+        $tahunAjaran = (string) paymentFirstValue($detail[0], ['tahun_ajaran', 'ta', 'tahun_pelajaran'], '');
+    }
+
     return [
         'ref' => $ref,
         'ref_etab' => $ref,
@@ -329,6 +337,7 @@ function paymentBuildSubmitPayload(array $payload)
         'nominal_bayar' => $nominal,
         'jumlah_bayar' => $nominal,
         'total_bayar' => $nominal,
+        'tahun_ajaran' => $tahunAjaran,
         'metode' => 'potong_tabungan',
         'metode_bayar' => 'potong_tabungan',
         'cara_bayar' => 'potong_tabungan',
@@ -448,6 +457,7 @@ function paymentBuildSubmitItems(array $items)
                 'nominal' => $rowNominal,
                 'jumlah' => $rowNominal,
                 'sisa' => $rowNominal,
+                'tahun_ajaran' => (string) paymentFirstValue($row, ['tahun_ajaran', 'ta', 'tahun_pelajaran', 'thn_ajaran', 'tahun_ajaran_bayar'], ''),
             ];
         }
 
@@ -473,6 +483,7 @@ function paymentBuildSubmitItems(array $items)
             'tipe' => (string) paymentFirstValue($item, ['tipe', 'tipe_bayar'], ''),
             'tipe_bayar' => (string) paymentFirstValue($item, ['tipe_bayar', 'tipe'], ''),
             'kelas' => (string) paymentFirstValue($item, ['kelas', 'kelas_siswa'], ''),
+            'tahun_ajaran' => (string) paymentFirstValue($item, ['tahun_ajaran', 'ta', 'tahun_pelajaran', 'thn_ajaran', 'tahun_ajaran_bayar'], ''),
             'nominal' => $itemNominal,
             'jumlah' => $itemNominal,
             'nominal_bayar' => $itemNominal,
@@ -910,13 +921,94 @@ function paymentNormalizeApiEnvelope($data)
 
 function paymentExtractDataList(array $response)
 {
-    $priority = ['tagihan', 'tagihans', 'data_tagihan', 'pembayaran', 'jenis_bayar', 'jenis', 'items', 'detail', 'details', 'result', 'results', 'data'];
+    $priority = ['tagihan', 'tagihans', 'data_tagihan', 'tunggakan', 'data_tunggakan', 'tunggakan_tahun_ajaran_lama', 'pembayaran', 'jenis_bayar', 'jenis', 'items', 'detail', 'details', 'result', 'results', 'data'];
     $list = paymentFindListByKeys($response, $priority);
     if ($list !== []) {
         return $list;
     }
 
     return paymentArrayToList($response);
+}
+
+function paymentMergeTunggakanData(array $response)
+{
+    $tunggakanKeys = ['tunggakan', 'data_tunggakan', 'tunggakan_tagihan'];
+    $tunggakanData = [];
+
+    // Ambil data tunggakan dari key top-level, lalu hapus key-nya
+    foreach ($tunggakanKeys as $key) {
+        if (isset($response[$key]) && is_array($response[$key])) {
+            $items = paymentArrayToList($response[$key]);
+            foreach ($items as $item) {
+                if (is_array($item) && !paymentRowLooksLikeStudentOnly($item)) {
+                    if (empty($item['tahun_ajaran'])) {
+                        $item['tahun_ajaran'] = 'Tunggakan';
+                    }
+                    $tunggakanData[] = $item;
+                }
+            }
+            unset($response[$key]);
+        }
+    }
+
+    // Ambil data tunggakan bersarang di response.data lalu hapus subkey-nya
+    $data = $response['data'] ?? null;
+    $nestedMode = is_array($data) && !paymentIsList($data) && !paymentLooksLikeRow($data);
+    if ($nestedMode) {
+        foreach ($tunggakanKeys as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $items = paymentArrayToList($data[$key]);
+                foreach ($items as $item) {
+                    if (is_array($item) && !paymentRowLooksLikeStudentOnly($item)) {
+                        if (empty($item['tahun_ajaran'])) {
+                            $item['tahun_ajaran'] = 'Tunggakan';
+                        }
+                        $tunggakanData[] = $item;
+                    }
+                }
+                unset($response['data'][$key]);
+            }
+        }
+    }
+
+    // Handle struktur tunggakan_tahun_ajaran_lama
+    // { "2025/2026": { "tahun_ajaran": "...", "items": [...] }, ... }
+    $tunggakanLama = $response['tunggakan_tahun_ajaran_lama'] ?? null;
+    if (is_array($tunggakanLama)) {
+        foreach ($tunggakanLama as $taKey => $taData) {
+            if (!is_array($taData)) continue;
+            $tahunAjaran = (string) ($taData['tahun_ajaran'] ?? $taKey);
+            $items = isset($taData['items']) && is_array($taData['items']) ? $taData['items'] : [];
+            foreach ($items as $item) {
+                if (is_array($item) && !paymentRowLooksLikeStudentOnly($item)) {
+                    if (empty($item['tahun_ajaran'])) {
+                        $item['tahun_ajaran'] = $tahunAjaran;
+                    }
+                    $tunggakanData[] = $item;
+                }
+            }
+        }
+        unset($response['tunggakan_tahun_ajaran_lama']);
+    }
+
+    if ($tunggakanData === []) {
+        return $response;
+    }
+
+    // Ambil data utama (tagihan) dari response.data
+    $mainData = [];
+    if (isset($response['data']) && is_array($response['data'])) {
+        $items = paymentArrayToList($response['data']);
+        foreach ($items as $item) {
+            if (is_array($item) && !paymentRowLooksLikeStudentOnly($item)) {
+                $mainData[] = $item;
+            }
+        }
+    }
+
+    // Gabungkan: tunggakan di atas, tagihan baru di bawah
+    $response['data'] = array_merge($tunggakanData, $mainData);
+    return $response;
 }
 
 function paymentFindListByKeys(array $value, array $keys)
@@ -1609,6 +1701,7 @@ function paymentBuildJenisFromRows(array $rows, array $context = [])
         'kelas' => $kelas,
         'target_kelas' => $targetKelas,
         'keterangan' => (string) paymentFirstValue($first, ['keterangan', 'deskripsi', 'description'], ''),
+        'tahun_ajaran' => (string) paymentFirstValue($first, ['tahun_ajaran', 'ta', 'tahun_pelajaran', 'thn_ajaran', 'tahun_ajaran_bayar'], ''),
         'kali_cicilan' => (int) paymentFirstValue($first, ['kali_cicilan', 'jumlah_cicilan', 'cicilan'], 0),
         'nominal' => $total,
         'sisa' => $source === 'master' ? 0 : $sisa,
@@ -1641,20 +1734,38 @@ function paymentJenisBayarNeedsTagihanFallback(array $jenis)
 function paymentMergeJenisWithTagihan(array $jenis, array $tagihan)
 {
     $merged = [];
+    $tunggakanItems = [];
     $tagihanMap = [];
 
+    // Pisahkan tunggakan dan tagihan aktif
     foreach (($tagihan['data'] ?? []) as $item) {
         $key = paymentNormalizeNameKey($item['nama'] ?? $item['id'] ?? '');
-        $tagihanMap[$key] = $item;
+        $ta = trim((string) ($item['tahun_ajaran'] ?? ''));
+        if ($ta !== '') {
+            $tunggakanItems[] = $item;
+        } else {
+            // Tagihan aktif: gunakan key unik supaya tidak timpa
+            $uniqueKey = $key . '__' . (count($tagihanMap) + 1);
+            $tagihanMap[$uniqueKey] = $item;
+        }
     }
 
+    // Master hanya dicocokkan dengan tagihan aktif (tanpa tahun_ajaran)
     foreach (($jenis['data'] ?? []) as $item) {
         $key = paymentNormalizeNameKey($item['nama'] ?? $item['id'] ?? '');
-        if (isset($tagihanMap[$key])) {
-            $merged[] = array_merge($item, $tagihanMap[$key]);
-            unset($tagihanMap[$key]);
-            continue;
+        $matched = false;
+
+        foreach ($tagihanMap as $uniqueKey => $tagihanItem) {
+            $tagihanKey = paymentNormalizeNameKey($tagihanItem['nama'] ?? $tagihanItem['id'] ?? '');
+            if ($tagihanKey === $key) {
+                $merged[] = array_merge($item, $tagihanItem);
+                unset($tagihanMap[$uniqueKey]);
+                $matched = true;
+                break;
+            }
         }
+
+        if ($matched) continue;
 
         $item['has_tagihan'] = false;
         $item['lunas'] = false;
@@ -1665,13 +1776,17 @@ function paymentMergeJenisWithTagihan(array $jenis, array $tagihan)
         $merged[] = $item;
     }
 
+    // Sisa tagihan aktif yang tidak cocok dengan master
     foreach ($tagihanMap as $item) {
         $merged[] = $item;
     }
 
+    // Gabungkan: tunggakan dulu, baru tagihan aktif
+    $finalData = array_merge($tunggakanItems, $merged);
+
     return [
         'success' => true,
-        'data' => $merged,
+        'data' => $finalData,
         'raw' => [
             'jenis' => $jenis['raw'] ?? $jenis,
             'tagihan' => $tagihan['raw'] ?? $tagihan,
@@ -1797,9 +1912,13 @@ function paymentNormalizeJenisBayar(array $response, array $context = [])
 
         $nama = paymentResolveJenisName($row);
         $id = paymentResolveJenisId($row, $nama);
+        $tahunAjaran = trim((string) paymentFirstValue($row, ['tahun_ajaran', 'ta', 'tahun_pelajaran', 'thn_ajaran', 'tahun_ajaran_bayar'], ''));
         $dedupeKey = paymentIsGenericPaymentName($nama)
             ? strtolower(paymentSlug($id !== '' ? $id : $nama))
             : strtolower(paymentSlug($nama));
+        if ($tahunAjaran !== '') {
+            $dedupeKey .= '__' . strtolower(paymentSlug($tahunAjaran));
+        }
 
         if (!isset($groups[$dedupeKey])) {
             $groups[$dedupeKey] = [];
