@@ -281,15 +281,15 @@ switch ($action) {
             }
         }
 
-        // Increment versi setiap kali update
+        // Increment versi setiap kali update (reset tiap ganti tahun)
         $versionFile = $rootDir . '/inc/version.json';
         $currentVersion = ['v' => date('y') . (int)date('n') . '01'];
         if (is_file($versionFile)) {
             $vData = json_decode(file_get_contents($versionFile), true);
             if ($vData && isset($vData['v']) && preg_match('/^(\d{2})(\d{1,2})(\d{2})$/', $vData['v'], $vm)) {
-                $vy = (int)$vm[1]; $vmM = (int)$vm[2]; $vs = (int)$vm[3];
+                $vy = (int)$vm[1]; $vs = (int)$vm[3];
                 $cy = (int)date('y'); $cm = (int)date('n');
-                if ($vy === $cy && $vmM === $cm) {
+                if ($vy === $cy) {
                     $currentVersion['v'] = $vy . $cm . str_pad($vs + 1, 2, '0', STR_PAD_LEFT);
                 } else {
                     $currentVersion['v'] = $cy . $cm . '01';
