@@ -174,7 +174,7 @@ $page_title = getPageTitle($current_page);
                 <?php if ($tahunAjaran !== ''): ?>
                 <div class="text-[11px] text-emerald-100/80">
                     <i class="fa-regular fa-calendar mr-1 text-emerald-200"></i>
-                    T.A <?= htmlspecialchars($tahunAjaran) ?>
+                    Tahun Ajaran <?= htmlspecialchars($tahunAjaran) ?>
                 </div>
                 <?php endif; ?>
                 
