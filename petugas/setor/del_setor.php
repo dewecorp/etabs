@@ -15,16 +15,11 @@ if(isset($_GET['kode'])){
     
     $desc = 'Menghapus setoran untuk ' . $data_setor['nama_siswa'] . ' sebesar Rp ' . number_format($data_setor['setor'], 0, ',', '.');
     
-    // Update status di riwayat menjadi Tidak Aktif
-    $data_nama = $_SESSION["ses_nama"];
-    $tgl_hapus = date('Y-m-d H:i:s');
-    $sql_update_riwayat = "UPDATE tb_riwayat 
-                           SET status = 'Tidak Aktif', 
-                               tgl_hapus = '".$tgl_hapus."', 
-                               petugas_hapus = '".mysqli_real_escape_string($koneksi, $data_nama)."'
-                           WHERE id_tabungan_asli = '".mysqli_real_escape_string($koneksi, $data_setor['id_tabungan'])."' 
-                           AND jenis = 'ST'";
-    mysqli_query($koneksi, $sql_update_riwayat);
+    // Hapus juga dari riwayat
+    $sql_hapus_riwayat = "DELETE FROM tb_riwayat 
+                          WHERE id_tabungan_asli = '".mysqli_real_escape_string($koneksi, $data_setor['id_tabungan'])."' 
+                          AND jenis = 'ST'";
+    mysqli_query($koneksi, $sql_hapus_riwayat);
     
     // Hapus dari tabel asli
     $sql_hapus = "DELETE FROM tb_tabungan WHERE id_tabungan='".mysqli_real_escape_string($koneksi, $_GET['kode'])."'";

@@ -1,6 +1,5 @@
 <?php
 if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_POST['id_tabungan']) > 0){
-    $data_nama = $_SESSION["ses_nama"];
     $ids = $_POST['id_tabungan'];
     $ids_escaped = array_map(function($id) use ($koneksi) {
         return "'" . mysqli_real_escape_string($koneksi, $id) . "'";
@@ -14,15 +13,10 @@ if(isset($_POST['id_tabungan']) && is_array($_POST['id_tabungan']) && count($_PO
     $query_get = mysqli_query($koneksi, $sql_get);
     $jumlah_hapus = mysqli_num_rows($query_get);
     
-    $tgl_hapus = date('Y-m-d H:i:s');
-    
-    // Update status di riwayat menjadi Tidak Aktif untuk semua data terpilih
-    $sql_update_riwayat = "UPDATE tb_riwayat 
-                           SET status = 'Tidak Aktif', 
-                               tgl_hapus = '".$tgl_hapus."', 
-                               petugas_hapus = '".mysqli_real_escape_string($koneksi, $data_nama)."'
-                           WHERE id_tabungan_asli IN ($ids_string) AND jenis = 'ST'";
-    mysqli_query($koneksi, $sql_update_riwayat);
+    // Hapus juga dari riwayat
+    $sql_hapus_riwayat = "DELETE FROM tb_riwayat 
+                          WHERE id_tabungan_asli IN ($ids_string) AND jenis = 'ST'";
+    mysqli_query($koneksi, $sql_hapus_riwayat);
     
     // Hapus dari tabel asli
     $sql_hapus = "DELETE FROM tb_tabungan WHERE id_tabungan IN ($ids_string) AND jenis = 'ST'";

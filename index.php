@@ -154,7 +154,7 @@ $page_title = getPageTitle($current_page);
 
 <body class="min-h-screen bg-slate-50 text-slate-900 flex flex-col transition-colors duration-200">
     <!-- Navbar sticky -->
-    <header class="sticky top-0 z-[100] border-b border-emerald-500 bg-emerald-600/95 backdrop-blur-xl shadow-md">
+    <header class="sticky top-0 z-[100] border-b border-emerald-500/60 bg-emerald-600/70 backdrop-blur-2xl shadow-lg shadow-emerald-900/20">
         <div class="flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-lg shadow-emerald-900/20">
@@ -162,18 +162,18 @@ $page_title = getPageTitle($current_page);
                 </div>
                 <div>
                     <h1 class="text-sm font-semibold tracking-tight text-white sm:text-base">e-Tabs Dashboard</h1>
-                    <p class="text-[11px] text-emerald-100/80 sm:text-xs"><?= $nama ?></p>
+                    <p class="text-[11px] text-white/80 sm:text-xs"><?= $nama ?></p>
                 </div>
             </div>
 
             <div class="hidden items-center gap-3 md:flex">
-                <div class="text-[11px] text-emerald-50 mr-2">
-                    <i class="fa-regular fa-calendar-days mr-1 text-emerald-200"></i>
+                <div class="text-[11px] text-white/90 mr-2">
+                    <i class="fa-regular fa-calendar-days mr-1 text-white/70"></i>
                     <?php $date = date('Y-m-d'); echo format_hari_tanggal($date) ?>
                 </div>
                 <?php if ($tahunAjaran !== ''): ?>
-                <div class="text-[11px] text-emerald-100/80">
-                    <i class="fa-regular fa-calendar mr-1 text-emerald-200"></i>
+                <div class="text-[11px] text-white/80">
+                    <i class="fa-regular fa-calendar mr-1 text-white/70"></i>
                     Tahun Ajaran <?= htmlspecialchars($tahunAjaran) ?>
                 </div>
                 <?php endif; ?>
@@ -184,7 +184,7 @@ $page_title = getPageTitle($current_page);
                             <?= substr($data_nama, 0, 2) ?>
                         </div>
                         <span><?= $data_nama ?></span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-emerald-300 group-hover:rotate-180 transition-transform"></i>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-white/60 group-hover:rotate-180 transition-transform"></i>
                     </button>
                     
                     <!-- User Dropdown Menu -->
@@ -210,7 +210,7 @@ $page_title = getPageTitle($current_page);
                 </div>
             </div>
 
-            <button class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500 bg-emerald-700/40 text-emerald-100 hover:bg-emerald-700/60 md:hidden" id="menuToggle">
+            <button class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500 bg-emerald-700/40 text-white/90 hover:bg-emerald-700/60 md:hidden" id="menuToggle">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </div>
@@ -219,16 +219,16 @@ $page_title = getPageTitle($current_page);
     <!-- Konten utama -->
     <main class="flex w-full flex-1 flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:flex-row lg:items-start relative">
         <!-- Sidebar -->
-        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[50] bg-white lg:bg-transparent absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-2xl lg:shadow-none rounded-b-3xl lg:rounded-none border-x border-b border-slate-100 lg:border-none">
+        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[50] bg-emerald-600/70 absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-xl rounded-2xl border-x border-b border-emerald-500/60 lg:border-none backdrop-blur-2xl" style="box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25), 0 10px 10px -5px rgba(0,0,0,0.12)">
             
 
-            <nav class="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm">
-                <p class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Menu Utama</p>
+            <nav class="rounded-2xl bg-emerald-700/30 p-3 text-xs text-white">
+                <p class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-white/70">Menu Utama</p>
                 <ul class="space-y-1.5">
                     <?php if ($data_level == "Administrator") { ?>
                     <li>
-                        <a href="?page=admin" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'admin') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'admin') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=admin" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'admin') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'admin') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-house text-[10px]"></i>
                             </span>
                             Dashboard
@@ -238,19 +238,19 @@ $page_title = getPageTitle($current_page);
                     <!-- Master Data Dropdown -->
                     <li>
                         <div class="flex flex-col gap-1">
-                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 w-full sidebar-dropdown-toggle" data-target="#masterDataMenu">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-white/90 hover:bg-emerald-500/30 hover:text-white w-full sidebar-dropdown-toggle" data-target="#masterDataMenu">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/30 text-white/90">
                                         <i class="fa-solid fa-folder text-[10px]"></i>
                                     </span>
                                     Master Data
                                 </div>
-                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-white/70"></i>
                             </button>
                             <div class="sidebar-dropdown-menu <?= (strpos($current_page, 'MyApp/data_') !== false) ? '' : 'hidden' ?>" id="masterDataMenu">
-                                <ul class="mt-1 space-y-1 pl-8 border-l border-slate-200 ml-3">
-                                    <li><a href="?page=MyApp/data_siswa" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'MyApp/data_siswa') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Data Siswa</a></li>
-                                    <li><a href="?page=MyApp/data_kelas" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'MyApp/data_kelas') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Data Kelas</a></li>
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-emerald-500 ml-3">
+                                    <li><a href="?page=MyApp/data_siswa" class="block py-1.5 hover:text-white <?= ($current_page == 'MyApp/data_siswa') ? 'text-white font-medium' : 'text-white/70' ?>">Data Siswa</a></li>
+                                    <li><a href="?page=MyApp/data_kelas" class="block py-1.5 hover:text-white <?= ($current_page == 'MyApp/data_kelas') ? 'text-white font-medium' : 'text-white/70' ?>">Data Kelas</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -259,28 +259,28 @@ $page_title = getPageTitle($current_page);
                     <!-- Transaksi Dropdown -->
                     <li>
                         <div class="flex flex-col gap-1">
-                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 w-full sidebar-dropdown-toggle" data-target="#transaksiMenu">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-white/90 hover:bg-emerald-500/30 hover:text-white w-full sidebar-dropdown-toggle" data-target="#transaksiMenu">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/30 text-white/90">
                                         <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
                                     </span>
                                     Transaksi
                                 </div>
-                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-white/70"></i>
                             </button>
                             <div class="sidebar-dropdown-menu <?= (in_array($current_page, ['data_setor', 'data_tarik', 'view_kas'])) ? '' : 'hidden' ?>" id="transaksiMenu">
-                                <ul class="mt-1 space-y-1 pl-8 border-l border-slate-200 ml-3">
-                                    <li><a href="?page=data_setor" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_setor') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Setoran</a></li>
-                                    <li><a href="?page=data_tarik" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_tarik') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Penarikan</a></li>
-                                    <li><a href="?page=view_kas" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'view_kas') ? 'text-indigo-600 font-medium' : 'text-slate-500' ?>">Info Kas</a></li>
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-emerald-500 ml-3">
+                                    <li><a href="?page=data_setor" class="block py-1.5 hover:text-white <?= ($current_page == 'data_setor') ? 'text-white font-medium' : 'text-white/70' ?>">Setoran</a></li>
+                                    <li><a href="?page=data_tarik" class="block py-1.5 hover:text-white <?= ($current_page == 'data_tarik') ? 'text-white font-medium' : 'text-white/70' ?>">Penarikan</a></li>
+                                    <li><a href="?page=view_kas" class="block py-1.5 hover:text-white <?= ($current_page == 'view_kas') ? 'text-white font-medium' : 'text-white/70' ?>">Info Kas</a></li>
                                 </ul>
                             </div>
                         </div>
                     </li>
 
                     <li>
-                        <a href="?page=view_tabungan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'view_tabungan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'view_tabungan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=view_tabungan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'view_tabungan') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'view_tabungan') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-book text-[10px]"></i>
                             </span>
                             Tabungan
@@ -288,8 +288,8 @@ $page_title = getPageTitle($current_page);
                     </li>
 
                     <li>
-                        <a href="?page=laporan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'laporan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'laporan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=laporan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'laporan') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'laporan') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-file-invoice text-[10px]"></i>
 
                             </span>
@@ -298,19 +298,19 @@ $page_title = getPageTitle($current_page);
                     </li>
 
                     <li>
-                        <a href="?page=data_riwayat" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'data_riwayat') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'data_riwayat') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=data_riwayat" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'data_riwayat') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'data_riwayat') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-clock-rotate-left text-[10px]"></i>
                             </span>
                             Riwayat
                         </a>
                     </li>
 
-                    <p class="mt-4 mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Pengaturan</p>
+                    <p class="mt-4 mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-white/70">Pengaturan</p>
                     
                     <li>
-                        <a href="?page=MyApp/data_pengguna" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/data_pengguna') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/data_pengguna') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=MyApp/data_pengguna" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/data_pengguna') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/data_pengguna') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-users-gear text-[10px]"></i>
                             </span>
                             Pengguna Sistem
@@ -318,8 +318,8 @@ $page_title = getPageTitle($current_page);
                     </li>
 
                     <li>
-                        <a href="?page=MyApp/data_profil" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/data_profil') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/data_profil') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=MyApp/data_profil" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/data_profil') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/data_profil') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-gear text-[10px]"></i>
                             </span>
                             Pengaturan
@@ -327,8 +327,8 @@ $page_title = getPageTitle($current_page);
                     </li>
 
                     <li>
-                        <a href="?page=MyApp/backup_restore" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/backup_restore') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/backup_restore') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=MyApp/backup_restore" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'MyApp/backup_restore') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'MyApp/backup_restore') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-database text-[10px]"></i>
                             </span>
                             Backup & Restore
@@ -338,8 +338,8 @@ $page_title = getPageTitle($current_page);
                     <?php } else { ?>
                     <!-- Petugas Menu -->
                     <li>
-                        <a href="?page=petugas" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'petugas') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'petugas') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=petugas" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'petugas') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'petugas') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-house text-[10px]"></i>
                             </span>
                             Dashboard
@@ -348,9 +348,9 @@ $page_title = getPageTitle($current_page);
 
                     <li>
                         <div class="flex flex-col gap-1">
-                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 w-full sidebar-dropdown-toggle" data-target="#transaksiMenuPetugas">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-white/90 hover:bg-emerald-500/30 hover:text-white w-full sidebar-dropdown-toggle" data-target="#transaksiMenuPetugas">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/30 text-white/90">
                                         <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
                                     </span>
                                     Transaksi
@@ -358,18 +358,18 @@ $page_title = getPageTitle($current_page);
                                 <i class="fa-solid fa-chevron-down text-[10px]"></i>
                             </button>
                             <div class="sidebar-dropdown-menu <?= (in_array($current_page, ['data_setor', 'data_tarik', 'view_kas'])) ? '' : 'hidden' ?>" id="transaksiMenuPetugas">
-                                <ul class="mt-1 space-y-1 pl-8 border-l border-slate-200 ml-3">
-                                    <li><a href="?page=data_setor" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_setor') ? 'text-indigo-600 font-medium' : 'text-slate-600' ?>">Setoran</a></li>
-                                    <li><a href="?page=data_tarik" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'data_tarik') ? 'text-indigo-600 font-medium' : 'text-slate-600' ?>">Penarikan</a></li>
-                                    <li><a href="?page=view_kas" class="block py-1.5 hover:text-indigo-600 <?= ($current_page == 'view_kas') ? 'text-indigo-600 font-medium' : 'text-slate-600' ?>">Info Kas</a></li>
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-emerald-500 ml-3">
+                                    <li><a href="?page=data_setor" class="block py-1.5 hover:text-white <?= ($current_page == 'data_setor') ? 'text-white font-medium' : 'text-white/70' ?>">Setoran</a></li>
+                                    <li><a href="?page=data_tarik" class="block py-1.5 hover:text-white <?= ($current_page == 'data_tarik') ? 'text-white font-medium' : 'text-white/70' ?>">Penarikan</a></li>
+                                    <li><a href="?page=view_kas" class="block py-1.5 hover:text-white <?= ($current_page == 'view_kas') ? 'text-white font-medium' : 'text-white/70' ?>">Info Kas</a></li>
                                 </ul>
                             </div>
                         </div>
                     </li>
 
                     <li>
-                        <a href="?page=view_tabungan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'view_tabungan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'view_tabungan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=view_tabungan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'view_tabungan') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'view_tabungan') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-book text-[10px]"></i>
                             </span>
                             Tabungan
@@ -377,8 +377,8 @@ $page_title = getPageTitle($current_page);
                     </li>
 
                     <li>
-                        <a href="?page=laporan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'laporan') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'laporan') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=laporan" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'laporan') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'laporan') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-file-invoice text-[10px]"></i>
                             </span>
                             Laporan
@@ -386,8 +386,8 @@ $page_title = getPageTitle($current_page);
                     </li>
 
                     <li>
-                        <a href="?page=data_riwayat" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'data_riwayat') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' ?>">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'data_riwayat') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500' ?>">
+                        <a href="?page=data_riwayat" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs <?= ($current_page == 'data_riwayat') ? 'bg-emerald-500/40 text-white font-semibold' : 'text-white/90 hover:bg-emerald-500/30 hover:text-white' ?>">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg <?= ($current_page == 'data_riwayat') ? 'bg-emerald-400/40 text-white' : 'bg-emerald-500/30 text-white/90' ?>">
                                 <i class="fa-solid fa-clock-rotate-left text-[10px]"></i>
                             </span>
                             Riwayat
@@ -395,9 +395,9 @@ $page_title = getPageTitle($current_page);
                     </li>
                     <?php } ?>
                     
-                    <li class="mt-6 border-t border-slate-200 pt-2">
-                        <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600 group">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-rose-50 text-rose-600 group-hover:bg-rose-100 transition-colors">
+                    <li class="mt-6 border-t border-emerald-500 pt-2">
+                        <a href="logout.php" onclick="confirmLogout(event)" class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-300 hover:bg-emerald-500/30 hover:text-rose-200 group">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/30 text-rose-300 group-hover:bg-emerald-500/50 transition-colors">
                                 <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i>
                             </span>
                             <span class="font-medium">Keluar Sistem</span>
@@ -579,13 +579,13 @@ $page_title = getPageTitle($current_page);
         </section>
     </main>
 
-    <footer class="border-t border-slate-200 bg-white/80 px-4 py-4 sm:px-6 lg:px-8 mt-auto">
-        <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 text-[11px] text-slate-500 sm:flex-row">
+    <footer class="border-t border-emerald-500/60 bg-emerald-600/70 backdrop-blur-2xl px-4 py-4 sm:px-6 lg:px-8 mt-auto">
+        <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 text-[11px] text-white/90 sm:flex-row">
             <p class="text-center sm:text-left">
                 © 2026 e-Tabs • <?= $nama ?> • All rights reserved.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-3">
-                <span class="text-slate-500"><?= $appVersion ?></span>
+                <span class="text-white/70"><?= $appVersion ?></span>
             </div>
         </div>
     </footer>

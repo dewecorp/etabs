@@ -13,15 +13,11 @@ if(isset($_GET['kode'])){
     
     $desc = 'Menghapus penarikan untuk ' . $data_tarik['nama_siswa'] . ' sebesar Rp ' . number_format($data_tarik['tarik'], 0, ',', '.');
     
-    $data_nama = $_SESSION["ses_nama"];
-    $tgl_hapus = date('Y-m-d H:i:s');
-    $sql_update_riwayat = "UPDATE tb_riwayat 
-                           SET status = 'Tidak Aktif', 
-                               tgl_hapus = '".$tgl_hapus."', 
-                               petugas_hapus = '".mysqli_real_escape_string($koneksi, $data_nama)."'
-                           WHERE id_tabungan_asli = '".mysqli_real_escape_string($koneksi, $data_tarik['id_tabungan'])."' 
-                           AND jenis = 'TR'";
-    mysqli_query($koneksi, $sql_update_riwayat);
+    // Hapus juga dari riwayat
+    $sql_hapus_riwayat = "DELETE FROM tb_riwayat 
+                          WHERE id_tabungan_asli = '".mysqli_real_escape_string($koneksi, $data_tarik['id_tabungan'])."' 
+                          AND jenis = 'TR'";
+    mysqli_query($koneksi, $sql_hapus_riwayat);
     
     $sql_hapus = "DELETE FROM tb_tabungan WHERE id_tabungan='".mysqli_real_escape_string($koneksi, $_GET['kode'])."'";
     $query_hapus = mysqli_query($koneksi, $sql_hapus);
