@@ -486,12 +486,12 @@ if (isset($_POST['Ubah'])) {
                         <select name="nis" id="nis_add" class="auth-input appearance-none pr-9 select2" required>
                             <option value="">-- Pilih --</option>
                             <?php
-                            $query = "select * from tb_siswa where status='Aktif'";
+                            $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas where s.status='Aktif'";
                             $hasil = mysqli_query($koneksi, $query);
                             while ($row = mysqli_fetch_array($hasil)) {
                             ?>
                             <option value="<?php echo $row['nis'] ?>">
-                                <?php echo $row['nama_siswa'] ?> - <?php echo $row['nis'] ?>
+                                <?php echo $row['nama_siswa'] ?> - <?php echo $row['kelas'] ?>
                             </option>
                             <?php } ?>
                         </select>
@@ -600,12 +600,12 @@ if (isset($_POST['Ubah'])) {
                     <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9 select2" required>
                         <option value="">-- Pilih --</option>
                         <?php
-                        $query = "select * from tb_siswa";
+                        $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas";
                         $hasil = mysqli_query($koneksi, $query);
                         while ($row = mysqli_fetch_array($hasil)) {
                         ?>
                         <option value="<?php echo $row['nis'] ?>">
-                            <?php echo $row['nis'] ?> - <?php echo $row['nama_siswa'] ?>
+                            <?php echo $row['nama_siswa'] ?> - <?php echo $row['kelas'] ?>
                         </option>
                         <?php } ?>
                     </select>
