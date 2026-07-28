@@ -94,7 +94,7 @@ CREATE TABLE `tb_siswa` (
   `jekel` enum('LK','PR') NOT NULL,
   `id_kelas` int(11) NOT NULL,
   `status` enum('Aktif','Lulus','Pindah') NOT NULL,
-  `th_masuk` year(4) NOT NULL
+  `th_masuk` year(4) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

@@ -22,6 +22,14 @@ if (!file_exists($koneksi_path)) {
 }
 include $koneksi_path;
 
+// Auto migrate: allow NULL on th_masuk
+$check = $koneksi->query("SHOW COLUMNS FROM tb_siswa LIKE 'th_masuk'");
+if ($check && $row = $check->fetch_assoc()) {
+    if ($row['Null'] === 'NO') {
+        $koneksi->query("ALTER TABLE tb_siswa MODIFY th_masuk year(4) NULL");
+    }
+}
+
 // Check database connection
 if (!isset($koneksi) || !$koneksi) {
     echo json_encode(['success' => false, 'message' => 'Koneksi database tidak tersedia']);
@@ -111,7 +119,7 @@ try {
             $nama_siswa = mysqli_real_escape_string($koneksi, trim($row[1]));
             $jekel_input = mysqli_real_escape_string($koneksi, strtoupper(trim($row[2])));
             $kelas = mysqli_real_escape_string($koneksi, trim($row[3]));
-            $th_masuk = mysqli_real_escape_string($koneksi, trim($row[4]));
+            $th_masuk = "NULL";
             $status = isset($row[5]) ? mysqli_real_escape_string($koneksi, trim($row[5])) : 'Aktif';
             
             // Validasi data
@@ -155,7 +163,7 @@ try {
                     nama_siswa = '$nama_siswa',
                     jekel = '$jekel',
                     id_kelas = '$id_kelas',
-                    th_masuk = '$th_masuk',
+                    th_masuk = $th_masuk,
                     status = '$status'
                     WHERE nis = '$nis'";
                 $query_update = mysqli_query($koneksi, $sql_update);
@@ -169,7 +177,7 @@ try {
             } else {
                 // Insert data baru
                 $sql_insert = "INSERT INTO tb_siswa (nis, nama_siswa, jekel, id_kelas, status, th_masuk) 
-                    VALUES ('$nis', '$nama_siswa', '$jekel', '$id_kelas', '$status', '$th_masuk')";
+                    VALUES ('$nis', '$nama_siswa', '$jekel', '$id_kelas', '$status', $th_masuk)";
                 $query_insert = mysqli_query($koneksi, $sql_insert);
                 
                 if ($query_insert) {

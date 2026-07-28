@@ -1,15 +1,22 @@
 <?php
+// Auto migrate: allow NULL on th_masuk
+$check = $koneksi->query("SHOW COLUMNS FROM tb_siswa LIKE 'th_masuk'");
+if ($check && $row = $check->fetch_assoc()) {
+    if ($row['Null'] === 'NO') {
+        $koneksi->query("ALTER TABLE tb_siswa MODIFY th_masuk year(4) NULL");
+    }
+}
+
 // Load PhpSpreadsheet library - Pindahkan ke blok yang memerlukannya agar tidak crash di hosting jika vendor/autoload.php bermasalah
 // use PhpOffice\PhpSpreadsheet\IOFactory;
 
 if (isset($_POST['Simpan'])) {
-    $sql_simpan = "INSERT INTO tb_siswa (nis,nama_siswa,jekel,id_kelas,status,th_masuk) VALUES (
+    $sql_simpan = "INSERT INTO tb_siswa (nis,nama_siswa,jekel,id_kelas,status) VALUES (
         '".$_POST['nis']."',
         '".$_POST['nama_siswa']."',
         '".$_POST['jekel']."',
         '".$_POST['id_kelas']."',
-        'Aktif',
-        '".$_POST['th_masuk']."')";
+        'Aktif')";
     $query_simpan = mysqli_query($koneksi, $sql_simpan);
     
     if ($query_simpan) {
@@ -80,8 +87,7 @@ if (isset($_POST['Ubah'])) {
     $sql_ubah = "UPDATE tb_siswa SET
         nama_siswa='".$_POST['nama_siswa']."',
         jekel='".$_POST['jekel']."',
-        id_kelas='".$_POST['id_kelas']."',
-        th_masuk='".$_POST['th_masuk']."'
+        id_kelas='".$_POST['id_kelas']."'
         WHERE nis='".$_POST['nis']."'";
     $query_ubah = mysqli_query($koneksi, $sql_ubah);
 
@@ -204,7 +210,7 @@ if (isset($_POST['simpan'])) {
                     $nama_siswa = mysqli_real_escape_string($koneksi, trim($row[1]));
                     $jekel_input = mysqli_real_escape_string($koneksi, strtoupper(trim($row[2])));
                     $kelas = mysqli_real_escape_string($koneksi, trim($row[3]));
-                    $th_masuk = mysqli_real_escape_string($koneksi, trim($row[4]));
+                    $th_masuk = "NULL";
                     $status = isset($row[5]) ? mysqli_real_escape_string($koneksi, trim($row[5])) : 'Aktif';
                     
                     // Validasi data
@@ -248,7 +254,7 @@ if (isset($_POST['simpan'])) {
                             nama_siswa = '$nama_siswa',
                             jekel = '$jekel',
                             id_kelas = '$id_kelas',
-                            th_masuk = '$th_masuk',
+                            th_masuk = $th_masuk,
                             status = '$status'
                             WHERE nis = '$nis'";
                         $query_update = mysqli_query($koneksi, $sql_update);
@@ -262,7 +268,7 @@ if (isset($_POST['simpan'])) {
                     } else {
                         // Insert data baru
                         $sql_insert = "INSERT INTO tb_siswa (nis, nama_siswa, jekel, id_kelas, status, th_masuk) 
-                            VALUES ('$nis', '$nama_siswa', '$jekel', '$id_kelas', '$status', '$th_masuk')";
+                            VALUES ('$nis', '$nama_siswa', '$jekel', '$id_kelas', '$status', $th_masuk)";
                         $query_insert = mysqli_query($koneksi, $sql_insert);
                         
                         if ($query_insert) {
@@ -486,7 +492,7 @@ if (isset($_POST['simpan'])) {
                               while ($data= $sql->fetch_assoc()) {
                       ?>
 
-                            <tr data-nis="<?php echo $data['nis']; ?>" data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>" data-jekel="<?php echo $data['jekel']; ?>" data-id_kelas="<?php echo $data['id_kelas']; ?>" data-kelas="<?php echo htmlspecialchars($data['kelas']); ?>" data-status="<?php echo $data['status']; ?>" data-th_masuk="<?php echo $data['th_masuk']; ?>">
+                            <tr data-nis="<?php echo $data['nis']; ?>" data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>" data-jekel="<?php echo $data['jekel']; ?>" data-id_kelas="<?php echo $data['id_kelas']; ?>" data-kelas="<?php echo htmlspecialchars($data['kelas']); ?>" data-status="<?php echo $data['status']; ?>">
                                 <td>
                                     <input type="checkbox" name="nis[]" class="checkItem" value="<?php echo $data['nis']; ?>" onchange="toggleButtonsSiswa()">
                                 </td>
@@ -539,7 +545,6 @@ if (isset($_POST['simpan'])) {
                                     data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>"
                                     data-jekel="<?php echo $data['jekel']; ?>"
                                     data-id_kelas="<?php echo $data['id_kelas']; ?>"
-                                    data-th_masuk="<?php echo $data['th_masuk']; ?>"
                                     title="Ubah">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
@@ -967,7 +972,6 @@ function loadDataForEdit(nisArray) {
     $('#formEditMultiple').find('input[name="nama_siswa[]"]').remove();
     $('#formEditMultiple').find('select[name="jekel[]"]').remove();
     $('#formEditMultiple').find('select[name="id_kelas[]"]').remove();
-    $('#formEditMultiple').find('input[name="th_masuk[]"]').remove();
     $('#formEditMultiple').find('select[name="status[]"]').remove();
     
     var count = 0;
@@ -979,8 +983,6 @@ function loadDataForEdit(nisArray) {
             var jekel = row.attr('data-jekel');
             var id_kelas = row.attr('data-id_kelas');
             var status = row.attr('data-status');
-            var th_masuk = row.attr('data-th_masuk');
-            
             // Buat select kelas dengan option yang sudah di-set selected
             var selectKelas = $('<select>', {
                 class: 'form-control',
@@ -1028,15 +1030,6 @@ function loadDataForEdit(nisArray) {
                     text: 'PR'
                 }))))
                 .append($('<td>').append(selectKelas.addClass('block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500')))
-                .append($('<td>').append($('<input>', {
-                    type: 'number',
-                    class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
-                    name: 'th_masuk[]',
-                    value: th_masuk,
-                    required: true,
-                    min: '1900',
-                    max: '2099'
-                })))
                 .append($('<td>').append($('<select>', {
                     class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
                     name: 'status[]',
@@ -1283,10 +1276,7 @@ window.syncSimad = syncSimad;
                         <label class="text-sm font-medium text-slate-700">NIS</label>
                         <input type="text" name="nis" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="NIS" required>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">Tahun Masuk</label>
-                        <input type="number" name="th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Tahun Masuk" required>
-                    </div>
+
                 </div>
                 
                 <div class="space-y-1.5">
@@ -1355,10 +1345,7 @@ window.syncSimad = syncSimad;
                         <label class="text-sm font-medium text-slate-700">NIS</label>
                         <input type="text" name="nis" id="edit_nis" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none" readonly>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">Tahun Masuk</label>
-                        <input type="number" name="th_masuk" id="edit_th_masuk" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required>
-                    </div>
+
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Nama Siswa</label>
@@ -1412,12 +1399,10 @@ window.syncSimad = syncSimad;
             var nama = $(this).data('nama');
             var jekel = $(this).data('jekel');
             var id_kelas = $(this).data('id_kelas');
-            var th_masuk = $(this).data('th_masuk');
             $('#edit_nis').val(nis);
             $('#edit_nama_siswa').val(nama);
             $('#edit_jekel').val(jekel);
             $('#edit_id_kelas').val(id_kelas);
-            $('#edit_th_masuk').val(th_masuk);
         }
         $(target).removeClass('hidden').addClass('flex');
     });

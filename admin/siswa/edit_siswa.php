@@ -1,4 +1,11 @@
 <?php
+// Auto migrate: allow NULL on th_masuk
+$check = $koneksi->query("SHOW COLUMNS FROM tb_siswa LIKE 'th_masuk'");
+if ($check && $row = $check->fetch_assoc()) {
+    if ($row['Null'] === 'NO') {
+        $koneksi->query("ALTER TABLE tb_siswa MODIFY th_masuk year(4) NULL");
+    }
+}
 
     if(isset($_GET['kode'])){
         $sql_cek = "SELECT * FROM tb_siswa WHERE nis='".$_GET['kode']."'";
@@ -71,10 +78,6 @@
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700  Masuk</label>"><input class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     name="th_masuk" value="<?php echo $data_cek['th_masuk']; ?>">
-                    </div>
-
-                    <div class="space-y-1.5">
                         <label class="text-sm font-medium text-slate-700">
                         <select name="status" id="status" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
                             <?php
@@ -113,7 +116,6 @@ if (isset ($_POST['Ubah'])){
         nama_siswa='".$_POST['nama_siswa']."',
         jekel='".$_POST['jekel']."',
         id_kelas='".$_POST['id_kelas']."',
-        th_masuk='".$_POST['th_masuk']."',
         status='".$_POST['status']."'
         WHERE nis='".$_POST['nis']."'";
     $query_ubah = mysqli_query($koneksi, $sql_ubah);

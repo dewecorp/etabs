@@ -46,7 +46,7 @@ function createTemplateSheet($spreadsheet, $kelas_name, $is_first = false) {
     $sheet->setTitle($sheet_title);
     
     // Header row dengan styling
-    $headers = ['NIS', 'Nama Siswa', 'Jenis Kelamin', 'Kelas', 'Tahun Masuk', 'Status'];
+    $headers = ['NIS', 'Nama Siswa', 'Jenis Kelamin', 'Kelas', 'Status'];
     $sheet->fromArray($headers, NULL, 'A1');
     
     // Style header
@@ -71,7 +71,7 @@ function createTemplateSheet($spreadsheet, $kelas_name, $is_first = false) {
         ],
     ];
     
-    $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+    $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
     
     // Set column widths
     $sheet->getColumnDimension('A')->setWidth(15);
@@ -79,13 +79,12 @@ function createTemplateSheet($spreadsheet, $kelas_name, $is_first = false) {
     $sheet->getColumnDimension('C')->setWidth(18);
     $sheet->getColumnDimension('D')->setWidth(20);
     $sheet->getColumnDimension('E')->setWidth(15);
-    $sheet->getColumnDimension('F')->setWidth(15);
     
     // Tambahkan contoh data (3 baris)
     $examples = [
-        ['123456789012', 'Ahmad Fauzi', 'L', $kelas_name, date('Y'), 'Aktif'],
-        ['123456789013', 'Siti Nurhaliza', 'P', $kelas_name, date('Y'), 'Aktif'],
-        ['123456789014', 'Budi Santoso', 'L', $kelas_name, date('Y'), 'Aktif'],
+        ['123456789012', 'Ahmad Fauzi', 'L', $kelas_name, 'Aktif'],
+        ['123456789013', 'Siti Nurhaliza', 'P', $kelas_name, 'Aktif'],
+        ['123456789014', 'Budi Santoso', 'L', $kelas_name, 'Aktif'],
     ];
     
     $row = 2;
@@ -110,7 +109,6 @@ function createTemplateSheet($spreadsheet, $kelas_name, $is_first = false) {
         $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('E' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         
         $row++;
     }
