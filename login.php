@@ -44,7 +44,7 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.4);
         }
         .auth-input {
             background: rgba(255, 255, 255, 0.05);
@@ -61,7 +61,7 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
         .auth-input:focus {
             outline: none;
             border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
             background: rgba(255, 255, 255, 0.1);
         }
     </style>
@@ -71,7 +71,7 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
     <div class="w-full max-w-md">
         <div class="auth-card p-6">
             <div class="text-center mb-6">
-                <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg shadow-indigo-500/10 mb-4 overflow-hidden p-2">
+                <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg shadow-emerald-500/10 mb-4 overflow-hidden p-2">
                     <img src="<?php echo $logo_path; ?>" alt="Logo" class="h-full w-full object-contain" onerror="this.src='images/logo.png'">
                 </div>
                 <h2 class="text-2xl font-bold text-white tracking-tight">E-Tabungan Siswa</h2>

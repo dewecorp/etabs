@@ -154,8 +154,8 @@ $activity_count = getActivityCount($koneksi);
 }
 
 .timeline > li > .timeline-item {
-	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-	box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 1px 1px rgba(16, 185, 129, 0.1);
+	box-shadow: 0 1px 1px rgba(16, 185, 129, 0.1);
 	border-radius: 3px;
 	margin-top: 0;
 	background: #fff;

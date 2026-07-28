@@ -236,7 +236,7 @@
 					</div>
 				</div>
 				<div class="border-t border-slate-100 p-6  mt-auto">
-					<button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 sm:w-auto tw-modal-open" data-target="#editProfilModal">
+					<button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 sm:w-auto tw-modal-open" data-target="#editProfilModal">
 						<i class="fa-solid fa-pen-to-square"></i> Edit Profil Sekolah
 					</button>
 				</div>
@@ -313,7 +313,7 @@
 
                     <form action="" method="post">
                         <input type="hidden" name="ResetTabungan" value="1">
-                        <button type="button" onclick="konfirmasiReset()" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/30 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                        <button type="button" onclick="konfirmasiReset()" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-rose-700 hover:shadow-lg hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
                             <i class="fa-solid fa-trash-can"></i> Reset Data Tabungan
                         </button>
                          <button type="submit" id="btnResetReal" class="hidden"></button>
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <!-- Footer -->
             <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100 ">
                 <button type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-200    tw-modal-close">Batal</button>
-                <button type="submit" name="Ubah" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-lg shadow-indigo-500/30">Simpan Perubahan</button>
+                <button type="submit" name="Ubah" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 shadow-lg shadow-emerald-500/30">Simpan Perubahan</button>
             </div>
         </form>
     </div>

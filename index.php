@@ -219,7 +219,7 @@ $page_title = getPageTitle($current_page);
     <!-- Konten utama -->
     <main class="flex w-full flex-1 flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:flex-row lg:items-start relative">
         <!-- Sidebar -->
-        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[50] bg-emerald-600/70 absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-xl rounded-2xl border-x border-b border-emerald-500/60 lg:border-none backdrop-blur-2xl" style="box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25), 0 10px 10px -5px rgba(0,0,0,0.12)">
+        <aside id="sidebar" class="order-1 w-full space-y-4 hidden md:block lg:w-64 lg:sticky lg:top-20 z-[50] bg-emerald-600/70 absolute lg:relative left-0 top-0 h-fit lg:h-auto p-4 lg:p-0 shadow-xl rounded-2xl border-x border-b border-emerald-500/60 lg:border-none backdrop-blur-2xl">
             
 
             <nav class="rounded-2xl bg-emerald-700/30 p-3 text-xs text-white">

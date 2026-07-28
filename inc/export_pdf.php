@@ -254,7 +254,7 @@ function exportToPDF($title, $headers, $data, $filename = null, $profil_data = n
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(16, 185, 129, 0.2);
         }
         .print-btn button:hover {
             background-color: #333 !important;

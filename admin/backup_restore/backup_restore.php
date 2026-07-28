@@ -541,7 +541,7 @@ if (isset($_POST['restore'])) {
                     </div>
                 </div>
                 <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
-                    <button type="submit" name="backup" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+                    <button type="submit" name="backup" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-emerald-500/30 transition-all">
                         <i class="fa-solid fa-download"></i>
                         <span>Buat Backup Sekarang</span>
                     </button>
@@ -651,7 +651,7 @@ if (isset($_POST['restore'])) {
                                     echo '<td class="text-center">';
                                     echo '<div class="flex items-center justify-center gap-2">';
                                     echo '<a href="' . $filepath . '" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-sm transition-all hover:bg-emerald-600 hover:shadow-emerald-500/30" download title="Download Backup"><i class="fa-solid fa-download"></i></a> ';
-                                    echo '<a href="?page=MyApp/backup_restore&hapus_backup=' . urlencode($filename) . '" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500 text-white shadow-sm transition-all hover:bg-rose-600 hover:shadow-rose-500/30 btn-hapus" title="Hapus Backup"><i class="fa-solid fa-trash"></i></a>';
+                                    echo '<a href="?page=MyApp/backup_restore&hapus_backup=' . urlencode($filename) . '" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500 text-white shadow-sm transition-all hover:bg-rose-600 hover:shadow-emerald-500/30 btn-hapus" title="Hapus Backup"><i class="fa-solid fa-trash"></i></a>';
                                     echo '</div>';
                                     echo '</td>';
                                     echo '</tr>';
@@ -681,10 +681,10 @@ if (isset($_POST['restore'])) {
             btnRestore.disabled = !this.checked;
             if (this.checked) {
                 btnRestore.classList.remove('opacity-50', 'cursor-not-allowed');
-                btnRestore.classList.add('hover:bg-amber-700', 'hover:shadow-lg', 'hover:shadow-amber-500/30');
+                btnRestore.classList.add('hover:bg-amber-700', 'hover:shadow-lg', 'hover:shadow-emerald-500/30');
             } else {
                 btnRestore.classList.add('opacity-50', 'cursor-not-allowed');
-                btnRestore.classList.remove('hover:bg-amber-700', 'hover:shadow-lg', 'hover:shadow-amber-500/30');
+                btnRestore.classList.remove('hover:bg-amber-700', 'hover:shadow-lg', 'hover:shadow-emerald-500/30');
             }
         });
     }
@@ -737,7 +737,7 @@ if (isset($_POST['restore'])) {
 }
 
 .box {
-    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.12), 0 1px 2px rgba(16, 185, 129, 0.24);
     border-radius: 4px;
 }
 </style>

@@ -77,11 +77,11 @@
 .btn-dashboard-primary {
     background-image: linear-gradient(to bottom right, #4f46e5, #3b82f6); /* from-indigo-600 to-blue-500 */
     color: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
 }
 .btn-dashboard-primary:hover {
     background-image: linear-gradient(to bottom right, #4338ca, #2563eb);
-    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2), 0 4px 6px -2px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2), 0 4px 6px -2px rgba(16, 185, 129, 0.1);
 }
 
 /* Soft Button (Light Background) */
@@ -136,7 +136,7 @@
 .auth-input:focus {
     outline: none;
     border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 /* Select2 styled to match auth-input/Tailwind look */
@@ -170,15 +170,15 @@
 
 .select2-container--default.select2-container--open .select2-selection--single,
 .select2-container--default .select2-selection--single:focus {
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
 }
 
 .select2-dropdown {
     border: 1px solid #e2e8f0 !important;
     border-radius: 0.75rem !important;
     overflow: hidden !important;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.12) !important;
     max-width: calc(100vw - 2rem) !important;
 }
 
@@ -219,7 +219,7 @@ body.select2-page-scroll-lock .select2-results__options {
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-    background-color: #4f46e5 !important;
+    background-color: #10b981 !important;
     color: #ffffff !important;
 }
 
@@ -324,8 +324,8 @@ body.modal-open #sidebar {
     background-color: #f8fafc;
 }
 .page-item.active .page-link {
-    background-color: #6366f1;
-    border-color: #6366f1;
+    background-color: #10b981;
+    border-color: #10b981;
     color: #ffffff;
 }
 .page-item.disabled .page-link {
@@ -341,6 +341,15 @@ body.modal-open #sidebar {
 }
 .bg-slate-800 {
     background-color: #ffffff !important;
+}
+
+/* Emerald shadow untuk card, box, container */
+.rounded-2xl.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(16, 185, 129, 0.1), 0 1px 3px 0 rgba(16, 185, 129, 0.06);
+}
+.rounded-2xl.shadow-xl,
+.modal .shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.15), 0 10px 10px -5px rgba(16, 185, 129, 0.1);
 }
 .bg-slate-950\/80 {
     background-color: rgba(255, 255, 255, 0.8) !important;

@@ -192,7 +192,7 @@ $activity_count = getActivityCount($koneksi);
 	background-color: #fff;
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+	box-shadow: 0 1px 1px rgba(16, 185, 129, 0.1);
 }
 
 .timeline > li > .fa {

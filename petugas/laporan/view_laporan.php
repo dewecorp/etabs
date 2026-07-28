@@ -44,7 +44,7 @@
 			<!-- /.box-body -->
 
 			<div class="px-6 py-4 bg-slate-50 border-t border-slate-100   flex justify-end">
-				<button type="submit" name="btnCetak" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+				<button type="submit" name="btnCetak" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-emerald-500/30 transition-all">
                     <i class="fa-solid fa-print"></i> Cetak
                 </button>
 			</div>
