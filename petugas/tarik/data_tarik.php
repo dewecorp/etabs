@@ -486,7 +486,7 @@ if (isset($_POST['Ubah'])) {
                         <select name="nis" id="nis_add" class="auth-input appearance-none pr-9 select2" required>
                             <option value="">-- Pilih --</option>
                             <?php
-                            $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas where s.status='Aktif'";
+                            $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas where s.status='Aktif' ORDER BY k.kelas ASC, s.nama_siswa ASC";
                             $hasil = mysqli_query($koneksi, $query);
                             while ($row = mysqli_fetch_array($hasil)) {
                             ?>
@@ -600,7 +600,7 @@ if (isset($_POST['Ubah'])) {
                     <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9 select2" required>
                         <option value="">-- Pilih --</option>
                         <?php
-                        $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas";
+                        $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
                         $hasil = mysqli_query($koneksi, $query);
                         while ($row = mysqli_fetch_array($hasil)) {
                         ?>
