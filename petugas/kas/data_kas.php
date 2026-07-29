@@ -10,6 +10,22 @@ $data_tarik = $sql_tarik ? $sql_tarik->fetch_assoc() : ['Ttarik' => 0];
 $tarik = isset($data_tarik['Ttarik']) && is_numeric($data_tarik['Ttarik']) ? (float)$data_tarik['Ttarik'] : 0;
 
 $saldo = $setor - $tarik;
+
+// Progress bar calculations
+$pct_tarik = $setor > 0 ? round(($tarik / $setor) * 100) : 0;
+$pct_saldo = $setor > 0 ? round(($saldo / $setor) * 100) : 0;
+
+function progressColor($pct, $mode = 'tarik') {
+    if ($mode === 'tarik') {
+        if ($pct < 50) return 'bg-emerald-500';
+        if ($pct < 80) return 'bg-amber-500';
+        return 'bg-rose-500';
+    }
+    // saldo mode
+    if ($pct > 50) return 'bg-emerald-500';
+    if ($pct > 20) return 'bg-amber-500';
+    return 'bg-rose-500';
+}
 ?>
 
 
@@ -46,8 +62,12 @@ $saldo = $setor - $tarik;
                             <i class="fa-solid fa-arrow-down-long text-emerald-600 text-lg"></i>
                         </div>
                     </div>
-                    <div class="mt-3 h-1 w-full rounded-full bg-emerald-200/40">
-                        <div class="h-1 rounded-full bg-emerald-500" style="width: 70%"></div>
+                    <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-emerald-200/40">
+                        <div class="h-1.5 rounded-full transition-all duration-500 bg-emerald-500" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-1 flex justify-between text-[10px] text-slate-500">
+                        <span>Basis total setoran</span>
+                        <span class="font-medium text-emerald-600">100%</span>
                     </div>
                 </a>
                 <a href="?page=data_tarik" class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-rose-50 to-white p-5 shadow-sm transition-all hover:border-rose-500/40 hover:shadow-lg">
@@ -60,8 +80,13 @@ $saldo = $setor - $tarik;
                             <i class="fa-solid fa-arrow-up-long text-rose-600 text-lg"></i>
                         </div>
                     </div>
-                    <div class="mt-3 h-1 w-full rounded-full bg-rose-200/40">
-                        <div class="h-1 rounded-full bg-rose-500" style="width: 40%"></div>
+                    <?php $warna_tarik = progressColor($pct_tarik, 'tarik'); ?>
+                    <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-rose-200/40">
+                        <div class="h-1.5 rounded-full transition-all duration-500 <?= $warna_tarik ?>" style="width: <?= min($pct_tarik, 100) ?>%"></div>
+                    </div>
+                    <div class="mt-1 flex justify-between text-[10px] text-slate-500">
+                        <span>Dari total setoran</span>
+                        <span class="font-medium <?= $pct_tarik < 50 ? 'text-emerald-600' : ($pct_tarik < 80 ? 'text-amber-600' : 'text-rose-600') ?>"><?= $pct_tarik ?>%</span>
                     </div>
                 </a>
                 <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm transition-all hover:border-amber-500/40 hover:shadow-lg">
@@ -74,8 +99,13 @@ $saldo = $setor - $tarik;
                             <i class="fa-solid fa-wallet text-amber-600 text-lg"></i>
                         </div>
                     </div>
-                    <div class="mt-3 h-1 w-full rounded-full bg-amber-200/40">
-                        <div class="h-1 rounded-full bg-amber-500" style="width: 55%"></div>
+                    <?php $warna_saldo = progressColor($pct_saldo, 'saldo'); ?>
+                    <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-amber-200/40">
+                        <div class="h-1.5 rounded-full transition-all duration-500 <?= $warna_saldo ?>" style="width: <?= min($pct_saldo, 100) ?>%"></div>
+                    </div>
+                    <div class="mt-1 flex justify-between text-[10px] text-slate-500">
+                        <span>Sisa dari total setoran</span>
+                        <span class="font-medium <?= $pct_saldo > 50 ? 'text-emerald-600' : ($pct_saldo > 20 ? 'text-amber-600' : 'text-rose-600') ?>"><?= $pct_saldo ?>%</span>
                     </div>
                 </div>
             </div>

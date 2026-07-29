@@ -53,7 +53,7 @@ ob_start();
 <html lang="id">
 <head>
 	<meta charset="UTF-8">
-	<title>Cetak Tabungan</title>
+	<title>Cetak Tabungan - <?php echo htmlspecialchars($data_siswa['nama_siswa']); ?></title>
 	<style>
 		body {
 			font-family: 'Arial', sans-serif;
@@ -229,14 +229,14 @@ ob_start();
 		</div>
 	</div>
 	
-	<div class="report-title">Laporan Tabungan Siswa</div>
+	<div class="report-title">Laporan Tabungan - <?php echo htmlspecialchars($data_siswa['nama_siswa']); ?></div>
 	
 	<div class="motto">Rajin Pangkal Pandai. Hemat Pangkal Kaya</div>
 	
 	<div class="student-info">
 		<table>
 			<tr>
-				<td>NIS</td>
+				<td>NISN</td>
 				<td>:</td>
 				<td><?php echo htmlspecialchars($data_siswa['nis']); ?></td>
 			</tr>
