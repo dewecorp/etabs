@@ -324,8 +324,9 @@ if (isset($_POST['Ubah'])) {
 									<input type="checkbox" id="checkAll" title="Pilih Semua" onchange="handleCheckAllClick(this)">
 								</th>
 								<th class="px-4 py-3 font-medium text-center" width="40px">No</th>
-								<th class="px-4 py-3 font-medium">NIS</th>
+								<th class="px-4 py-3 font-medium">NISN</th>
 								<th class="px-4 py-3 font-medium">Nama</th>
+								<th class="px-4 py-3 font-medium">Kelas</th>
 								<th class="px-4 py-3 font-medium">Tanggal</th>
 								<th class="px-4 py-3 font-medium">Tujuan</th>
 								<th class="px-4 py-3 font-medium">Jenis / Keterangan</th>
@@ -339,9 +340,10 @@ if (isset($_POST['Ubah'])) {
 							<?php
 
                   $no = 1;
-				  $sql = $koneksi->query("select s.nis, s.nama_siswa, t.id_tabungan, t.tarik, t.tgl, t.petugas,
+				  $sql = $koneksi->query("select s.nis, s.nama_siswa, k.kelas, t.id_tabungan, t.tarik, t.tgl, t.petugas,
 				  t.tujuan_tarik, t.jenis_bayar, t.keterangan_tarik, t.payment_sync, t.payment_ref from 
-				  tb_siswa s join tb_tabungan t on s.nis=t.nis 
+				  tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas 
+				  join tb_tabungan t on s.nis=t.nis 
 				  where jenis ='TR' order by tgl desc, id_tabungan desc");
                   while ($data= $sql->fetch_assoc()) {
                 ?>
@@ -358,6 +360,9 @@ if (isset($_POST['Ubah'])) {
 							</td>
 							<td class="px-4 py-3">
 								<?php echo $data['nama_siswa']; ?>
+							</td>
+							<td class="px-4 py-3">
+								<?php echo $data['kelas']; ?>
 							</td>
 							<td class="px-4 py-3">
                                 <span class="badge-pill badge-pill-secondary inline-flex items-center gap-2">

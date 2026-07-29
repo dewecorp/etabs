@@ -25,7 +25,7 @@
                             <option value="" selected="selected">-- Pilih --</option>
                             <?php
                             // ambil data dari database
-                            $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas where s.status='Aktif'";
+                            $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas where s.status='Aktif' ORDER BY k.kelas ASC, s.nama_siswa ASC";
                             $hasil = mysqli_query($koneksi, $query);
                             while ($row = mysqli_fetch_array($hasil)) {
                             ?>

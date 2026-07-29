@@ -264,8 +264,9 @@ if (isset($_POST['Ubah'])) {
 									<input type="checkbox" id="checkAll" title="Pilih Semua" onchange="handleCheckAllClick(this)">
 								</th>
 								<th class="px-4 py-3 font-medium text-center" width="40px">No</th>
-								<th class="px-4 py-3 font-medium">NIS</th>
+								<th class="px-4 py-3 font-medium">NISN</th>
 								<th class="px-4 py-3 font-medium">Nama</th>
+								<th class="px-4 py-3 font-medium">Kelas</th>
 								<th class="px-4 py-3 font-medium">Tanggal</th>
 								<th class="px-4 py-3 font-medium">Setoran</th>
 								<th class="px-4 py-3 font-medium">Petugas</th>
@@ -277,8 +278,9 @@ if (isset($_POST['Ubah'])) {
 							<?php
 
                   $no = 1;
-				  $sql = $koneksi->query("select s.nis, s.nama_siswa, t.id_tabungan, t.setor, t.tgl, t.petugas from 
-				  tb_siswa s join tb_tabungan t on s.nis=t.nis 
+                  $sql = $koneksi->query("select s.nis, s.nama_siswa, k.kelas, t.id_tabungan, t.setor, t.tgl, t.petugas from 
+				  tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas 
+				  join tb_tabungan t on s.nis=t.nis 
 				  where jenis ='ST' order by tgl desc, id_tabungan desc");
                   while ($data= $sql->fetch_assoc()) {
                 ?>
@@ -295,6 +297,9 @@ if (isset($_POST['Ubah'])) {
 							</td>
 							<td class="px-4 py-3">
 								<?php echo $data['nama_siswa']; ?>
+							</td>
+							<td class="px-4 py-3">
+								<?php echo $data['kelas']; ?>
 							</td>
 							<td class="px-4 py-3">
                                 <span class="badge-pill badge-pill-secondary inline-flex items-center gap-2">
