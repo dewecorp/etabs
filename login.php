@@ -33,84 +33,107 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
     
     <style>
         .auth-bg {
-            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.8)), url('<?php echo $bg_path; ?>');
+            background:
+                radial-gradient(1200px 600px at 10% -10%, rgba(16, 185, 129, 0.20), transparent 60%),
+                radial-gradient(1000px 500px at 110% 110%, rgba(5, 150, 105, 0.18), transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.92)), url('<?php echo $bg_path; ?>');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
         .auth-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.4);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15), 0 8px 20px -8px rgba(16, 185, 129, 0.15);
         }
         .auth-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
             padding: 12px 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             width: 100%;
             transition: all 0.2s ease;
         }
         .auth-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+            color: #94a3b8;
         }
         .auth-input:focus {
             outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-            background: rgba(255, 255, 255, 0.1);
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            background-color: #ffffff;
+        }
+        .btn-login {
+            background-image: linear-gradient(to right, #047857, #10b981);
+            color: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 10px 20px -8px rgba(5, 150, 105, 0.55);
+            transition: all 0.2s ease;
+        }
+        .btn-login:hover {
+            background-image: linear-gradient(to right, #065f46, #059669);
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px -8px rgba(5, 150, 105, 0.6);
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        @media (max-height: 600px) {
+            html, body {
+                overflow-y: auto;
+            }
         }
     </style>
 </head>
 
-<body class="hold-transition auth-bg min-h-screen flex items-center justify-center p-4">
+<body class="hold-transition auth-bg h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-        <div class="auth-card p-6">
+        <div class="auth-card px-7 py-8">
             <div class="text-center mb-6">
-                <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg shadow-emerald-500/10 mb-4 overflow-hidden p-2">
-                    <img src="<?php echo $logo_path; ?>" alt="Logo" class="h-full w-full object-contain" onerror="this.src='images/logo.png'">
+                <img src="<?php echo $logo_path; ?>" alt="Logo" class="h-20 mx-auto object-contain mb-4 drop-shadow-sm" onerror="this.src='images/logo.png'">
+                <h2 class="text-2xl font-bold text-slate-800 tracking-tight">E-Tabungan Siswa</h2>
+                <p class="text-emerald-600 text-sm font-semibold mt-1 uppercase tracking-wide"><?= $nama ?></p>
+            </div>
+
+
+            <form action="#" method="post" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-500 ml-1">Username</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i class="fa-solid fa-user text-xs"></i>
+                        </span>
+                        <input type="text" class="auth-input pl-10" name="username" placeholder="Masukkan username" required autocomplete="username">
+                    </div>
                 </div>
-                <h2 class="text-2xl font-bold text-white tracking-tight">E-Tabungan Siswa</h2>
-                 <p class="text-emerald-400 text-sm font-bold mt-1 uppercase tracking-wide"><?= $nama ?></p>
-             </div>
 
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-500 ml-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </span>
+                        <input type="password" class="auth-input pl-10" name="password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                </div>
 
-             <form action="#" method="post" class="space-y-3">
-                 <div class="space-y-1">
-                     <label class="text-xs font-medium text-slate-400 ml-1">Username</label>
-                     <div class="relative">
-                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                             <i class="fa-solid fa-user text-xs"></i>
-                         </span>
-                         <input type="text" class="auth-input pl-10" name="username" placeholder="Masukkan username" required autocomplete="username">
-                     </div>
-                 </div>
-
-                 <div class="space-y-1">
-                     <label class="text-xs font-medium text-slate-400 ml-1">Password</label>
-                     <div class="relative">
-                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                             <i class="fa-solid fa-lock text-xs"></i>
-                         </span>
-                         <input type="password" class="auth-input pl-10" name="password" placeholder="••••••••" required autocomplete="current-password">
-                     </div>
-                 </div>
-
-                 <button type="submit" class="w-full rounded-xl btn-dashboard-primary mt-6 flex items-center justify-center gap-2 py-3" name="btnLogin">
-                     <span>Masuk</span>
-                     <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
-                 </button>
-             </form>
-             
-             <div class="mt-6 pt-6 border-t border-slate-800 text-center">
-                 <p class="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
-                     &copy; 2026 E-Tabungan Siswa • <?= $nama ?>
-                 </p>
-             </div>
+                <button type="submit" class="btn-login w-full mt-5 flex items-center justify-center gap-2 py-3 font-semibold" name="btnLogin">
+                    <span>Masuk</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                </button>
+            </form>
+            
+            <div class="mt-6 pt-4 border-t border-slate-200/80 text-center">
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
+                    &copy; 2026 E-Tabungan Siswa • <?= $nama ?>
+                </p>
+            </div>
         </div>
     </div>
 
