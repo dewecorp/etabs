@@ -9,6 +9,12 @@ $nama=$data['nama_sekolah'];
 $alamat=$data['alamat'];
 // Handle Logo & Background dynamic
 $logo_path = (isset($data['logo_sekolah']) && !empty($data['logo_sekolah'])) ? 'uploads/logo/' . $data['logo_sekolah'] : 'images/logo.png';
+if (!file_exists($logo_path)) {
+    $logo_path = 'images/logo.png';
+}
+if (isset($data['bg_login']) && !empty($data['bg_login']) && !file_exists('uploads/bg/' . $data['bg_login'])) {
+    $data['bg_login'] = '';
+}
 $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg/' . $data['bg_login'] : 'images/bg_sf.jpg';
 ?>
 
@@ -20,7 +26,7 @@ $bg_path = (isset($data['bg_login']) && !empty($data['bg_login'])) ? 'uploads/bg
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Login | e-Tabs</title>
-    <link rel="icon" href="<?php echo $logo_path; ?>">
+    <link rel="icon" type="image/png" href="<?php echo $logo_path; ?>?v=<?php echo file_exists($logo_path) ? filemtime($logo_path) : time(); ?>">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     
