@@ -1,2 +1,0 @@
-backup progress mode test
-y
