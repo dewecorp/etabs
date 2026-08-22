@@ -97,27 +97,32 @@ echo    (Menunggu antrian proses file...)
 timeout /t 2 /nobreak >nul
 
 :: Menggunakan PowerShell dengan .NET ZipFile untuk hasil ZIP yang lebih standar dan bersih (Menghindari false positive virus)
+:: Mode progres: tidak menampilkan daftar file, hanya progress bar + ringkasan akhir
 powershell -NoProfile -Command ^
     "$backupFile = '%backupFile%';" ^
     "if (Test-Path $backupFile) { Remove-Item $backupFile -Force };" ^
     "Write-Host '   Membuat file backup standar (NET ZipFile)...' -ForegroundColor Yellow;" ^
     "Add-Type -AssemblyName 'System.IO.Compression.FileSystem';" ^
     "$exclude = @($backupFile, '.git', '.vs', '.vscode', '.gitignore', 'node_modules', '*.zip', '*.bat', 'DEPLOY_HOSTING.md');" ^
+    "$files = @(Get-ChildItem -Path . -Recurse | Where-Object { -not $_.PSIsContainer });" ^
+    "$total = $files.Count; $done = 0; $added = 0;" ^
     "$zip = [System.IO.Compression.ZipFile]::Open($backupFile, 'Create');" ^
-    "Get-ChildItem -Path . -Recurse | Where-Object { -not $_.PSIsContainer } | ForEach-Object {" ^
-    "    $filePath = $_.FullName;" ^
+    "foreach ($f in $files) {" ^
+    "    $filePath = $f.FullName;" ^
     "    $relPath = Resolve-Path -Path $filePath -Relative;" ^
     "    $relPath = $relPath.Replace('.\', '').Replace('\', '/');" ^
     "    $skip = $false;" ^
     "    foreach ($ex in $exclude) {" ^
     "        if ($relPath -like $ex -or $relPath -like ($ex + '/*') -or $relPath.StartsWith('.git/')) { $skip = $true; break }" ^
     "    }" ^
-    "    if (-not $skip) {" ^
-    "        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $filePath, $relPath, 'Optimal')" ^
-    "    }" ^
+    "    if (-not $skip) { [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $filePath, $relPath, 'Optimal') | Out-Null; $added++ }" ^
+    "    $done++;" ^
+    "    $pct = 100; if ($total -gt 0) { $pct = ($done / $total) * 100 };" ^
+    "    Write-Progress -Activity 'Backup ZIP' -Status ('Proses: ' + $done + '/' + $total + ' file') -PercentComplete $pct;" ^
     "};" ^
+    "Write-Progress -Activity 'Backup ZIP' -Completed;" ^
     "$zip.Dispose();" ^
-    "Write-Host '   Backup berhasil! (etabs_backup.zip)' -ForegroundColor Green"
+    "Write-Host ('   Backup berhasil! File masuk: ' + $added + ', ukuran: ' + [math]::Round((Get-Item $backupFile).Length / 1MB, 2) + ' MB') -ForegroundColor Green"
 
 echo.
 echo ========================================
