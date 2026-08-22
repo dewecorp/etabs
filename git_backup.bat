@@ -1,9 +1,9 @@
 @echo off
 setlocal
-title Git Commit, Push & Backup Utility
+title Git Commit, Push ^& Backup Utility
 
 echo ========================================
-echo    GIT COMMIT, PUSH & BACKUP UTILITY
+echo    GIT COMMIT, PUSH ^& BACKUP UTILITY
 echo ========================================
 echo.
 
@@ -16,6 +16,15 @@ if %errorlevel% neq 0 (
 )
 
 :: 2. Tampilkan Status
+:: Pastikan repo dikenali (hindari error "dubious ownership")
+cd /d "%~dp0"
+for %%i in ("%~dp0.") do set "REPO_DIR=%%~fi"
+git rev-parse --is-inside-work-tree >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [INFO] Menambahkan safe.directory untuk: %REPO_DIR%
+    git config --global --add safe.directory "%REPO_DIR%"
+)
+
 echo Status Perubahan:
 git status -s
 echo.
@@ -52,11 +61,31 @@ if /i not "%confirm%"=="y" (
 echo.
 echo [1/3] Menjalankan Git Add ^& Commit...
 git add .
-git commit -m "%msg%"
+if %errorlevel% neq 0 (
+    echo [ERROR] Git add gagal.
+    pause
+    exit /b 1
+)
+git diff --cached --quiet
+if %errorlevel% equ 0 (
+    echo [WARNING] Tidak ada perubahan untuk di-commit.
+) else (
+    git commit -m "%msg%"
+    if errorlevel 1 (
+        echo [ERROR] Git commit gagal.
+        pause
+        exit /b 1
+    )
+)
 
 echo.
-echo [2/3] Menjalankan Git Push (Paksa)...
-git push -u origin main --force
+echo [2/3] Menjalankan Git Push...
+git push -u origin main
+if %errorlevel% neq 0 (
+    echo [ERROR] Git push gagal. Commit tersimpan lokal tapi belum terkirim ke repo.
+    pause
+    exit /b 1
+)
 
 :: 6. Eksekusi Backup (via PowerShell wrapper)
 echo.
