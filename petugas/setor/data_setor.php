@@ -375,6 +375,10 @@ if (isset($_POST['Ubah'])) {
                         <?php
                         $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
                         $hasil = mysqli_query($koneksi, $query);
+                        // DEBUG SEMENTARA - hapus blok ini setelah masalah selesai
+                        if (!$hasil || mysqli_num_rows($hasil) == 0) {
+                            echo '<option value="">[DEBUG] rows=' . ($hasil ? mysqli_num_rows($hasil) : 'false') . ' | err=' . htmlspecialchars(mysqli_error($koneksi)) . '</option>';
+                        }
                         while ($row = mysqli_fetch_array($hasil)) {
                         ?>
                         <option value="<?php echo $row['nis'] ?>">
