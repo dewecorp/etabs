@@ -5,6 +5,31 @@ $data_nama = $_SESSION["ses_nama"];
 date_default_timezone_set("Asia/Jakarta"); 
 $tanggal = date("Y-m-d");
 
+// Query tahan-gagal: kalau query gagal (koneksi DB drop sesaat), reconnect lalu coba 1x lagi.
+if (!function_exists('queryStabil')) {
+    function queryStabil($koneksi, $query)
+    {
+        $hasil = @mysqli_query($koneksi, $query);
+        if ($hasil !== false) {
+            return $hasil;
+        }
+        if (isset($GLOBALS['db_host']) && !empty($GLOBALS['db_host'])) {
+            $baru = @new mysqli($GLOBALS['db_host'], $GLOBALS['db_user'], $GLOBALS['db_pass'], $GLOBALS['db_name']);
+            if (!$baru->connect_error) {
+                $baru->set_charset('utf8mb4');
+                $GLOBALS['koneksi'] = $baru;
+                $hasil = @$baru->query($query);
+                if ($hasil !== false) {
+                    return $hasil;
+                }
+                return ['__error' => mysqli_error($baru)];
+            }
+            return ['__error' => $baru->connect_error];
+        }
+        return ['__error' => mysqli_error($koneksi)];
+    }
+}
+
 if (isset($_POST['Simpan'])) {
     //menangkap post setor
     $setor = $_POST['setor'];
@@ -374,12 +399,13 @@ if (isset($_POST['Ubah'])) {
                         <option value="">-- Pilih --</option>
                         <?php
                         $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
-                        $hasil = mysqli_query($koneksi, $query);
+                        $hasil = queryStabil($koneksi, $query);
                         // DEBUG SEMENTARA - hapus blok ini setelah masalah selesai
-                        if (!$hasil || mysqli_num_rows($hasil) == 0) {
-                            echo '<option value="">[DEBUG] rows=' . ($hasil ? mysqli_num_rows($hasil) : 'false') . ' | err=' . htmlspecialchars(mysqli_error($koneksi)) . '</option>';
+                        if (!is_object($hasil) || mysqli_num_rows($hasil) == 0) {
+                            $dbg = is_array($hasil) ? ('err=' . $hasil['__error']) : 'rows=0';
+                            echo '<option value="">[DEBUG] ' . htmlspecialchars($dbg) . '</option>';
                         }
-                        while ($row = mysqli_fetch_array($hasil)) {
+                        if (is_object($hasil)) while ($row = mysqli_fetch_array($hasil)) {
                         ?>
                         <option value="<?php echo $row['nis'] ?>">
                             <?php echo $row['nama_siswa'] ?> - <?php echo $row['kelas'] ?>
@@ -445,8 +471,8 @@ if (isset($_POST['Ubah'])) {
                         <option value="">-- Pilih --</option>
                         <?php
                         $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
-                        $hasil = mysqli_query($koneksi, $query);
-                        while ($row = mysqli_fetch_array($hasil)) {
+                        $hasil = queryStabil($koneksi, $query);
+                        if (is_object($hasil)) while ($row = mysqli_fetch_array($hasil)) {
                         ?>
                         <option value="<?php echo $row['nis'] ?>">
                             <?php echo $row['nama_siswa'] ?> - <?php echo $row['kelas'] ?>
@@ -457,6 +483,7 @@ if (isset($_POST['Ubah'])) {
                         <i class="fa-solid fa-chevron-down text-xs"></i>
                     </span>
                     </div>
+                </div>
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700  Setoran</label>">
