@@ -76,23 +76,6 @@ if ($check && $row = $check->fetch_assoc()) {
                         ?>
                         </select>
                     </div>
-
-                    <div class="space-y-1.5">
-                        <label class="text-sm font-medium text-slate-700">
-                        <select name="status" id="status" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>"><option value="">-- Pilih --</option>
-                            <?php
-                            //cek data yg dipilih sebelumnya
-                            if ($data_cek['status'] == "Aktif") echo "<option value='Aktif' selected>Aktif</option>";
-                            else echo "<option value='Aktif'>Aktif</option>";
-                            
-                            if ($data_cek['status'] == "Lulus") echo "<option value='Lulus' selected>Lulus</option>";
-                            else echo "<option value='Lulus'>Lulus</option>";
-
-                            if ($data_cek['status'] == "Pindah") echo "<option value='Pindah' selected>Pindah</option>";
-                            else echo "<option value='Pindah'>Pindah</option>";
-                        ?>
-                        </select>
-                    </div>
                 </div>
 
             </div>
@@ -115,8 +98,7 @@ if (isset ($_POST['Ubah'])){
     $sql_ubah = "UPDATE tb_siswa SET
         nama_siswa='".$_POST['nama_siswa']."',
         jekel='".$_POST['jekel']."',
-        id_kelas='".$_POST['id_kelas']."',
-        status='".$_POST['status']."'
+        id_kelas='".$_POST['id_kelas']."'
         WHERE nis='".$_POST['nis']."'";
     $query_ubah = mysqli_query($koneksi, $sql_ubah);
 

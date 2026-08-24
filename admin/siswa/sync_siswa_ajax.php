@@ -102,7 +102,6 @@ foreach ($dataSiswa as $siswa) {
     $nama_kelas = trim($nama_kelas);
     
     // Default values if missing from API
-    $status = 'Aktif';
     $th_masuk = null;
     if (isset($siswa['tanggal_masuk']) && !empty(trim($siswa['tanggal_masuk']))) {
         $th_masuk = substr(trim($siswa['tanggal_masuk']), 0, 4);
@@ -140,12 +139,11 @@ foreach ($dataSiswa as $siswa) {
     if (mysqli_num_rows($result_cek) > 0) {
         // Update data jika sudah ada
         $th_masuk_sql = $th_masuk ? "'$th_masuk'" : "NULL";
-        $sql_update = "UPDATE tb_siswa SET 
+        $sql_update = "UPDATE tb_siswa SET
             nama_siswa = '$nama',
             jekel = '$jekel',
             id_kelas = '$id_kelas',
-            th_masuk = $th_masuk_sql,
-            status = '$status'
+            th_masuk = $th_masuk_sql
             WHERE nis = '$nis'";
         $query_update = mysqli_query($koneksi, $sql_update);
         
@@ -159,8 +157,8 @@ foreach ($dataSiswa as $siswa) {
     } else {
         // Insert data baru
         $th_masuk_sql = $th_masuk ? "'$th_masuk'" : "NULL";
-        $sql_insert = "INSERT INTO tb_siswa (nis, nama_siswa, jekel, id_kelas, status, th_masuk) 
-            VALUES ('$nis', '$nama', '$jekel', '$id_kelas', '$status', $th_masuk_sql)";
+        $sql_insert = "INSERT INTO tb_siswa (nis, nama_siswa, jekel, id_kelas, th_masuk)
+            VALUES ('$nis', '$nama', '$jekel', '$id_kelas', $th_masuk_sql)";
         $query_insert = mysqli_query($koneksi, $sql_insert);
         
         if ($query_insert) {

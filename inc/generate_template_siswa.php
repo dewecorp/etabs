@@ -46,7 +46,7 @@ function createTemplateSheet($spreadsheet, $kelas_name, $is_first = false) {
     $sheet->setTitle($sheet_title);
     
     // Header row dengan styling
-    $headers = ['NIS', 'Nama Siswa', 'Jenis Kelamin', 'Kelas', 'Status'];
+    $headers = ['NIS', 'Nama Siswa', 'Jenis Kelamin', 'Kelas'];
     $sheet->fromArray($headers, NULL, 'A1');
     
     // Style header
@@ -124,11 +124,10 @@ function createTemplateSheet($spreadsheet, $kelas_name, $is_first = false) {
     $sheet->setCellValue('A' . $note_row, 'Catatan:');
     $sheet->setCellValue('A' . ($note_row + 1), '1. Jenis Kelamin: L atau LK untuk Laki-laki, P atau PR untuk Perempuan');
     $sheet->setCellValue('A' . ($note_row + 2), '2. Kelas harus sesuai dengan nama kelas yang ada di database');
-    $sheet->setCellValue('A' . ($note_row + 3), '3. Status: Aktif, Lulus, atau Pindah');
-    
+
     $sheet->getStyle('A' . $note_row)->getFont()->setBold(true);
-    $sheet->getStyle('A' . $note_row . ':A' . ($note_row + 3))->getFont()->setSize(10);
-    $sheet->getStyle('A' . $note_row . ':A' . ($note_row + 3))->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF666666'));
+    $sheet->getStyle('A' . $note_row . ':A' . ($note_row + 2))->getFont()->setSize(10);
+    $sheet->getStyle('A' . $note_row . ':A' . ($note_row + 2))->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF666666'));
     
     return $sheet;
 }

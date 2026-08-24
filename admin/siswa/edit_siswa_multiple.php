@@ -7,37 +7,39 @@ if ($check && $row = $check->fetch_assoc()) {
     }
 }
 
-if(isset($_POST['nis']) && is_array($_POST['nis']) && 
-   isset($_POST['nama_siswa']) && is_array($_POST['nama_siswa']) && 
-   isset($_POST['jekel']) && is_array($_POST['jekel']) && 
-   isset($_POST['id_kelas']) && is_array($_POST['id_kelas']) && 
-   isset($_POST['status']) && is_array($_POST['status']) && 
+if(isset($_POST['nis']) && is_array($_POST['nis']) &&
+   isset($_POST['nama_siswa']) && is_array($_POST['nama_siswa']) &&
+   isset($_POST['jekel']) && is_array($_POST['jekel']) &&
+   isset($_POST['id_kelas']) && is_array($_POST['id_kelas']) &&
    count($_POST['nis']) > 0){
-    
+
     $nis_array = $_POST['nis'];
     $nama_siswa_array = $_POST['nama_siswa'];
     $jekel_array = $_POST['jekel'];
     $id_kelas_array = $_POST['id_kelas'];
-    $status_array = $_POST['status'];
+    $th_masuk_array = isset($_POST['th_masuk']) && is_array($_POST['th_masuk']) ? $_POST['th_masuk'] : [];
     
     $jumlah_update = 0;
     $jumlah_error = 0;
     
     // Update setiap data satu per satu berdasarkan index array
     for ($i = 0; $i < count($nis_array); $i++) {
-        if (isset($nis_array[$i]) && isset($nama_siswa_array[$i]) && isset($jekel_array[$i]) && 
-            isset($id_kelas_array[$i]) && isset($status_array[$i])) {
+        if (isset($nis_array[$i]) && isset($nama_siswa_array[$i]) && isset($jekel_array[$i]) &&
+            isset($id_kelas_array[$i])) {
             $nis = mysqli_real_escape_string($koneksi, $nis_array[$i]);
             $nama_siswa = mysqli_real_escape_string($koneksi, $nama_siswa_array[$i]);
             $jekel = mysqli_real_escape_string($koneksi, $jekel_array[$i]);
             $id_kelas = mysqli_real_escape_string($koneksi, $id_kelas_array[$i]);
-            $status = mysqli_real_escape_string($koneksi, $status_array[$i]);
-            
-            $sql_update = "UPDATE tb_siswa 
+            $th_masuk_sql = "NULL";
+            if (isset($th_masuk_array[$i]) && trim($th_masuk_array[$i]) !== '') {
+                $th_masuk_sql = "'" . mysqli_real_escape_string($koneksi, (int)$th_masuk_array[$i]) . "'";
+            }
+
+            $sql_update = "UPDATE tb_siswa
                            SET nama_siswa = '".$nama_siswa."',
                                jekel = '".$jekel."',
                                id_kelas = '".$id_kelas."',
-                               status = '".$status."'
+                               th_masuk = ".$th_masuk_sql."
                            WHERE nis = '".$nis."'";
             if (mysqli_query($koneksi, $sql_update)) {
                 $jumlah_update++;

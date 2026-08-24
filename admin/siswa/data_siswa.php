@@ -11,12 +11,11 @@ if ($check && $row = $check->fetch_assoc()) {
 // use PhpOffice\PhpSpreadsheet\IOFactory;
 
 if (isset($_POST['Simpan'])) {
-    $sql_simpan = "INSERT INTO tb_siswa (nis,nama_siswa,jekel,id_kelas,status) VALUES (
+    $sql_simpan = "INSERT INTO tb_siswa (nis,nama_siswa,jekel,id_kelas) VALUES (
         '".$_POST['nis']."',
         '".$_POST['nama_siswa']."',
         '".$_POST['jekel']."',
-        '".$_POST['id_kelas']."',
-        'Aktif')";
+        '".$_POST['id_kelas']."')";
     $query_simpan = mysqli_query($koneksi, $sql_simpan);
     
     if ($query_simpan) {
@@ -211,7 +210,6 @@ if (isset($_POST['simpan'])) {
                     $jekel_input = mysqli_real_escape_string($koneksi, strtoupper(trim($row[2])));
                     $kelas = mysqli_real_escape_string($koneksi, trim($row[3]));
                     $th_masuk = "NULL";
-                    $status = isset($row[5]) ? mysqli_real_escape_string($koneksi, trim($row[5])) : 'Aktif';
                     
                     // Validasi data
                     if (empty($nis) || empty($nama_siswa) || empty($jekel_input) || empty($kelas)) {
@@ -250,12 +248,11 @@ if (isset($_POST['simpan'])) {
                     
                     if (mysqli_num_rows($result_cek) > 0) {
                         // Update data jika sudah ada
-                        $sql_update = "UPDATE tb_siswa SET 
+                        $sql_update = "UPDATE tb_siswa SET
                             nama_siswa = '$nama_siswa',
                             jekel = '$jekel',
                             id_kelas = '$id_kelas',
-                            th_masuk = $th_masuk,
-                            status = '$status'
+                            th_masuk = $th_masuk
                             WHERE nis = '$nis'";
                         $query_update = mysqli_query($koneksi, $sql_update);
                         
@@ -267,8 +264,8 @@ if (isset($_POST['simpan'])) {
                         }
                     } else {
                         // Insert data baru
-                        $sql_insert = "INSERT INTO tb_siswa (nis, nama_siswa, jekel, id_kelas, status, th_masuk) 
-                            VALUES ('$nis', '$nama_siswa', '$jekel', '$id_kelas', '$status', $th_masuk)";
+                        $sql_insert = "INSERT INTO tb_siswa (nis, nama_siswa, jekel, id_kelas, th_masuk)
+                            VALUES ('$nis', '$nama_siswa', '$jekel', '$id_kelas', $th_masuk)";
                         $query_insert = mysqli_query($koneksi, $sql_insert);
                         
                         if ($query_insert) {
@@ -453,7 +450,6 @@ if (isset($_POST['simpan'])) {
                                 <th>Laki-laki</th>
                                 <th>Perempuan</th>
                                 <th>Kelas</th>
-                                <th>Status</th>
                                 <th>Th Masuk</th>
                                 <th>Aksi</th>
                             </tr>
@@ -464,7 +460,7 @@ if (isset($_POST['simpan'])) {
                       $no = 1;
                       // Cek koneksi dan query dengan error handling
                       if (!isset($koneksi) || !$koneksi) {
-                          echo '<tr><td colspan="10" class="text-center text-danger">Error: Koneksi database tidak tersedia</td></tr>';
+                          echo '<tr><td colspan="9" class="text-center text-danger">Error: Koneksi database tidak tersedia</td></tr>';
                       } else {
                           // Debug: Hitung total siswa di database
                           $count_all = @$koneksi->query("SELECT COUNT(*) as total FROM tb_siswa");
@@ -475,24 +471,24 @@ if (isset($_POST['simpan'])) {
                           }
                           
                           // Gunakan LEFT JOIN untuk menampilkan semua siswa meskipun kelas tidak ada
-                          $sql = @$koneksi->query("SELECT s.nis, s.nama_siswa, s.jekel, s.status, s.th_masuk, s.id_kelas, 
-                          COALESCE(k.kelas, 'Tidak Ada Kelas') as kelas 
-                          from tb_siswa s 
+                          $sql = @$koneksi->query("SELECT s.nis, s.nama_siswa, s.jekel, s.th_masuk, s.id_kelas,
+                          COALESCE(k.kelas, 'Tidak Ada Kelas') as kelas
+                          from tb_siswa s
                           LEFT JOIN tb_kelas k on s.id_kelas=k.id_kelas 
                           order by COALESCE(k.kelas, 'ZZZ') asc, s.nama_siswa asc");
                           
                           // Debug: Tampilkan error jika ada
                           if ($sql === false) {
-                              echo '<tr><td colspan="10" class="text-center text-danger">Error Query: ' . htmlspecialchars($koneksi->error) . '</td></tr>';
+                              echo '<tr><td colspan="9" class="text-center text-danger">Error Query: ' . htmlspecialchars($koneksi->error) . '</td></tr>';
                           } elseif ($sql && $sql->num_rows > 0) {
                               // Debug info (akan dihapus setelah fix)
                               if ($total_siswa > $sql->num_rows) {
-                                  echo '<tr><td colspan="10" class="text-center text-warning"><small>Total siswa di database: ' . $total_siswa . ', yang ditampilkan: ' . $sql->num_rows . '</small></td></tr>';
+                                  echo '<tr><td colspan="9" class="text-center text-warning"><small>Total siswa di database: ' . $total_siswa . ', yang ditampilkan: ' . $sql->num_rows . '</small></td></tr>';
                               }
                               while ($data= $sql->fetch_assoc()) {
                       ?>
 
-                            <tr data-nis="<?php echo $data['nis']; ?>" data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>" data-jekel="<?php echo $data['jekel']; ?>" data-id_kelas="<?php echo $data['id_kelas']; ?>" data-kelas="<?php echo htmlspecialchars($data['kelas']); ?>" data-status="<?php echo $data['status']; ?>">
+                            <tr data-nis="<?php echo $data['nis']; ?>" data-nama="<?php echo htmlspecialchars($data['nama_siswa']); ?>" data-jekel="<?php echo $data['jekel']; ?>" data-id_kelas="<?php echo $data['id_kelas']; ?>" data-kelas="<?php echo htmlspecialchars($data['kelas']); ?>" data-th_masuk="<?php echo $data['th_masuk']; ?>">
                                 <td>
                                     <input type="checkbox" name="nis[]" class="checkItem" value="<?php echo $data['nis']; ?>" onchange="toggleButtonsSiswa()">
                                 </td>
@@ -523,17 +519,6 @@ if (isset($_POST['simpan'])) {
                                 <?php echo $data['kelas']; ?>
                             </td>
 
-                            <?php $warna = $data['status']  ?>
-                            <td>
-                                <?php if ($warna == 'Aktif') { ?>
-                                <span class="badge-pill badge-pill-primary">Aktif</span>
-                                <?php } elseif ($warna == 'Lulus') { ?>
-                                <span class="badge-pill badge-pill-success">Lulus</span>
-                                <?php } elseif ($warna == 'Pindah') { ?>
-                                <span class="badge-pill badge-pill-danger">Pindah</span>
-                            </td>
-                            <?php } ?>
-
                             <td>
                                 <?php echo $data['th_masuk']; ?>
                             </td>
@@ -560,7 +545,7 @@ if (isset($_POST['simpan'])) {
                               }
                           } else {
                               // Tampilkan pesan jika tidak ada data
-                              echo '<tr><td colspan="10" class="text-center">';
+                              echo '<tr><td colspan="9" class="text-center">';
                               if ($sql === false) {
 
                                   echo '<span class="text-danger">Error: ' . htmlspecialchars($koneksi->error) . '</span>';
@@ -611,7 +596,6 @@ if (isset($_POST['simpan'])) {
                                 <th class="px-4 py-3 font-medium">Jenis Kelamin</th>
                                 <th class="px-4 py-3 font-medium">Kelas</th>
                                 <th class="px-4 py-3 font-medium">Tahun Masuk</th>
-                                <th class="px-4 py-3 font-medium">Status</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyEditMultiple" class="divide-y divide-slate-200  bg-white">
@@ -656,7 +640,7 @@ window.executeFilterSiswa = function() {
         var table = $('#example1').DataTable();
         
         // Apply filter ke setiap kolom menggunakan DataTable API
-        // Kolom index: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
+        // Kolom index: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Th Masuk, 8=Aksi
         
         // Filter NIS dan Nama menggunakan search biasa (partial match)
         table.column(2).search(filterNIS);
@@ -675,10 +659,10 @@ window.executeFilterSiswa = function() {
         if (filterThMasuk !== '') {
             // Gunakan regex untuk exact match: ^2024$ akan match hanya "2024"
             var regexPattern = '^' + filterThMasuk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$';
-            table.column(8).search(regexPattern, true, false);
+            table.column(7).search(regexPattern, true, false);
         } else {
             // Jika tidak ada filter tahun, clear search
-            table.column(8).search('');
+            table.column(7).search('');
         }
         
         // Draw tabel dengan filter yang sudah diterapkan
@@ -696,11 +680,11 @@ window.executeFilterSiswa = function() {
             var $row = $(this);
             
             // Ambil nilai dari setiap kolom
-            // Kolom: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Status, 8=Th Masuk, 9=Aksi
+            // Kolom: 0=checkbox, 1=No, 2=NIS, 3=Nama, 4=Laki-laki, 5=Perempuan, 6=Kelas, 7=Th Masuk, 8=Aksi
             var nis = $row.find('td').eq(2).text().trim().toLowerCase();
             var nama = $row.find('td').eq(3).text().trim().toLowerCase();
             var kelas = $row.find('td').eq(6).text().trim();
-            var thMasuk = $row.find('td').eq(8).text().trim();
+            var thMasuk = $row.find('td').eq(7).text().trim();
             
             var showRow = true;
             
@@ -972,7 +956,7 @@ function loadDataForEdit(nisArray) {
     $('#formEditMultiple').find('input[name="nama_siswa[]"]').remove();
     $('#formEditMultiple').find('select[name="jekel[]"]').remove();
     $('#formEditMultiple').find('select[name="id_kelas[]"]').remove();
-    $('#formEditMultiple').find('select[name="status[]"]').remove();
+    $('#formEditMultiple').find('input[name="th_masuk[]"]').remove();
     
     var count = 0;
     
@@ -982,7 +966,7 @@ function loadDataForEdit(nisArray) {
             var nama = row.attr('data-nama');
             var jekel = row.attr('data-jekel');
             var id_kelas = row.attr('data-id_kelas');
-            var status = row.attr('data-status');
+            var th_masuk = row.attr('data-th_masuk');
             // Buat select kelas dengan option yang sudah di-set selected
             var selectKelas = $('<select>', {
                 class: 'form-control',
@@ -1030,23 +1014,14 @@ function loadDataForEdit(nisArray) {
                     text: 'PR'
                 }))))
                 .append($('<td>').append(selectKelas.addClass('block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500')))
-                .append($('<td>').append($('<select>', {
+                .append($('<td>').append($('<input>', {
+                    type: 'number',
+                    min: 1900,
+                    max: 2100,
                     class: 'block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
-                    name: 'status[]',
-                    required: true
-                }).append($('<option>', {
-                    value: 'Aktif',
-                    selected: status == 'Aktif',
-                    text: 'Aktif'
-                })).append($('<option>', {
-                    value: 'Lulus',
-                    selected: status == 'Lulus',
-                    text: 'Lulus'
-                })).append($('<option>', {
-                    value: 'Pindah',
-                    selected: status == 'Pindah',
-                    text: 'Pindah'
-                }))));
+                    name: 'th_masuk[]',
+                    value: th_masuk == 'null' || th_masuk == undefined ? '' : th_masuk
+                })));
             
             tbody.append(tr);
             
