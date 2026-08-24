@@ -2,6 +2,7 @@
 session_start();
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
+@set_time_limit(300);
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['ses_username']) || ($_SESSION['ses_level'] ?? '') !== 'Administrator') {
@@ -11,6 +12,13 @@ if (!isset($_SESSION['ses_username']) || ($_SESSION['ses_level'] ?? '') !== 'Adm
 
 $rootDir = dirname(dirname(__DIR__));
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+// Catat semua error PHP (termasuk fatal) ke file agar bisa diperiksa
+if (!is_dir($rootDir . '/tmp')) {
+    @mkdir($rootDir . '/tmp', 0755, true);
+}
+ini_set('log_errors', '1');
+ini_set('error_log', $rootDir . '/tmp/update_error.log');
 
 function updateJsonResponse($success, $message, $extra = [])
 {
@@ -275,9 +283,9 @@ function updateCleanupSession($rootDir)
     unset($_SESSION['update_zip'], $_SESSION['update_extract'], $_SESSION['update_source'], $_SESSION['update_sha'], $_SESSION['update_warn']);
 }
 
-switch ($action) {
-    case 'download':
-        updateCleanupSession($rootDir);
+try {
+    switch ($action) {
+    case 'download':        updateCleanupSession($rootDir);
         $tmpDir = updateEnsureTmpDir($rootDir);
         $zipPath = $tmpDir . '/etabs_update_' . date('Ymd_His') . '.zip';
 
@@ -348,7 +356,7 @@ switch ($action) {
 
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($sourceDir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveDirectoryIterator::SELF_FIRST
+            RecursiveIteratorIterator::SELF_FIRST
         );
 
         foreach ($iterator as $item) {
@@ -463,4 +471,7 @@ switch ($action) {
 
     default:
         updateJsonResponse(false, 'Aksi update tidak valid.');
+    }
+} catch (Throwable $e) {
+    updateJsonResponse(false, 'Error internal tahap "' . $action . '": ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')');
 }

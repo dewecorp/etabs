@@ -6,51 +6,51 @@ include "inc/koneksi.php";
 
 header('Content-Type: text/plain; charset=utf-8');
 echo "PHP: " . PHP_VERSION . "\n";
-echo "DB: " . $koneksi->server_info . "\n";
-echo "Database: " . $db_name . "\n";
 echo str_repeat('-', 50) . "\n";
 
+// 1. Data DB
 $r = @$koneksi->query("SELECT COUNT(*) c FROM tb_siswa");
 echo "Total tb_siswa: " . ($r ? $r->fetch_assoc()['c'] : 'ERR: ' . $koneksi->error) . "\n";
-
-$r = @$koneksi->query("SHOW COLUMNS FROM tb_siswa LIKE 'status'");
-echo "Kolom status ada: " . ($r && $r->num_rows ? 'YA' : 'TIDAK') . "\n";
-
-if ($r && $r->num_rows) {
-    $r = @$koneksi->query("SELECT status, COUNT(*) c FROM tb_siswa GROUP BY status");
-    while ($row = $r->fetch_assoc()) { echo "  status='{$row['status']}': {$row['c']}\n"; }
-}
-
-$r = @$koneksi->query("SELECT COUNT(*) c FROM tb_kelas");
-echo "Total tb_kelas: " . ($r ? $r->fetch_assoc()['c'] : 'ERR: ' . $koneksi->error) . "\n";
 echo str_repeat('-', 50) . "\n";
 
-$q = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
-$hasil = @mysqli_query($koneksi, $q);
-echo "Query dropdown gagal: " . ($hasil ? 'TIDAK' : 'YA -> ' . mysqli_error($koneksi)) . "\n";
-echo "Jumlah baris hasil: " . ($hasil ? mysqli_num_rows($hasil) : 0) . "\n";
-echo str_repeat('-', 50) . "\n";
+// 2. Eksekusi langsung data_setor.php seperti yang dilakukan index.php
+$f = __DIR__ . '/petugas/setor/data_setor.php';
+echo "File ada: " . (file_exists($f) ? 'YA' : 'TIDAK') . "\n";
+if (file_exists($f)) {
+    echo "Ukuran : " . filesize($f) . " bytes\n";
+    echo "MD5    : " . md5_file($f) . "\n";
+    echo "MD5 versi lokal yang benar: f68e7cae4d174b8453f7335843065c04 (44787 bytes)\n";
+    echo str_repeat('-', 50) . "\n";
 
-if ($hasil && mysqli_num_rows($hasil)) {
-    echo "5 siswa pertama:\n";
-    $i = 0;
-    while ($row = mysqli_fetch_array($hasil)) {
-        echo "  {$row['nis']} | {$row['nama_siswa']} | {$row['kelas']}\n";
-        if (++$i >= 5) break;
+    // Stub fungsi dari inc/rupiah.php agar include mandiri tidak fatal
+    if (!function_exists('rupiah')) {
+        function rupiah($n) { return 'Rp ' . number_format((float)$n, 0, ',', '.'); }
+    }
+    if (!function_exists('tgl_indo_standar')) {
+        function tgl_indo_standar($t) { return $t; }
+    }
+
+    $_GET['page'] = 'data_setor';
+    $html = '';
+    try {
+        ob_start();
+        include $f;
+        $html = ob_get_clean();
+        echo "Eksekusi data_setor.php: OK, panjang output " . strlen($html) . " karakter\n";
+        echo "Jumlah '<option' dirender: " . substr_count($html, '<option') . "\n";
+        echo "Ada teks [DEBUG]: " . (strpos($html, '[DEBUG]') !== false ? 'YA -> ' . strip_tags(substr($html, strpos($html, '[DEBUG]'), 120)) : 'TIDAK') . "\n";
+    } catch (Throwable $e) {
+        ob_end_clean();
+        echo "FATAL saat eksekusi: " . $e->getMessage() . " di " . basename($e->getFile()) . ":" . $e->getLine() . "\n";
     }
 }
 
-// Cek file yang sedang dipakai
-$f = __DIR__ . '/petugas/setor/data_setor.php';
 echo str_repeat('-', 50) . "\n";
-echo "data_setor.php ada: " . (file_exists($f) ? 'YA' : 'TIDAK') . "\n";
-echo "Ukuran: " . (file_exists($f) ? filesize($f) . ' bytes' : '-') . "\n";
-echo "Terakhir diubah: " . (file_exists($f) ? date('Y-m-d H:i:s', filemtime($f)) : '-') . " (waktu server)\n";
-echo "MD5 file di hosting: " . (file_exists($f) ? md5_file($f) : '-') . "\n";
-echo "MD5 file versi lokal : MD5_LOKAL_NANTI\n";
-echo "Ada filter status di file: ";
-$src = file_exists($f) ? file_get_contents($f) : '';
-echo (strpos($src, "status='Aktif'") !== false) ? "MASIH ADA (file lama!)" : "sudah dihapus (file baru)";
-echo "\n";
-echo "Ada queryStabil (fix anti-gagal): " . (strpos($src, 'function_exists(\'queryStabil\')') !== false || strpos($src, 'queryStabil') !== false ? "YA (file terbaru)" : "TIDAK ADA (file lama!)") . "\n";
-echo "Ada blok DEBUG dropdown: " . (strpos($src, '[DEBUG]') !== false ? "YA" : "TIDAK") . "\n";
+// 3. Aset pendukung dropdown
+$assets = [
+    'plugins/select2/select2.min.css',
+    'plugins/select2/select2.full.min.js',
+];
+foreach ($assets as $a) {
+    echo "$a : " . (file_exists(__DIR__ . '/' . $a) ? 'ADA (' . filesize(__DIR__ . '/' . $a) . ' b)' : 'TIDAK ADA!') . "\n";
+}

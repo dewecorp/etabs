@@ -557,7 +557,16 @@ window.runSystemUpdate = async function() {
                 body: "action=" + encodeURIComponent(step.action)
             });
 
-            const data = await response.json();
+            const raw = await response.text();
+            let data;
+            try {
+                data = JSON.parse(raw);
+            } catch (parseError) {
+                throw new Error(
+                    "[" + step.action + "] Respons server tidak valid (HTTP " + response.status + "): " +
+                    (raw ? raw.substring(0, 200) : "kosong - kemungkinan proses dihentikan server")
+                );
+            }
             if (!data.success) {
                 throw new Error(data.message || "Proses update gagal pada tahap " + step.action + ".");
             }
