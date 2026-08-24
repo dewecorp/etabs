@@ -583,23 +583,9 @@ function handleCheckAllClick(checkbox) {
             clearInterval(waitForJQuery);
 
             $(document).ready(function() {
-                // Initialize Select2 (dengan guard: jangan init dua kali)
-                if (typeof $.fn.select2 !== 'undefined') {
-                    $('.select2').not('.select2-hidden-accessible').each(function () {
-                        var $select = $(this);
-                        var $modalParent = $select.closest('.modal');
-                        if ($modalParent.length) {
-                            $select.select2({
-                                dropdownParent: $modalParent,
-                                width: '100%'
-                            });
-                        } else {
-                            $select.select2({
-                                width: '100%'
-                            });
-                        }
-                    });
-                }
+                // PENTING: Select2 untuk dropdown di dalam modal TIDAK diinisialisasi di sini.
+                // Inisialisasi tunggal dilakukan saat modal dibuka (handler .tw-modal-open di bawah)
+                // agar tidak pernah terjadi inisialisasi ganda / widget dobel.
 
                 // AJAX for Saldo in Add Modal
                 $('#nis_add').change(function(){
