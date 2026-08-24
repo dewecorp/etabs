@@ -2,6 +2,10 @@
     //Mulai Sesion
 session_start();
 ob_start();
+// Cegah cache halaman (penyebab data lama/basi tampil acak di beberapa hosting)
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 if (isset($_SESSION["ses_username"])==""){
 	header("location: login.php");
 	

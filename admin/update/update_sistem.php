@@ -4,6 +4,8 @@ ini_set('display_errors', '0');
 error_reporting(E_ALL);
 @set_time_limit(300);
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 if (!isset($_SESSION['ses_username']) || ($_SESSION['ses_level'] ?? '') !== 'Administrator') {
     echo json_encode(['success' => false, 'message' => 'Akses ditolak. Hanya Administrator yang dapat memperbarui sistem.']);
