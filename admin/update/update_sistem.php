@@ -1,5 +1,7 @@
 <?php
 session_start();
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['ses_username']) || ($_SESSION['ses_level'] ?? '') !== 'Administrator') {
@@ -7,15 +9,85 @@ if (!isset($_SESSION['ses_username']) || ($_SESSION['ses_level'] ?? '') !== 'Adm
     exit;
 }
 
+$rootDir = dirname(dirname(__DIR__));
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+function updateJsonResponse($success, $message, $extra = [])
+{
+    while (ob_get_level() > 0) {
+        @ob_end_clean();
+    }
+    echo json_encode(array_merge([
+        'success' => (bool) $success,
+        'message' => $message,
+    ], $extra));
+    exit;
+}
+
+// Diagnostik lingkungan server untuk update
+if ($action === 'status') {
+    $tmpDir = $rootDir . '/tmp';
+    $env = [
+        'php' => PHP_VERSION,
+        'zip_archive' => class_exists('ZipArchive'),
+        'curl' => function_exists('curl_init'),
+        'allow_url_fopen' => (bool) ini_get('allow_url_fopen'),
+        'tmp_writable' => is_writable($rootDir),
+        'github_error' => null,
+        'github_http_code' => null,
+        'ssl_insecure_needed' => false,
+    ];
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init('https://codeload.github.com/dewecorp/etabs/zip/refs/heads/main');
+        curl_setopt_array($ch, [
+            CURLOPT_NOBODY => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_USERAGENT => 'e-Tabs-Updater/1.0',
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT => 30,
+        ]);
+        $ok = curl_exec($ch);
+        $env['github_http_code'] = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err = curl_error($ch);
+        curl_close($ch);
+
+        if (!$ok && $err && stripos($err, 'ssl') !== false) {
+            // Deteksi CA bundle bermasalah: coba tanpa verifikasi SSL
+            $ch2 = curl_init('https://codeload.github.com/dewecorp/etabs/zip/refs/heads/main');
+            curl_setopt_array($ch2, [
+                CURLOPT_NOBODY => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_USERAGENT => 'e-Tabs-Updater/1.0',
+                CURLOPT_CONNECTTIMEOUT => 15,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => 0,
+            ]);
+            $ok2 = curl_exec($ch2);
+            curl_close($ch2);
+            if ($ok2) {
+                $env['ssl_insecure_needed'] = true;
+                $env['github_error'] = 'CA bundle server bermasalah (' . $err . '). Updater akan pakai fallback tanpa verifikasi SSL.';
+            } else {
+                $env['github_error'] = $err;
+            }
+        } elseif (!$ok) {
+            $env['github_error'] = $err ?: 'Tidak dapat menghubungi GitHub.';
+        }
+    }
+
+    updateJsonResponse(true, 'Status lingkungan update.', ['env' => $env]);
+}
+
 if (!class_exists('ZipArchive')) {
     echo json_encode(['success' => false, 'message' => 'Ekstensi PHP ZipArchive tidak tersedia di server hosting.']);
     exit;
 }
 
-$rootDir = dirname(dirname(__DIR__));
-$action = $_POST['action'] ?? '';
-
-$githubZipUrl = 'https://github.com/dewecorp/etabs/archive/refs/heads/main.zip';
+$repoOwner = 'dewecorp';
+$repoName = 'etabs';
+$branch = 'main';
 
 $preservePaths = [
     'inc/koneksi.php',
@@ -27,15 +99,6 @@ $preservePaths = [
 ];
 
 $skipDirs = ['.git', 'node_modules', 'vendor', 'tmp'];
-
-function updateJsonResponse($success, $message, $extra = [])
-{
-    echo json_encode(array_merge([
-        'success' => (bool) $success,
-        'message' => $message,
-    ], $extra));
-    exit;
-}
 
 function updateEnsureTmpDir($rootDir)
 {
@@ -49,66 +112,113 @@ function updateEnsureTmpDir($rootDir)
     return $tmpDir;
 }
 
-function updateDownloadZip($url, $dest)
+/**
+ * Unduh file ke $dest via cURL dengan fallback SSL.
+ * return: [ok(bool), error(string), warn(string)]
+ */
+function updateCurlToFile($url, $dest)
 {
-    if (function_exists('curl_init')) {
+    $fp = fopen($dest, 'w+');
+    if (!$fp) {
+        return [false, 'Tidak dapat membuat file unduhan sementara.', ''];
+    }
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_FILE => $fp,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
+        CURLOPT_CONNECTTIMEOUT => 30,
+        CURLOPT_TIMEOUT => 300,
+        CURLOPT_USERAGENT => 'e-Tabs-Updater/1.0',
+        CURLOPT_HTTPHEADER => ['Cache-Control: no-cache'],
+    ]);
+
+    $ok = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    fclose($fp);
+
+    // Fallback: CA bundle server bermasalah -> ulang tanpa verifikasi SSL
+    if ((!$ok || $httpCode !== 200) && $error && stripos($error, 'ssl') !== false) {
         $fp = fopen($dest, 'w+');
-        if (!$fp) {
-            return 'Tidak dapat membuat file unduhan sementara.';
+        if ($fp) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_FILE => $fp,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_CONNECTTIMEOUT => 30,
+                CURLOPT_TIMEOUT => 300,
+                CURLOPT_USERAGENT => 'e-Tabs-Updater/1.0',
+            ]);
+            $ok = curl_exec($ch);
+            $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+            fclose($fp);
+            if ($ok && $httpCode === 200) {
+                return [true, '', 'SSL diverifikasi tanpa CA bundle (fallback).'];
+            }
         }
-
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_FILE => $fp,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_CONNECTTIMEOUT => 30,
-            CURLOPT_TIMEOUT => 300,
-            CURLOPT_USERAGENT => 'e-Tabs-Updater/1.0',
-        ]);
-
-        $ok = curl_exec($ch);
-        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-        fclose($fp);
-
-        if (!$ok || $httpCode !== 200) {
-            @unlink($dest);
-            return 'Gagal mengunduh update dari GitHub' . ($error ? ': ' . $error : '') . '.';
-        }
-    } elseif (ini_get('allow_url_fopen')) {
-        $context = stream_context_create([
-            'http' => [
-                'timeout' => 300,
-                'user_agent' => 'e-Tabs-Updater/1.0',
-            ],
-            'ssl' => [
-                'verify_peer' => true,
-                'verify_peer_name' => true,
-            ],
-        ]);
-
-        $data = @file_get_contents($url, false, $context);
-        if ($data === false || $data === '') {
-            @unlink($dest);
-            return 'Gagal mengunduh update dari GitHub.';
-        }
-
-        if (@file_put_contents($dest, $data) === false) {
-            @unlink($dest);
-            return 'Gagal menyimpan file unduhan update.';
-        }
-    } else {
-        return 'Server tidak mendukung cURL maupun allow_url_fopen untuk mengunduh update.';
     }
 
-    if (!file_exists($dest) || filesize($dest) < 1024) {
+    if (!$ok || $httpCode !== 200) {
         @unlink($dest);
-        return 'File update tidak valid atau terlalu kecil.';
+        return [false, 'Gagal mengunduh (HTTP ' . $httpCode . ')' . ($error ? ': ' . $error : '') . '.', ''];
     }
 
-    return true;
+    return [true, '', ''];
+}
+
+/**
+ * Ambil SHA commit terakhir via API (bebas cache) agar ZIP selalu versi paling baru.
+ */
+function updateResolveDownloadUrl($owner, $repo, $branch)
+{
+    $sha = '';
+    if (function_exists('curl_init')) {
+        foreach ([true, false] as $verify) {
+            $ch = curl_init("https://api.github.com/repos/{$owner}/{$repo}/commits/{$branch}");
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => $verify,
+                CURLOPT_SSL_VERIFYHOST => $verify ? 2 : 0,
+                CURLOPT_CONNECTTIMEOUT => 15,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_USERAGENT => 'e-Tabs-Updater/1.0',
+                CURLOPT_HTTPHEADER => [
+                    'Accept: application/vnd.github+json',
+                    'Cache-Control: no-cache',
+                ],
+            ]);
+            $body = curl_exec($ch);
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($body && $code === 200) {
+                $meta = json_decode($body, true);
+                if (!empty($meta['sha'])) {
+                    $sha = $meta['sha'];
+                    break;
+                }
+            }
+            if ($verify && $code !== 403) {
+                break; // bukan masalah SSL, jangan ulangi insecure
+            }
+        }
+    }
+
+    if ($sha !== '') {
+        // Archive per-SHA tidak pernah stale/cache lama
+        return ["https://codeload.github.com/{$owner}/{$repo}/zip/{$sha}", $sha];
+    }
+
+    return ["https://github.com/{$owner}/{$repo}/archive/refs/heads/{$branch}.zip", ''];
 }
 
 function updateShouldPreserve($relativePath, $preservePaths)
@@ -127,9 +237,7 @@ function updateShouldPreserve($relativePath, $preservePaths)
 
 function updateShouldSkipSource($relativePath, $skipDirs)
 {
-    $relativePath = str_replace('\\', '/', $relativePath);
-    $parts = explode('/', $relativePath);
-
+    $parts = explode('/', str_replace('\\', '/', $relativePath));
     return in_array($parts[0], $skipDirs, true);
 }
 
@@ -164,7 +272,7 @@ function updateCleanupSession($rootDir)
         updateRemoveDirectory($_SESSION['update_extract']);
     }
 
-    unset($_SESSION['update_zip'], $_SESSION['update_extract'], $_SESSION['update_source']);
+    unset($_SESSION['update_zip'], $_SESSION['update_extract'], $_SESSION['update_source'], $_SESSION['update_sha'], $_SESSION['update_warn']);
 }
 
 switch ($action) {
@@ -173,15 +281,23 @@ switch ($action) {
         $tmpDir = updateEnsureTmpDir($rootDir);
         $zipPath = $tmpDir . '/etabs_update_' . date('Ymd_His') . '.zip';
 
-        $result = updateDownloadZip($githubZipUrl, $zipPath);
-        if ($result !== true) {
-            updateJsonResponse(false, $result);
+        list($url, $sha) = updateResolveDownloadUrl($repoOwner, $repoName, $branch);
+        list($ok, $err, $warn) = updateCurlToFile($url, $zipPath);
+        if (!$ok) {
+            updateJsonResponse(false, $err);
+        }
+
+        if (!file_exists($zipPath) || filesize($zipPath) < 1024) {
+            @unlink($zipPath);
+            updateJsonResponse(false, 'File update tidak valid atau terlalu kecil.');
         }
 
         $_SESSION['update_zip'] = $zipPath;
         $_SESSION['update_extract'] = $tmpDir . '/etabs_extract_' . date('Ymd_His');
+        $_SESSION['update_sha'] = substr($sha, 0, 7);
+        $_SESSION['update_warn'] = $warn;
 
-        updateJsonResponse(true, 'Update berhasil diunduh dari GitHub.');
+        updateJsonResponse(true, 'Update berhasil diunduh dari GitHub.' . ($sha ? ' Commit: ' . substr($sha, 0, 7) . '.' : ''));
         break;
 
     case 'extract':
@@ -228,10 +344,11 @@ switch ($action) {
         $sourceDir = rtrim(str_replace('\\', '/', $sourceDir), '/');
         $rootDirNormalized = rtrim(str_replace('\\', '/', $rootDir), '/');
         $copied = 0;
+        $failed = [];
 
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($sourceDir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
+            RecursiveDirectoryIterator::SELF_FIRST
         );
 
         foreach ($iterator as $item) {
@@ -251,21 +368,47 @@ switch ($action) {
 
             if ($item->isDir()) {
                 if (!is_dir($targetPath) && !mkdir($targetPath, 0755, true)) {
-                    updateJsonResponse(false, 'Gagal membuat folder: ' . $relativePath);
+                    $failed[] = $relativePath . ' (gagal membuat folder)';
                 }
                 continue;
             }
 
             $targetDir = dirname($targetPath);
             if (!is_dir($targetDir) && !mkdir($targetDir, 0755, true)) {
-                updateJsonResponse(false, 'Gagal membuat folder tujuan: ' . $relativePath);
+                $failed[] = $relativePath . ' (gagal membuat folder tujuan)';
+                continue;
+            }
+
+            // File lama milik user FTP sering tidak bisa ditimpa oleh PHP -> coba chmod dulu
+            if (file_exists($targetPath) && !is_writable($targetPath)) {
+                @chmod($targetPath, 0644);
             }
 
             if (!@copy($item->getPathname(), $targetPath)) {
-                updateJsonResponse(false, 'Gagal menyalin file: ' . $relativePath);
+                // Coba sekali lagi setelah longgar permission
+                @chmod($targetPath, 0664);
+                if (!@copy($item->getPathname(), $targetPath)) {
+                    $clear = @pathinfo($targetPath);
+                    $why = is_file($targetPath) && !is_writable($targetPath) ? 'file tidak bisa ditulis (kepemilikan/permission)' : 'copy gagal';
+                    $failed[] = $relativePath . ' (' . $why . ')';
+                } else {
+                    @chmod($targetPath, 0644);
+                    $copied++;
+                }
+                continue;
             }
 
+            @chmod($targetPath, 0644);
             $copied++;
+        }
+
+        if (!empty($failed)) {
+            $contoh = implode(', ', array_slice($failed, 0, 5));
+            $sisa = count($failed) > 5 ? ' +' . (count($failed) - 5) . ' file lain' : '';
+            updateJsonResponse(false, count($failed) . ' file gagal diperbarui: ' . $contoh . $sisa . '. Ubah permission/kepemilikan file itu (atau hapus lewat File Manager) lalu ulangi update.', [
+                'files_failed' => $failed,
+                'files_updated' => $copied,
+            ]);
         }
 
         $koneksiPath = $rootDir . '/inc/koneksi.php';
@@ -300,7 +443,15 @@ switch ($action) {
         }
         @file_put_contents($versionFile, json_encode($currentVersion));
 
-        updateJsonResponse(true, 'Update berhasil diterapkan (' . $copied . ' file diperbarui).', [
+        $pesan = 'Update berhasil diterapkan (' . $copied . ' file diperbarui).';
+        if (!empty($_SESSION['update_sha'])) {
+            $pesan .= ' Commit: ' . $_SESSION['update_sha'] . '.';
+        }
+        if (!empty($_SESSION['update_warn'])) {
+            $pesan .= ' Catatan: ' . $_SESSION['update_warn'];
+        }
+
+        updateJsonResponse(true, $pesan, [
             'files_updated' => $copied,
         ]);
         break;
