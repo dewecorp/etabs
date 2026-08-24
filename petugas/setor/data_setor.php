@@ -418,16 +418,13 @@ if (isset($_POST['Ubah'])) {
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Tabungan</label>">
-                    <input type="text" name="saldo" id="saldo_add" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none    placeholder="Saldo saat ini" readonly>
+                    <label class="text-sm font-medium text-slate-700">Saldo Tabungan</label>
+                    <input type="text" name="saldo" id="saldo_add" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 focus:outline-none" placeholder="Saldo saat ini" readonly>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Setoran</label>">
+                    <label class="text-sm font-medium text-slate-700">Setoran</label>
                     <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <span class="text-slate-500">
-                        </div>
-                        <input type="text" name="setor" id="setor_add" class="block w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     placeholder="0" required>
+                        <input type="text" name="setor" id="setor_add" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="0" required>
                     </div>
                 </div>
             </div>
@@ -448,57 +445,52 @@ if (isset($_POST['Ubah'])) {
 
 <!-- Modal Edit -->
 <div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal" id="editModal">
-    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl  transition-all">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl transition-all">
         <!-- Header -->
         <div class="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
-            <h3 class="text-lg font-semibold text-slate-900  flex items-center gap-2">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-pen-to-square text-indigo-500"></i>
                 Ubah Setoran
             </h3>
-            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700    tw-modal-close transition-colors">
+            <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 tw-modal-close transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        
+
         <!-- Body -->
         <form action="" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id_tabungan" id="id_tabungan_edit">
+
             <div class="space-y-4">
-                <input type="hidden" name="id_tabungan" id="id_tabungan_edit">
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-slate-700">Pilih Siswa</label>
                     <div class="relative">
-                    <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9 select2" required>
-                        <option value="">-- Pilih --</option>
-                        <?php
-                        $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
-                        $hasil = queryStabil($koneksi, $query);
-                        if (is_object($hasil)) while ($row = mysqli_fetch_array($hasil)) {
-                        ?>
-                        <option value="<?php echo $row['nis'] ?>">
-                            <?php echo $row['nama_siswa'] ?> - <?php echo $row['kelas'] ?>
-                        </option>
-                        <?php } ?>
-                    </select>
-                    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </span>
+                        <select name="nis" id="nis_edit" class="auth-input appearance-none pr-9 select2" required>
+                            <option value="">-- Pilih --</option>
+                            <?php
+                            $query = "select s.*, k.kelas from tb_siswa s left join tb_kelas k on s.id_kelas=k.id_kelas ORDER BY k.kelas ASC, s.nama_siswa ASC";
+                            $hasil = queryStabil($koneksi, $query);
+                            if (is_object($hasil)) while ($row = mysqli_fetch_array($hasil)) {
+                            ?>
+                            <option value="<?php echo $row['nis'] ?>">
+                                <?php echo $row['nama_siswa'] ?> - <?php echo $row['kelas'] ?>
+                            </option>
+                            <?php } ?>
+                        </select>
                     </div>
                 </div>
-                </div>
+
                 <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-slate-700  Setoran</label>">
+                    <label class="text-sm font-medium text-slate-700">Setoran</label>
                     <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <span class="text-slate-500">
-                        </div>
-                        <input type="text" name="setor" id="setor_edit" class="block w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20     required>">
+                        <input type="text" name="setor" id="setor_edit" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="0" required>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Footer -->
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50      tw-modal-close transition-all">
+                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200/50 tw-modal-close transition-all">
                     Batal
                 </button>
                 <button type="submit" name="Ubah" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all">
@@ -576,6 +568,32 @@ function handleCheckAllClick(checkbox) {
 	toggleButtonsSetor();
 }
 
+// Fungsi tunggal untuk membuka modal + sinkronisasi Select2.
+// Didefinisikan di luar document.ready agar tersedia untuk semua jalur pembuka modal
+// (tombol tw-modal-open maupun editTerpilih/hapusTerpilih).
+window.bukaModalSetor = function (target) {
+    if (typeof window.jQuery === 'undefined') return;
+    var $m = window.jQuery(target);
+    if (!$m.length) return;
+    if (typeof window.jQuery.fn.select2 !== 'undefined') {
+        $m.find('select.select2').each(function () {
+            var $s = window.jQuery(this), g = 0;
+            while ($s.hasClass('select2-hidden-accessible') && g++ < 5) {
+                $s.select2('destroy');
+            }
+        });
+    }
+    $m.removeClass('hidden').addClass('flex');
+    if (typeof window.jQuery.fn.select2 !== 'undefined') {
+        $m.find('select.select2').each(function () {
+            window.jQuery(this).select2({
+                dropdownParent: $m,
+                width: '100%'
+            });
+        });
+    }
+};
+
 // Checkbox untuk pilih semua
 (function() {
     var waitForJQuery = setInterval(function() {
@@ -584,7 +602,7 @@ function handleCheckAllClick(checkbox) {
 
             $(document).ready(function() {
                 // PENTING: Select2 untuk dropdown di dalam modal TIDAK diinisialisasi di sini.
-                // Inisialisasi tunggal dilakukan saat modal dibuka (handler .tw-modal-open di bawah)
+                // Inisialisasi tunggal dilakukan saat modal dibuka (window.bukaModalSetor)
                 // agar tidak pernah terjadi inisialisasi ganda / widget dobel.
 
                 // AJAX for Saldo in Add Modal
@@ -632,29 +650,7 @@ function handleCheckAllClick(checkbox) {
                         $('#setor_edit').val(formatRupiah(String(setor == null ? '' : setor), 'Rp '));
                     }
 
-                    // Reset Select2 agar selalu sinkron dengan opsi terkini di DOM
-                    if (typeof $.fn.select2 !== 'undefined') {
-                        $(target).find('select.select2').each(function () {
-                            var $s = $(this);
-                            var guard = 0;
-                            // Bersihkan semua lapisan inisialisasi (jika terjadi dobel)
-                            while ($s.hasClass('select2-hidden-accessible') && guard++ < 5) {
-                                $s.select2('destroy');
-                            }
-                        });
-                    }
-
-                    // Tampilkan modal dulu supaya Select2 bisa mengukur lebar dengan benar
-                    $(target).removeClass('hidden').addClass('flex');
-
-                    if (typeof $.fn.select2 !== 'undefined') {
-                        $(target).find('select.select2').each(function () {
-                            $(this).select2({
-                                dropdownParent: $(target),
-                                width: '100%'
-                            });
-                        });
-                    }
+                    window.bukaModalSetor(target);
                 });
 
                 $(document).on('click', '.tw-modal-close', function () {
@@ -757,7 +753,7 @@ function editTerpilih() {
             var nis = row.attr('data-nis');
             var setor = row.attr('data-setor');
             $('#id_tabungan_edit').val(id);
-            $('#nis_edit').val(nis).trigger('change');
+            $('#nis_edit').val(nis);
             var number_string = String(setor).replace(/[^,\d]/g, ''),
                 split = number_string.split(','),
                 sisa = split[0].length % 3,
@@ -766,7 +762,7 @@ function editTerpilih() {
             if (ribuan) { var separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
             rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
             $('#setor_edit').val('Rp ' + rupiah);
-            $('#editModal').removeClass('hidden').addClass('flex');
+            window.bukaModalSetor('#editModal');
         }
         return;
 	}

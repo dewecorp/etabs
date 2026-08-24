@@ -724,21 +724,9 @@ function handleCheckAllClick(checkbox) {
             clearInterval(waitForJQuery);
 
             $(document).ready(function() {
-                // Initialize Select2
-                $('.select2').each(function () {
-                    var $select = $(this);
-                    var $modalParent = $select.closest('.modal');
-                    if ($modalParent.length) {
-                        $select.select2({
-                            dropdownParent: $modalParent,
-                            width: '100%'
-                        });
-                    } else {
-                        $select.select2({
-                            width: '100%'
-                        });
-                    }
-                });
+                // PENTING: Select2 untuk dropdown di dalam modal TIDAK diinisialisasi di sini.
+                // Inisialisasi tunggal dilakukan saat modal dibuka (window.bukaModalTarik)
+                // agar tidak pernah terjadi inisialisasi ganda / widget dobel.
 
                 // AJAX for Saldo in Add Modal
                 var addModalScrollTopBeforeSelect = 0;
@@ -1170,6 +1158,29 @@ function handleCheckAllClick(checkbox) {
                     return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
                 }
 
+                // Fungsi tunggal untuk membuka modal + sinkronisasi Select2
+                window.bukaModalTarik = function (target) {
+                    var $m = $(target);
+                    if (!$m.length) return;
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $m.find('select.select2').each(function () {
+                            var $s = $(this), g = 0;
+                            while ($s.hasClass('select2-hidden-accessible') && g++ < 5) {
+                                $s.select2('destroy');
+                            }
+                        });
+                    }
+                    $m.removeClass('hidden').addClass('flex');
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $m.find('select.select2').each(function () {
+                            $(this).select2({
+                                dropdownParent: $m,
+                                width: '100%'
+                            });
+                        });
+                    }
+                };
+
                 $(document).on('click', '.tw-modal-open', function (event) {
                     event.preventDefault();
                     var target = $(this).data('target');
@@ -1181,11 +1192,11 @@ function handleCheckAllClick(checkbox) {
                         var tarik = $(this).data('tarik');
 
                         $('#id_tabungan_edit').val(id);
-                        $('#nis_edit').val(nis).trigger('change');
+                        $('#nis_edit').val(nis);
                         $('#tarik_edit').val(formatRupiah(String(tarik == null ? '' : tarik), 'Rp '));
                     }
 
-                    $(target).removeClass('hidden').addClass('flex');
+                    window.bukaModalTarik(target);
                     if (target === '#addModal') {
                         $('#addModalBody').scrollTop(0);
                     }
@@ -1305,10 +1316,10 @@ function editTerpilih() {
             var nis = row.attr('data-nis');
             var tarik = row.attr('data-tarik');
             $('#id_tabungan_edit').val(id);
-            $('#nis_edit').val(nis).trigger('change');
+            $('#nis_edit').val(nis);
             $('#tarik_edit').val(formatNumber(String(tarik)));
             $('#tarik_edit').val((function(v){ var s=v.replace(/[^,\\d]/g,''); var a=s.split(','); var si=a[0].length%3; var r=a[0].substr(0,si); var rb=a[0].substr(si).match(/\\d{3}/gi); if(rb){ var sep=si?'.':''; r+=sep+rb.join('.'); } r=a[1]!=undefined? r+','+a[1] : r; return 'Rp '+r; })(String(tarik)));
-            $('#editModal').removeClass('hidden').addClass('flex');
+            window.bukaModalTarik('#editModal');
         }
         return;
 	}
