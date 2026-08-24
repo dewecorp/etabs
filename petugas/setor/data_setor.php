@@ -640,11 +640,30 @@ function handleCheckAllClick(checkbox) {
                         var setor = $(this).data('setor');
 
                         $('#id_tabungan_edit').val(id);
-                        $('#nis_edit').val(nis).trigger('change');
+                        $('#nis_edit').val(nis);
                         $('#setor_edit').val(formatRupiah(String(setor == null ? '' : setor), 'Rp '));
                     }
 
+                    // Reset Select2 agar selalu sinkron dengan opsi terkini di DOM
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(target).find('select.select2').each(function () {
+                            if ($(this).hasClass('select2-hidden-accessible')) {
+                                $(this).select2('destroy');
+                            }
+                        });
+                    }
+
+                    // Tampilkan modal dulu supaya Select2 bisa mengukur lebar dengan benar
                     $(target).removeClass('hidden').addClass('flex');
+
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(target).find('select.select2').each(function () {
+                            $(this).select2({
+                                dropdownParent: $(target),
+                                width: '100%'
+                            });
+                        });
+                    }
                 });
 
                 $(document).on('click', '.tw-modal-close', function () {
