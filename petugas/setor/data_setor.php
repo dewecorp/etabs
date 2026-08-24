@@ -583,21 +583,23 @@ function handleCheckAllClick(checkbox) {
             clearInterval(waitForJQuery);
 
             $(document).ready(function() {
-                // Initialize Select2
-                $('.select2').each(function () {
-                    var $select = $(this);
-                    var $modalParent = $select.closest('.modal');
-                    if ($modalParent.length) {
-                        $select.select2({
-                            dropdownParent: $modalParent,
-                            width: '100%'
-                        });
-                    } else {
-                        $select.select2({
-                            width: '100%'
-                        });
-                    }
-                });
+                // Initialize Select2 (dengan guard: jangan init dua kali)
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $('.select2').not('.select2-hidden-accessible').each(function () {
+                        var $select = $(this);
+                        var $modalParent = $select.closest('.modal');
+                        if ($modalParent.length) {
+                            $select.select2({
+                                dropdownParent: $modalParent,
+                                width: '100%'
+                            });
+                        } else {
+                            $select.select2({
+                                width: '100%'
+                            });
+                        }
+                    });
+                }
 
                 // AJAX for Saldo in Add Modal
                 $('#nis_add').change(function(){
@@ -647,8 +649,11 @@ function handleCheckAllClick(checkbox) {
                     // Reset Select2 agar selalu sinkron dengan opsi terkini di DOM
                     if (typeof $.fn.select2 !== 'undefined') {
                         $(target).find('select.select2').each(function () {
-                            if ($(this).hasClass('select2-hidden-accessible')) {
-                                $(this).select2('destroy');
+                            var $s = $(this);
+                            var guard = 0;
+                            // Bersihkan semua lapisan inisialisasi (jika terjadi dobel)
+                            while ($s.hasClass('select2-hidden-accessible') && guard++ < 5) {
+                                $s.select2('destroy');
                             }
                         });
                     }
