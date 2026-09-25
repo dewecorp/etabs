@@ -38,8 +38,54 @@ if (!isset($koneksi) || !$koneksi) {
 // Set headers untuk JSON
 header('Content-Type: application/json; charset=utf-8');
 
-// API Endpoint Simad
-$apiUrl = "https://simad.misultanfattah.sch.id/api/v1/students?api_key=SIS_CENTRAL_HUB_SECRET_2026";
+// Ambil API Endpoint Simad dari database (tb_endpoint_masuk)
+$apiUrl = "";
+$apiKey = "";
+
+$resEp = $koneksi->query("SELECT base_url, api_key, status FROM tb_endpoint_masuk WHERE kode_app = 'simad' LIMIT 1");
+if ($resEp && $rowEp = $resEp->fetch_assoc()) {
+    if (empty($rowEp['status'])) {
+        echo json_encode(['success' => false, 'message' => 'Integrasi SIMAD dinonaktifkan di Pengaturan Endpoint.']);
+        exit;
+    }
+
+    $baseUrl = trim($rowEp['base_url']);
+    $apiKey = trim($rowEp['api_key']);
+
+    if (!empty($baseUrl)) {
+        if (preg_match('/students(\.php)?/i', $baseUrl)) {
+            $apiUrl = $baseUrl;
+        } elseif (strpos($baseUrl, '/api/') !== false) {
+            $apiUrl = rtrim($baseUrl, '/');
+            if (strpos($apiUrl, 'students') === false) {
+                $apiUrl .= (substr($apiUrl, -4) === '.php') ? '' : '/students.php';
+            }
+        } else {
+            $apiUrl = rtrim($baseUrl, '/') . '/api/v1/students.php';
+        }
+    }
+}
+
+if (empty($apiUrl)) {
+    if (defined('SIMAD_API_BASE_URL') && !empty(SIMAD_API_BASE_URL)) {
+        $apiUrl = SIMAD_API_BASE_URL;
+    } else {
+        $apiUrl = "https://simad.misultanfattah.sch.id/api/v1/students.php";
+    }
+}
+
+// Sematkan API Key ke URL jika belum ada
+if (!empty($apiKey) && strpos($apiUrl, 'api_key=') === false) {
+    $sep = (strpos($apiUrl, '?') === false) ? '?' : '&';
+    $apiUrl .= $sep . 'api_key=' . urlencode($apiKey);
+}
+
+// Request cURL ke SIMAD
+$headers = ['Accept: application/json'];
+if (!empty($apiKey)) {
+    $headers[] = 'X-API-KEY: ' . $apiKey;
+    $headers[] = 'Authorization: Bearer ' . $apiKey;
+}
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $apiUrl);
@@ -48,7 +94,10 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
 $response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $err = curl_error($ch);
 curl_close($ch);
 
@@ -57,14 +106,34 @@ if ($err) {
     exit;
 }
 
-$result = json_decode($response, true);
-
-if (!isset($result['status']) || $result['status'] !== 'success') {
-    echo json_encode(['success' => false, 'message' => 'API Simad mengembalikan status gagal atau format tidak valid.']);
+if ($httpCode < 200 || $httpCode >= 300) {
+    echo json_encode(['success' => false, 'message' => 'API Simad merespons HTTP error code ' . $httpCode . ' (URL: ' . htmlspecialchars($apiUrl) . ')']);
     exit;
 }
 
-$dataSiswa = $result['data'];
+$result = json_decode($response, true);
+
+if (!is_array($result)) {
+    echo json_encode(['success' => false, 'message' => 'Format respons dari API Simad bukan JSON valid. Respons: ' . substr(strip_tags($response), 0, 150)]);
+    exit;
+}
+
+$dataSiswa = null;
+if (isset($result['status']) && ($result['status'] === 'success' || $result['status'] === true)) {
+    $dataSiswa = $result['data'] ?? null;
+} elseif (isset($result['success']) && $result['success'] === true) {
+    $dataSiswa = $result['data'] ?? null;
+} elseif (isset($result['data']) && is_array($result['data'])) {
+    $dataSiswa = $result['data'];
+} elseif (isset($result[0]) && is_array($result[0])) {
+    $dataSiswa = $result;
+}
+
+if (empty($dataSiswa) || !is_array($dataSiswa)) {
+    $errMsg = $result['message'] ?? 'API Simad mengembalikan data kosong atau format tidak sesuai.';
+    echo json_encode(['success' => false, 'message' => $errMsg]);
+    exit;
+}
 $success_count = 0;
 $update_count = 0;
 $error_count = 0;

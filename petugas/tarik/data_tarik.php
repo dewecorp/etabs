@@ -47,6 +47,22 @@ if ($urlStatus === 'success' && $urlMsg !== '') {
         }
     })();
     </script>";
+} elseif ($urlStatus === 'warning' && $urlMsg !== '') {
+    echo "<script>
+    (function(){
+        if(typeof Swal!=='undefined'){
+            Swal.fire({
+                title:'Perhatian!',
+                text:'" . addslashes(urldecode($urlMsg)) . "',
+                icon:'warning',
+                confirmButtonText:'OK',
+                confirmButtonColor:'#f59e0b'
+            });
+        }else{
+            alert('" . addslashes(urldecode($urlMsg)) . "');
+        }
+    })();
+    </script>";
 }
 
 if (isset($_POST['Simpan'])) {
@@ -91,16 +107,17 @@ if (isset($_POST['Simpan'])) {
             ];
             $paymentResult = paymentSubmitTransaksi($paymentPayload);
 
+            $sync_error_msg = '';
             if (empty($paymentResult['success'])) {
-                $msg = $paymentResult['message'] ?? 'Gagal sinkron ke sistem pembayaran.';
-                echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode($msg) . "';</script>";
+                $payment_sync = 'failed';
+                $sync_error_msg = $paymentResult['message'] ?? 'Gagal sinkron ke sistem pembayaran.';
             } else {
                 $payment_ref = mysqli_real_escape_string($koneksi, $paymentResult['ref'] ?? $paymentResult['data']['ref_transaksi'] ?? '');
                 $payment_sync = !empty($paymentResult['mock']) ? 'mock' : 'success';
             }
         }
 
-        if ($tujuan_tarik === 'lainnya' || ($payment_sync === 'mock' || $payment_sync === 'success')) {
+        if ($tujuan_tarik === 'lainnya' || in_array($payment_sync, ['mock', 'success', 'failed'])) {
         $sql_simpan = "INSERT INTO tb_tabungan (nis,setor,tarik,tgl,jenis,petugas,tujuan_tarik,jenis_bayar,jenis_bayar_id,keterangan_tarik,payment_ref,payment_sync,payment_detail) VALUES (
             '".$_POST['nis']."',
             '0',
@@ -158,12 +175,17 @@ if (isset($_POST['Simpan'])) {
                 logActivity($koneksi, 'CREATE', 'tb_tabungan', 'Menambah penarikan untuk ' . $nama_siswa . ' sebesar Rp ' . number_format($tarik_hasil, 0, ',', '.'), $_POST['nis']);
             }
 
-            $successText = $tujuan_tarik === 'pembayaran'
-                ? 'Penarikan & pembayaran berhasil dicatat'
-                : 'Penarikan berhasil ditambahkan';
+            if ($payment_sync === 'failed') {
+                $warnMsg = 'Penarikan tabungan berhasil disimpan! Namun sinkron ke Sibayar belum berhasil (' . $sync_error_msg . '). Anda dapat menekan tombol Sinkron Ulang di tabel.';
+                echo "<script>window.location.href='index.php?page=data_tarik&status=warning&msg=" . rawurlencode($warnMsg) . "';</script>";
+            } else {
+                $successText = $tujuan_tarik === 'pembayaran'
+                    ? 'Penarikan & pembayaran berhasil dicatat'
+                    : 'Penarikan berhasil ditambahkan';
 
-            $redirectMsg = rawurlencode($successText);
-            echo "<script>window.location.href='index.php?page=data_tarik&status=success&msg={$redirectMsg}';</script>";
+                $redirectMsg = rawurlencode($successText);
+                echo "<script>window.location.href='index.php?page=data_tarik&status=success&msg={$redirectMsg}';</script>";
+            }
         } else {
             echo "<script>window.location.href='index.php?page=data_tarik&status=error&msg=" . rawurlencode('Penarikan gagal ditambahkan') . "';</script>";
         }

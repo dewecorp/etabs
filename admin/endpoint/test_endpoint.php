@@ -48,8 +48,9 @@ if (empty($baseUrl)) {
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $baseUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
@@ -75,9 +76,9 @@ $statusText = '';
 
 if ($curlErr) {
     $statusText = "GAGAL (" . substr($curlErr, 0, 40) . ")";
-} else if ($httpCode >= 200 && $httpCode < 400) {
+} else if ($httpCode >= 200 && $httpCode < 300) {
     $isSuccess = true;
-    $statusText = "OK HTTP " . $httpCode . " OK " . $latency . "ms";
+    $statusText = "OK HTTP " . $httpCode . " (" . $latency . "ms)";
 } else {
     $statusText = "GAGAL HTTP " . $httpCode . " (" . $latency . "ms)";
 }

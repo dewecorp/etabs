@@ -90,16 +90,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $apiKey = trim($_POST['api_key'] ?? '');
 
         if (!empty($kodeApp) && !empty($baseUrl)) {
-            $stmt = $koneksi->prepare("INSERT INTO tb_endpoint_masuk (kode_app, nama_app, deskripsi, base_url, api_key, status) VALUES (?, ?, ?, ?, ?, 1)");
-            $stmt->bind_param("sssss", $kodeApp, $namaApp, $deskripsi, $baseUrl, $apiKey);
-            if ($stmt->execute()) {
-                $alertMsg = "Aplikasi endpoint masuk berhasil ditambahkan!";
-                $alertType = "success";
-            } else {
-                $alertMsg = "Gagal menambahkan aplikasi. Kode aplikasi mungkin sudah ada.";
+            $checkKode = $koneksi->prepare("SELECT id FROM tb_endpoint_masuk WHERE kode_app = ?");
+            $checkKode->bind_param("s", $kodeApp);
+            $checkKode->execute();
+            $resKode = $checkKode->get_result();
+            if ($resKode && $resKode->num_rows > 0) {
+                $alertMsg = "Gagal menambahkan. Kode aplikasi '" . htmlspecialchars($kodeApp) . "' sudah ada!";
                 $alertType = "danger";
+            } else {
+                try {
+                    $stmt = $koneksi->prepare("INSERT INTO tb_endpoint_masuk (kode_app, nama_app, deskripsi, base_url, api_key, status) VALUES (?, ?, ?, ?, ?, 1)");
+                    $stmt->bind_param("sssss", $kodeApp, $namaApp, $deskripsi, $baseUrl, $apiKey);
+                    if ($stmt->execute()) {
+                        $alertMsg = "Aplikasi endpoint masuk berhasil ditambahkan!";
+                        $alertType = "success";
+                    } else {
+                        $alertMsg = "Gagal menambahkan aplikasi. Kode aplikasi mungkin sudah ada.";
+                        $alertType = "danger";
+                    }
+                    $stmt->close();
+                } catch (Throwable $e) {
+                    $alertMsg = "Gagal menambahkan. Kode aplikasi '" . htmlspecialchars($kodeApp) . "' sudah ada!";
+                    $alertType = "danger";
+                }
             }
-            $stmt->close();
+            $checkKode->close();
         }
     }
 
@@ -626,6 +641,15 @@ function testEndpoint(id) {
                         <div class="text-[9px] font-mono text-emerald-600">${res.formatted}</div>
                     </div>
                 `;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Tes Koneksi Sukses!',
+                        text: `Endpoint merespons ${res.formatted}`,
+                        icon: 'success',
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
+                }
             } else {
                 container.innerHTML = `
                     <div class="inline-block rounded-lg bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700 border border-rose-200">
@@ -637,6 +661,13 @@ function testEndpoint(id) {
                         <div class="text-[9px] font-mono text-rose-600">${res.formatted}</div>
                     </div>
                 `;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Tes Koneksi Gagal!',
+                        text: res.formatted || 'Gagal terhubung ke endpoint.',
+                        icon: 'error'
+                    });
+                }
             }
         }
     })

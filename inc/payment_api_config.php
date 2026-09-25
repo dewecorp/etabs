@@ -9,13 +9,43 @@ if (file_exists(__DIR__ . '/koneksi.php')) {
         if ($resEp && $resEp->num_rows > 0) {
             while ($rowEp = $resEp->fetch_assoc()) {
                 $kode = strtolower($rowEp['kode_app']);
+                $urlVal = trim($rowEp['base_url']);
+                
                 if ($kode === 'sibayar') {
-                    if (!defined('PAYMENT_API_BASE_URL')) define('PAYMENT_API_BASE_URL', $rowEp['base_url']);
-                    if (!defined('PAYMENT_API_KEY')) define('PAYMENT_API_KEY', $rowEp['api_key']);
+                    $apiKeyVal = trim($rowEp['api_key']);
+                    if (strpos($urlVal, '?') !== false) {
+                        $parsed = parse_url($urlVal);
+                        if (isset($parsed['query'])) {
+                            parse_str($parsed['query'], $queryParams);
+                            if (empty($apiKeyVal) && !empty($queryParams['api_key'])) {
+                                $apiKeyVal = $queryParams['api_key'];
+                            }
+                        }
+                        $urlVal = strtok($urlVal, '?');
+                    }
+                    if (!empty($urlVal) && strpos($urlVal, '/api/') === false && substr($urlVal, -4) !== '.php') {
+                        $urlVal = rtrim($urlVal, '/') . '/api/etab.php';
+                    }
+                    if (!defined('PAYMENT_API_BASE_URL')) define('PAYMENT_API_BASE_URL', $urlVal);
+                    if (!defined('PAYMENT_API_KEY')) define('PAYMENT_API_KEY', $apiKeyVal);
                     if (!defined('PAYMENT_API_ENABLED')) define('PAYMENT_API_ENABLED', (bool)$rowEp['status']);
                 } else if ($kode === 'simad') {
-                    if (!defined('SIMAD_API_BASE_URL')) define('SIMAD_API_BASE_URL', $rowEp['base_url']);
-                    if (!defined('SIMAD_API_KEY')) define('SIMAD_API_KEY', $rowEp['api_key']);
+                    $apiKeyVal = trim($rowEp['api_key']);
+                    if (strpos($urlVal, '?') !== false) {
+                        $parsed = parse_url($urlVal);
+                        if (isset($parsed['query'])) {
+                            parse_str($parsed['query'], $queryParams);
+                            if (empty($apiKeyVal) && !empty($queryParams['api_key'])) {
+                                $apiKeyVal = $queryParams['api_key'];
+                            }
+                        }
+                        $urlVal = strtok($urlVal, '?');
+                    }
+                    if (!empty($urlVal) && strpos($urlVal, '/api/') === false && substr($urlVal, -4) !== '.php') {
+                        $urlVal = rtrim($urlVal, '/') . '/api/v1/students.php';
+                    }
+                    if (!defined('SIMAD_API_BASE_URL')) define('SIMAD_API_BASE_URL', $urlVal);
+                    if (!defined('SIMAD_API_KEY')) define('SIMAD_API_KEY', $apiKeyVal);
                     if (!defined('SIMAD_API_ENABLED')) define('SIMAD_API_ENABLED', (bool)$rowEp['status']);
                 }
             }

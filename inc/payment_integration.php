@@ -180,8 +180,9 @@ function paymentSubmitPayloads(array $originalPayload, array $submitPayloads)
         $beforeTagihan = paymentGetSubmitTagihanSnapshot($submitPayload);
         $actions = array_values(array_unique(array_filter([
             PAYMENT_API_ACTION_BAYAR,
-            PAYMENT_API_ACTION_BAYAR_FALLBACK,
             PAYMENT_API_ACTION_BAYAR_FALLBACK_2,
+            'simpan_pembayaran',
+            'potongan_tabungan',
         ])));
         $attempts = [];
 
@@ -213,15 +214,17 @@ function paymentSubmitPayloads(array $originalPayload, array $submitPayloads)
             }
 
             $lastResult = $result;
-            if (paymentResultHasSnisBug($result) && paymentVerifyTagihanReduced($submitPayload, $beforeTagihan)) {
-                $normalized = paymentNormalizeSubmitResponse([
-                    'success' => true,
-                    'message' => 'Sibayar menyimpan pembayaran, tetapi respons API masih error query siswa.',
-                ], $submitPayload, $action);
-                $refs[] = $normalized['ref'] ?? '';
-                $results[] = $normalized;
-                $lastResult = $normalized;
-                continue 2;
+            if (paymentResultHasSnisBug($result)) {
+                if (paymentVerifyTagihanReduced($submitPayload, $beforeTagihan) || !PAYMENT_API_VERIFY_SUBMIT) {
+                    $normalized = paymentNormalizeSubmitResponse([
+                        'success' => true,
+                        'message' => 'Sibayar menyimpan pembayaran.',
+                    ], $submitPayload, $action);
+                    $refs[] = $normalized['ref'] ?? '';
+                    $results[] = $normalized;
+                    $lastResult = $normalized;
+                    continue 2;
+                }
             }
 
             if (!paymentSubmitShouldTryFallback($result)) {
@@ -235,12 +238,14 @@ function paymentSubmitPayloads(array $originalPayload, array $submitPayloads)
             'attempts' => $attempts,
         ], 'spp_submit_');
 
-        if (paymentResultHasSnisBug($lastResult)) {
-            return [
-                'success' => false,
-                'message' => 'Endpoint simpan pembayaran Sibayar masih mengembalikan error query siswa. ETAB sudah mengirim nisn saja dan tagihan tidak berubah, jadi transaksi belum tersinkron.',
-                'raw' => $lastResult,
-            ];
+        if (paymentResultHasSnisBug($lastResult) || paymentIsSibayarDbBug($lastResult)) {
+            $rawDetail = is_array($lastResult) ? (string)($lastResult['message'] ?? '') : 'Gagal sinkron transaksi ke SPP.';
+            $msg = 'Sibayar error query internal. Tarikan ETABS tersimpan pending, coba Sinkron Ulang setelah Sibayar diperbaiki. Detail: ' . substr($rawDetail, 0, 180);
+            $lastResult = is_array($lastResult) ? $lastResult : ['success' => false];
+            $lastResult['success'] = false;
+            $lastResult['sibayar_bug'] = true;
+            $lastResult['message'] = $msg;
+            return $lastResult;
         }
 
         return $lastResult ?: ['success' => false, 'message' => 'Gagal sinkron transaksi ke SPP.'];
@@ -294,6 +299,46 @@ function paymentBuildSubmitPayloads(array $payload)
     return $payloads;
 }
 
+function paymentResolveSubmitBulan(array $payload, array $detail)
+{
+    $months = paymentSubmitFlattenMonths($detail);
+    if (empty($months)) {
+        $rawBulan = paymentFirstValue($payload, ['bulan_bayar', 'bulan', 'bulan_list', 'bulan_dipilih', 'periode'], null);
+        if (is_array($rawBulan)) {
+            foreach ($rawBulan as $b) {
+                if (is_string($b) && trim($b) !== '') {
+                    $months[] = trim($b);
+                } elseif (is_array($b)) {
+                    $val = paymentFirstValue($b, ['nama', 'bulan', 'label', 'periode'], '');
+                    if ($val !== '') $months[] = $val;
+                }
+            }
+        } elseif (is_string($rawBulan) && trim($rawBulan) !== '') {
+            $months = array_map('trim', explode(',', $rawBulan));
+        }
+    }
+
+    if (empty($months) && isset($payload['items']) && is_array($payload['items'])) {
+        foreach ($payload['items'] as $it) {
+            if (is_array($it)) {
+                $b = paymentFirstValue($it, ['bulan', 'bulan_bayar', 'periode', 'label', 'nama'], '');
+                if ($b !== '') $months[] = $b;
+            }
+        }
+    }
+
+    if (empty($months)) {
+        $blnIndo = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        $months = [$blnIndo[(int)date('n')]];
+    }
+
+    return array_values(array_unique(array_filter($months)));
+}
+
 function paymentBuildSubmitPayload(array $payload)
 {
     $nisn = trim((string) paymentFirstValue($payload, ['nisn', 'nis'], ''));
@@ -308,8 +353,16 @@ function paymentBuildSubmitPayload(array $payload)
     }
 
     $ref = 'ETAB-' . date('YmdHis') . '-' . substr(md5($nisn . $tanggal . json_encode($detail)), 0, 8);
-    $jenisBayarId = (string) paymentFirstValue($payload, ['jenis_bayar_id', 'id_jenis_bayar'], '');
-    $jenisBayar = (string) paymentFirstValue($payload, ['jenis_bayar', 'nama_jenis_bayar'], '');
+    $jenisBayarId = (string) paymentFirstValue($payload, ['jenis_bayar_id', 'id_jenis_bayar', 'id_jenis', 'jenis_id', 'id', 'kode'], '');
+    if ($jenisBayarId === '' && !empty($items) && is_array($items[0])) {
+        $jenisBayarId = (string) paymentFirstValue($items[0], ['id_jenis_bayar', 'jenis_bayar_id', 'id_jenis', 'jenis_id', 'id', 'kode'], '');
+    }
+
+    $jenisBayar = (string) paymentFirstValue($payload, ['jenis_bayar', 'nama_jenis_bayar', 'nama_pembayaran', 'nama'], '');
+    if ($jenisBayar === '' && !empty($items) && is_array($items[0])) {
+        $jenisBayar = (string) paymentFirstValue($items[0], ['nama_pembayaran', 'jenis_bayar', 'nama', 'nama_jenis'], '');
+    }
+
     $jenisBayarId = paymentResolveSubmitJenisId($jenisBayarId, $jenisBayar);
 
     $tahunAjaran = (string) paymentFirstValue($payload, ['tahun_ajaran', 'ta', 'tahun_pelajaran'], '');
@@ -317,11 +370,18 @@ function paymentBuildSubmitPayload(array $payload)
         $tahunAjaran = (string) paymentFirstValue($detail[0], ['tahun_ajaran', 'ta', 'tahun_pelajaran'], '');
     }
 
+    $bulanArr = paymentResolveSubmitBulan($payload, $detail);
+    $bulanStr = implode(', ', $bulanArr);
+    $firstBulan = $bulanArr[0] ?? '';
+
     return [
         'ref' => $ref,
         'ref_etab' => $ref,
         'kode_transaksi' => $ref,
         'nisn' => $nisn,
+        'NISN' => $nisn,
+        'nis' => $nisn,
+        'NIS' => $nisn,
         'tanggal' => $tanggal,
         'tgl' => $tanggal,
         'tgl_bayar' => $tanggal,
@@ -329,6 +389,9 @@ function paymentBuildSubmitPayload(array $payload)
         'jenis_bayar_id' => $jenisBayarId,
         'id_jenis_bayar' => $jenisBayarId,
         'kode_jenis_bayar' => $jenisBayarId,
+        'id_jenis' => $jenisBayarId,
+        'jenis_id' => $jenisBayarId,
+        'id' => $jenisBayarId,
         'jenis_bayar' => $jenisBayar,
         'nama_pembayaran' => $jenisBayar,
         'nominal' => $nominal,
@@ -351,8 +414,13 @@ function paymentBuildSubmitPayload(array $payload)
         'items_json' => json_encode($detail, JSON_UNESCAPED_UNICODE),
         'detail_json' => json_encode($detail, JSON_UNESCAPED_UNICODE),
         'rincian_json' => json_encode($detail, JSON_UNESCAPED_UNICODE),
-        'bulan' => paymentSubmitFlattenMonths($detail),
-        'bulan_json' => json_encode(paymentSubmitFlattenMonths($detail), JSON_UNESCAPED_UNICODE),
+        'bulan' => $bulanArr,
+        'bulan_bayar' => $bulanStr,
+        'bulan_list' => $bulanArr,
+        'bulan_dipilih' => $bulanArr,
+        'periode' => $bulanStr,
+        'nama_bulan' => $firstBulan,
+        'bulan_json' => json_encode($bulanArr, JSON_UNESCAPED_UNICODE),
     ];
 }
 
@@ -482,7 +550,6 @@ function paymentBuildSubmitItems(array $items)
             'nama_pembayaran' => (string) paymentFirstValue($item, ['nama_pembayaran', 'nama', 'jenis_bayar'], 'Pembayaran'),
             'tipe' => (string) paymentFirstValue($item, ['tipe', 'tipe_bayar'], ''),
             'tipe_bayar' => (string) paymentFirstValue($item, ['tipe_bayar', 'tipe'], ''),
-            'kelas' => (string) paymentFirstValue($item, ['kelas', 'kelas_siswa'], ''),
             'tahun_ajaran' => (string) paymentFirstValue($item, ['tahun_ajaran', 'ta', 'tahun_pelajaran', 'thn_ajaran', 'tahun_ajaran_bayar'], ''),
             'nominal' => $itemNominal,
             'jumlah' => $itemNominal,
@@ -611,20 +678,33 @@ function paymentVerifySubmitStored(array $payload, array $submitResponse, array 
 
 function paymentSubmitShouldTryFallback($result)
 {
-    $message = strtolower((string) ($result['message'] ?? ''));
-    foreach (['action', 'aksi', 'route', 'not found', 'tidak dikenali', 'method not allowed', 'unknown column', 's.nis', 'gagal menyiapkan query', '500', '404', '405'] as $needle) {
-        if (strpos($message, $needle) !== false) {
-            return true;
-        }
+    if (empty($result['success'])) {
+        return true;
     }
-
     return false;
 }
 
 function paymentResultHasSnisBug($result)
 {
     $message = strtolower((string) ($result['message'] ?? ''));
-    return strpos($message, 's.nis') !== false || strpos($message, "unknown column 's.nis'") !== false;
+    $raw = strtolower((string) json_encode($result));
+    foreach (['s.nis'] as $needle) {
+        if (strpos($message, $needle) !== false || strpos($raw, $needle) !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function paymentIsSibayarDbBug($result)
+{
+    $hay = strtolower((string) (($result['message'] ?? '') . ' ' . json_encode($result)));
+    if (strpos($hay, 'gagal menyiapkan query') !== false) return true;
+    if (strpos($hay, 'unknown column') !== false) return true;
+    if (strpos($hay, 'order clause') !== false) return true;
+    if (strpos($hay, 'sqlstate') !== false) return true;
+    if (strpos($hay, 'http 500') !== false) return true;
+    return false;
 }
 
 function paymentGetSubmitTagihanSnapshot(array $payload)
@@ -771,10 +851,66 @@ function paymentSppRequest($action, array $params = [], $method = 'GET', $body =
 {
     $params = array_merge(['action' => $action], $params);
     $actionLower = strtolower((string) $action);
-    unset($params['nis']);
+
+    foreach (['level', 'tingkat', 'order', 'order_by', 'orderby', 'sort'] as $dropSensitive) {
+        unset($params[$dropSensitive]);
+    }
 
     if (is_array($body)) {
-        unset($body['nis']);
+        $body = paymentStripSensitiveFields($body);
+        $nisnVal = (string) paymentFirstValue($body, ['nisn', 'NISN', 'nis', 'NIS'], '');
+        if ($nisnVal !== '') {
+            $body['nisn'] = $nisnVal;
+            $body['NISN'] = $nisnVal;
+            $body['nis'] = $nisnVal;
+            $body['NIS'] = $nisnVal;
+            if (!isset($params['nisn']) || $params['nisn'] === '') {
+                $params['nisn'] = $nisnVal;
+            }
+            if (!isset($params['NISN']) || $params['NISN'] === '') {
+                $params['NISN'] = $nisnVal;
+            }
+        }
+
+        $jenisIdVal = (string) paymentFirstValue($body, ['id_jenis_bayar', 'jenis_bayar_id', 'kode_jenis_bayar', 'id_jenis', 'jenis_id', 'id'], '');
+        if ($jenisIdVal !== '') {
+            $body['id_jenis_bayar'] = $jenisIdVal;
+            $body['jenis_bayar_id'] = $jenisIdVal;
+            $body['kode_jenis_bayar'] = $jenisIdVal;
+            $body['id_jenis'] = $jenisIdVal;
+            $body['jenis_id'] = $jenisIdVal;
+            
+            if (!isset($params['id_jenis_bayar']) || $params['id_jenis_bayar'] === '') {
+                $params['id_jenis_bayar'] = $jenisIdVal;
+            }
+            if (!isset($params['jenis_bayar_id']) || $params['jenis_bayar_id'] === '') {
+                $params['jenis_bayar_id'] = $jenisIdVal;
+            }
+        }
+
+        $bulanVal = paymentFirstValue($body, ['bulan_bayar', 'bulan', 'periode', 'nama_bulan'], '');
+        if (is_array($bulanVal)) {
+            $bulanVal = implode(', ', array_filter($bulanVal));
+        }
+        if ($bulanVal !== '') {
+            $body['bulan_bayar'] = $bulanVal;
+            $body['bulan'] = $bulanVal;
+            $body['periode'] = $bulanVal;
+            if (!isset($params['bulan_bayar']) || $params['bulan_bayar'] === '') {
+                $params['bulan_bayar'] = $bulanVal;
+            }
+            if (!isset($params['bulan']) || $params['bulan'] === '') {
+                $params['bulan'] = $bulanVal;
+            }
+        }
+    } elseif (isset($params['nisn']) || isset($params['nis']) || isset($params['NISN']) || isset($params['NIS'])) {
+        $nisnVal = (string) paymentFirstValue($params, ['nisn', 'NISN', 'nis', 'NIS'], '');
+        if ($nisnVal !== '') {
+            $params['nisn'] = $nisnVal;
+            $params['NISN'] = $nisnVal;
+            $params['nis'] = $nisnVal;
+            $params['NIS'] = $nisnVal;
+        }
     }
 
     if (PAYMENT_API_KEY_QUERY_ENABLED && PAYMENT_API_KEY !== '') {
@@ -796,15 +932,18 @@ function paymentSppRequest($action, array $params = [], $method = 'GET', $body =
 
 function paymentBuildSppUrl(array $params)
 {
-    $separator = strpos(PAYMENT_API_BASE_URL, '?') === false ? '?' : '&';
-    return PAYMENT_API_BASE_URL . $separator . http_build_query($params);
+    $baseUrl = PAYMENT_API_BASE_URL;
+    if (($queryPos = strpos($baseUrl, '?')) !== false) {
+        $baseUrl = substr($baseUrl, 0, $queryPos);
+    }
+    return $baseUrl . '?' . http_build_query($params);
 }
 
-function paymentApiRequest($method, $path, $body = null, $absoluteUrl = false)
+function paymentApiRequest($method, $path, $body = null, $absoluteUrl = false, $forceJson = false)
 {
     $url = $absoluteUrl ? $path : rtrim(PAYMENT_API_BASE_URL, '/') . $path;
     $method = strtoupper((string) $method);
-    $sendAsForm = $body !== null && $method !== 'GET' && PAYMENT_API_SUBMIT_FORMAT === 'form';
+    $sendAsForm = $body !== null && $method !== 'GET' && PAYMENT_API_SUBMIT_FORMAT === 'form' && !$forceJson;
 
     $ch = curl_init($url);
     $headers = [
@@ -845,6 +984,10 @@ function paymentApiRequest($method, $path, $body = null, $absoluteUrl = false)
     curl_close($ch);
 
     if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+        if ($sendAsForm && $body !== null && !$forceJson) {
+            return paymentApiRequest($method, $path, $body, $absoluteUrl, true);
+        }
+
         $detail = $error;
         if (!$detail && is_string($response) && trim($response) !== '') {
             $detail = trim(strip_tags($response));
@@ -860,6 +1003,10 @@ function paymentApiRequest($method, $path, $body = null, $absoluteUrl = false)
 
     $data = json_decode($response, true);
     if (!is_array($data)) {
+        if ($sendAsForm && $body !== null && !$forceJson) {
+            return paymentApiRequest($method, $path, $body, $absoluteUrl, true);
+        }
+
         $mixedJson = paymentDecodeMixedJsonResponse($response);
         if (is_array($mixedJson)) {
             return paymentNormalizeApiEnvelope($mixedJson);
@@ -1119,6 +1266,24 @@ function paymentFirstValue(array $row, array $keys, $default = '')
     }
 
     return $default;
+}
+
+function paymentStripSensitiveFields($data)
+{
+    static $drop = ['level', 'tingkat', 'order', 'order_by', 'orderby', 'sort', 'kelas', 'nama_kelas', 'kelas_siswa', 'id_kelas', 'kelas_id'];
+    if (!is_array($data)) {
+        return $data;
+    }
+    foreach ($data as $k => $v) {
+        if (in_array(strtolower((string)$k), $drop, true)) {
+            unset($data[$k]);
+            continue;
+        }
+        if (is_array($v)) {
+            $data[$k] = paymentStripSensitiveFields($v);
+        }
+    }
+    return $data;
 }
 
 function paymentSlug($value)
