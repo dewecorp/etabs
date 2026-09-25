@@ -82,6 +82,16 @@ if (empty($apiKey) || $apiKey !== $SIMAD_API_KEY) {
 $action = $_GET['action'] ?? '';
 $nis = $_GET['nis'] ?? '';
 
+// Health check / ping test
+if ($action === 'ping' || (empty($action) && empty($nis))) {
+    sendJsonResponse([
+        'success' => true,
+        'status' => 'OK',
+        'message' => 'ETABS SIMAD API is active',
+        'timestamp' => date('Y-m-d H:i:s')
+    ], 200);
+}
+
 if (empty($action)) {
     sendErrorResponse('Action parameter is required');
 }

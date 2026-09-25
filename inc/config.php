@@ -165,6 +165,9 @@ function getPageTitle($page = '') {
         // Backup & Restore
         'MyApp/backup_restore' => 'Backup & Restore',
         
+        // Integrasi & Endpoint
+        'MyApp/pengaturan_endpoint' => 'Pengaturan Endpoint',
+        
         // Aktivitas
         'MyApp/view_activity' => 'Activity Log',
         'MyApp/activity_log' => 'Activity Log',

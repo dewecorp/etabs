@@ -310,6 +310,26 @@ $page_title = getPageTitle($current_page);
                         </a>
                     </li>
 
+                    <!-- Integrasi Dropdown -->
+                    <li>
+                        <div class="flex flex-col gap-1">
+                            <button class="flex items-center justify-between rounded-xl px-3 py-2 text-xs text-white/90 hover:bg-emerald-500/30 hover:text-white w-full sidebar-dropdown-toggle" data-target="#integrasiMenu">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/30 text-white/90">
+                                        <i class="fa-solid fa-plug text-[10px]"></i>
+                                    </span>
+                                    Integrasi
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-white/70"></i>
+                            </button>
+                            <div class="sidebar-dropdown-menu <?= (in_array($current_page, ['MyApp/pengaturan_endpoint'])) ? '' : 'hidden' ?>" id="integrasiMenu">
+                                <ul class="mt-1 space-y-1 pl-8 border-l border-emerald-500 ml-3">
+                                    <li><a href="?page=MyApp/pengaturan_endpoint" class="block py-1.5 hover:text-white <?= ($current_page == 'MyApp/pengaturan_endpoint') ? 'text-white font-medium' : 'text-white/70' ?>">Pengaturan Endpoint</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+
                     <p class="mt-4 mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-white/70">Pengaturan</p>
                     
                     <li>
@@ -493,6 +513,11 @@ $page_title = getPageTitle($current_page);
 				//Backup & Restore
                             case 'MyApp/backup_restore':
                             include "admin/backup_restore/backup_restore.php";
+                            break;
+
+				//Integrasi & Endpoint
+                            case 'MyApp/pengaturan_endpoint':
+                            include "admin/endpoint/pengaturan_endpoint.php";
                             break;
 
 				//Aktivitas
