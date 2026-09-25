@@ -777,6 +777,28 @@ function handleCheckAllClick(checkbox) {
                 var paymentDetailCache = null;
                 var paymentJenisCache = [];
                 var selectedPayments = {};
+                var selectedBulan = {};
+
+                function rincianRowId(row) {
+                    return String(row.id || row.id_tagihan || row.label || row.bulan || '');
+                }
+
+                function unpaidRincian(item) {
+                    var list = (item && item.rincian && item.rincian.length) ? item.rincian : [];
+                    return list.filter(function(row) {
+                        var sisa = parseInt(row.sisa || row.nominal || 0, 10) || 0;
+                        return !row.lunas && sisa > 0;
+                    });
+                }
+
+                function selectedRincian(item, key) {
+                    var unpaid = unpaidRincian(item);
+                    if (!unpaid.length) return null;
+                    if (!selectedBulan[key]) return unpaid;
+                    var map = selectedBulan[key];
+                    var filtered = unpaid.filter(function(row) { return !!map[rincianRowId(row)]; });
+                    return filtered;
+                }
 
                 function escapeHtml(value) {
                     return String(value == null ? '' : value)
@@ -911,53 +933,77 @@ function handleCheckAllClick(checkbox) {
                 }
 
                 function updatePaymentSummary() {
-                    var selectedItems = Object.keys(selectedPayments).map(function(id) { return selectedPayments[id]; });
+                    var selectedKeys = Object.keys(selectedPayments);
                     var nominal = 0;
                     var ids = [];
                     var names = [];
                     var detailHtml = '';
+                    var payloadItems = [];
 
-                    selectedItems.forEach(function(item) {
-                        var itemNominal = parseInt(item.sisa || item.nominal || 0, 10) || 0;
+                    selectedKeys.forEach(function(key) {
+                        var item = selectedPayments[key];
+                        var rows = selectedRincian(item, key);
+                        var itemNominal = 0;
+                        var bulanLabel = 'tanpa rincian bulan';
+                        if (rows === null) {
+                            itemNominal = parseInt(item.sisa || item.nominal || 0, 10) || 0;
+                        } else {
+                            itemNominal = rows.reduce(function(sum, row) { return sum + (parseInt(row.sisa || row.nominal || 0, 10) || 0); }, 0);
+                            bulanLabel = rows.length + ' bulan dipilih';
+                        }
+                        if (itemNominal <= 0) return;
                         nominal += itemNominal;
                         ids.push(item.id);
                         names.push(item.nama);
+                        payloadItems.push({
+                            id: item.id,
+                            id_jenis_bayar: item.id_jenis_bayar || item.id,
+                            jenis_bayar_id: item.jenis_bayar_id || item.id,
+                            nama: item.nama,
+                            jenis_bayar: item.nama,
+                            nama_pembayaran: item.nama,
+                            tipe: item.tipe,
+                            tahun_ajaran: item.tahun_ajaran,
+                            nominal: itemNominal,
+                            sisa: itemNominal,
+                            rincian: rows === null ? [] : rows
+                        });
 
                         detailHtml += '<div class="rounded-xl border border-slate-200 bg-slate-50 p-3">' +
                             '<div class="flex items-start justify-between gap-3">' +
                                 '<div>' +
                                     '<p class="text-sm font-semibold text-slate-800">' + escapeHtml(item.nama || 'Pembayaran') + '</p>' +
-                                    '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '') + (item.tahun_ajaran ? ' · T.A ' + item.tahun_ajaran : '')) + '</p>' +
+                                    '<p class="mt-0.5 text-xs text-slate-500">' + escapeHtml((item.tipe || 'tagihan') + (item.kelas ? ' · Kelas ' + item.kelas : '') + (item.tahun_ajaran ? ' · T.A ' + item.tahun_ajaran : '')) + ' · ' + bulanLabel + '</p>' +
                                 '</div>' +
                                 '<span class="text-sm font-bold text-indigo-700">' + formatRupiahNum(itemNominal) + '</span>' +
                             '</div>';
 
-                        if (item.rincian && item.rincian.length) {
+                        var unpaid = unpaidRincian(item);
+                        if (unpaid.length) {
                             detailHtml += '<div class="mt-3 space-y-1.5">';
-                            item.rincian.forEach(function(row) {
-                                var rowSisa = parseInt(row.sisa || 0, 10) || 0;
-                                detailHtml += '<div class="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-xs">' +
-                                    '<span class="min-w-0 text-slate-600">' + escapeHtml(row.label || 'Rincian') + (row.lunas ? ' <span class="font-semibold text-emerald-600">(lunas)</span>' : '') + '</span>' +
-                                    '<span class="shrink-0 font-semibold ' + (row.lunas ? 'text-slate-400' : 'text-slate-800') + '">' + formatRupiahNum(rowSisa) + '</span>' +
-                                '</div>';
+                            unpaid.forEach(function(row) {
+                                var rowId = rincianRowId(row);
+                                var rowSisa = parseInt(row.sisa || row.nominal || 0, 10) || 0;
+                                var checked = selectedBulan[key] ? !!selectedBulan[key][rowId] : true;
+                                detailHtml += '<button type="button" class="rincian-toggle flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs transition-all ' + (checked ? 'bg-indigo-50 ring-1 ring-indigo-300' : 'bg-white hover:bg-slate-50') + '" data-key="' + escapeHtml(key) + '" data-row="' + escapeHtml(rowId) + '">' +
+                                    '<span class="flex min-w-0 items-center gap-2 text-slate-600"><span class="flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[9px] ' + (checked ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-transparent') + '"><i class="fa-solid fa-check"></i></span><span class="truncate">' + escapeHtml(row.label || row.bulan || 'Rincian') + '</span></span>' +
+                                    '<span class="shrink-0 font-semibold text-slate-800">' + formatRupiahNum(rowSisa) + '</span>' +
+                                '</button>';
                             });
                             detailHtml += '</div>';
-                        } else {
-                            detailHtml += '<p class="mt-2 text-xs text-slate-500">Rincian tagihan tidak tersedia dari SPP.</p>';
                         }
-
                         detailHtml += '</div>';
                     });
 
                     $('#tarik_add').val(nominal > 0 ? formatRupiahNum(nominal) : '');
                     $('#jenis_bayar_id').val(ids.join(','));
                     $('#jenis_bayar').val(names.join(', '));
-                    $('#payment_detail').val(selectedItems.length ? JSON.stringify({ items: selectedItems }) : '');
+                    $('#payment_detail').val(payloadItems.length ? JSON.stringify({ items: payloadItems }) : '');
                     $('#detail-total').text(formatRupiahNum(nominal));
 
-                    if (selectedItems.length) {
+                    if (payloadItems.length) {
                         $('#detail-judul').text('Rincian Tagihan Dipilih');
-                        $('#detail-subjudul').text(selectedItems.length + ' jenis pembayaran');
+                        $('#detail-subjudul').text(payloadItems.length + ' jenis pembayaran · klik bulan untuk bayar sebagian');
                         $('#rincian-tagihan-list').html(detailHtml);
                         $('#panel-detail-bayar').removeClass('hidden');
                     } else {
@@ -997,11 +1043,34 @@ function handleCheckAllClick(checkbox) {
 
                     if (selectedPayments[key]) {
                         delete selectedPayments[key];
+                        delete selectedBulan[key];
                     } else {
                         selectedPayments[key] = item;
+                        var initMap = {};
+                        unpaidRincian(item).forEach(function(row) { initMap[rincianRowId(row)] = true; });
+                        selectedBulan[key] = initMap;
                     }
 
                     renderJenisBayarList();
+                });
+
+                $(document).on('click', '.rincian-toggle', function(event) {
+                    event.preventDefault();
+                    var key = String($(this).data('key') || '');
+                    var rowId = String($(this).data('row') || '');
+                    var item = selectedPayments[key];
+                    if (!item || !rowId) return;
+                    if (!selectedBulan[key]) selectedBulan[key] = {};
+                    if (selectedBulan[key][rowId]) {
+                        delete selectedBulan[key][rowId];
+                        if (Object.keys(selectedBulan[key]).length === 0) {
+                            delete selectedPayments[key];
+                            delete selectedBulan[key];
+                        }
+                    } else {
+                        selectedBulan[key][rowId] = true;
+                    }
+                    updatePaymentSummary();
                 });
 
                 $(document).on('click', '.bulan-tag', function(event) {
