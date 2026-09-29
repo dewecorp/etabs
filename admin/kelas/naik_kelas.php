@@ -35,25 +35,39 @@ function nk_log($koneksi, $aksi, $ket) {
     if (function_exists('logActivity')) { @logActivity($koneksi, $aksi, 'tb_siswa', $ket, null); }
 }
 
+// Deteksi aksi: hidden field aksi, fallback nama tombol (tahan browser lama)
+$aksiPost = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!empty($_POST['aksi'])) $aksiPost = trim($_POST['aksi']);
+    elseif (isset($_POST['ProsesNaik'])) $aksiPost = 'naik';
+    elseif (isset($_POST['BatalNaik'])) $aksiPost = 'batal';
+}
+
 // Proses naik
-if (isset($_POST['ProsesNaik']) && $asalId > 0 && $tujuanId > 0) {
+if ($aksiPost === 'naik') {
     $nisList = isset($_POST['nis_naik']) && is_array($_POST['nis_naik']) ? $_POST['nis_naik'] : [];
     $nisList = array_values(array_filter(array_map('trim', $nisList)));
-    if (!empty($nisList)) {
+    if (empty($nisList)) { $errNaik = 'Pilih minimal 1 siswa di kelas asal.'; }
+    elseif ($asalId <= 0) { $errNaik = 'Pilih kelas asal terlebih dahulu.'; }
+    elseif ($tujuanId <= 0) { $errNaik = 'Kelas ini tingkat tertinggi. Tidak ada kelas tujuan.'; }
+    else {
         $esc = array_map(function($v) use ($koneksi) { return "'" . $koneksi->real_escape_string($v) . "'"; }, $nisList);
         $in = implode(',', $esc);
         $q = @$koneksi->query("UPDATE tb_siswa SET id_kelas=$tujuanId WHERE nis IN ($in) AND id_kelas=$asalId AND status='Aktif'");
-        if ($q) {
-            nk_log($koneksi, 'UPDATE', 'Naik kelas ' . count($nisList) . ' siswa dari id_kelas ' . $asalId . ' ke ' . $tujuanId);
-            echo "<script>window.location.href='index.php?page=MyApp/naik_kelas&asal=$asalId&ok=naik';</script>";
+        if ($q && $koneksi->affected_rows > 0) {
+            $n = $koneksi->affected_rows;
+            nk_log($koneksi, 'UPDATE', 'Naik kelas ' . $n . ' siswa dari id_kelas ' . $asalId . ' ke ' . $tujuanId);
+            echo "<script>window.location.href='index.php?page=MyApp/naik_kelas&asal=$asalId&ok=naik&n=$n';</script>";
             return;
+        } elseif ($q) {
+            $errNaik = 'Tidak ada data berubah. Siswa mungkin sudah pindah kelas.';
         } else {
-            $errNaik = 'Gagal memproses kenaikan kelas.';
+            $errNaik = 'Gagal memproses kenaikan kelas: ' . htmlspecialchars($koneksi->error);
         }
-    } else { $errNaik = 'Pilih minimal 1 siswa di kelas asal.'; }
+    }
 }
 // Proses batal
-if (isset($_POST['BatalNaik'])) {
+if ($aksiPost === 'batal') {
     $nisList = isset($_POST['nis_batal']) && is_array($_POST['nis_batal']) ? $_POST['nis_batal'] : [];
     $nisList = array_values(array_filter(array_map('trim', $nisList)));
     if (empty($nisList)) { $errBatal = 'Pilih minimal 1 siswa di kelas tujuan.'; }
@@ -62,11 +76,14 @@ if (isset($_POST['BatalNaik'])) {
         $esc = array_map(function($v) use ($koneksi) { return "'" . $koneksi->real_escape_string($v) . "'"; }, $nisList);
         $in = implode(',', $esc);
         $q = @$koneksi->query("UPDATE tb_siswa SET id_kelas=$asalId WHERE nis IN ($in) AND id_kelas=$tujuanId AND status='Aktif'");
-        if ($q) {
-            nk_log($koneksi, 'UPDATE', 'Batal naik ' . count($nisList) . ' siswa dari id_kelas ' . $tujuanId . ' ke ' . $asalId);
-            echo "<script>window.location.href='index.php?page=MyApp/naik_kelas&asal=$asalId&ok=batal';</script>";
+        if ($q && $koneksi->affected_rows > 0) {
+            $n = $koneksi->affected_rows;
+            nk_log($koneksi, 'UPDATE', 'Batal naik ' . $n . ' siswa dari id_kelas ' . $tujuanId . ' ke ' . $asalId);
+            echo "<script>window.location.href='index.php?page=MyApp/naik_kelas&asal=$asalId&ok=batal&n=$n';</script>";
             return;
-        } else { $errBatal = 'Gagal membatalkan kenaikan kelas.'; }
+        } elseif ($q) {
+            $errBatal = 'Tidak ada data berubah.';
+        } else { $errBatal = 'Gagal membatalkan kenaikan kelas: ' . htmlspecialchars($koneksi->error); }
     }
 }
 
@@ -93,13 +110,13 @@ foreach ($kelasList as $kl) {
 </section>
 
 <section class="content">
-<?php if (isset($_GET['ok'])) { ?>
+<?php if (isset($_GET['ok'])) { $nOk = isset($_GET['n']) ? (int)$_GET['n'] : 0; ?>
     <div class="mb-3 rounded-xl px-4 py-3 text-sm <?php echo $_GET['ok'] === 'batal' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'; ?>">
-        <?php echo $_GET['ok'] === 'batal' ? 'Siswa berhasil dikembalikan ke kelas asal.' : 'Siswa berhasil dinaikkan ke kelas tujuan.'; ?>
+        <?php echo $_GET['ok'] === 'batal' ? 'Berhasil mengembalikan ' . $nOk . ' siswa ke kelas asal.' : 'Berhasil menaikkan ' . $nOk . ' siswa ke kelas tujuan.'; ?>
     </div>
 <?php } ?>
-<?php if (!empty($errNaik)) { ?><div class="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"><?php echo htmlspecialchars($errNaik); ?></div><?php } ?>
-<?php if (!empty($errBatal)) { ?><div class="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"><?php echo htmlspecialchars($errBatal); ?></div><?php } ?>
+<?php if (!empty($errNaik)) { ?><div class="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"><?php echo $errNaik; ?></div><?php } ?>
+<?php if (!empty($errBatal)) { ?><div class="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"><?php echo $errBatal; ?></div><?php } ?>
 
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
     <!-- PANEL ASAL -->
@@ -116,16 +133,17 @@ foreach ($kelasList as $kl) {
                 <?php } ?>
             </select>
 
-            <form method="post" action="index.php?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>">
+            <form method="post" action="index.php?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>" id="formNaik" autocomplete="off">
+            <input type="hidden" name="aksi" value="naik">
             <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
                 <span>Tampilkan</span>
-                <select class="rounded-lg border border-slate-200 px-2 py-1" onchange="nkPageSize('asal',this.value)">
+                <select id="sizeAsal" class="rounded-lg border border-slate-200 px-2 py-1" onchange="nkSetSize('asal',this.value)">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
                 </select>
                 <span>entri</span>
-                <span class="ml-auto">Cari: <input id="cariAsal" class="rounded-lg border border-slate-200 px-2 py-1" onkeyup="nkFilter('asal')"></span>
+                <span class="ml-auto">Cari: <input id="cariAsal" class="rounded-lg border border-slate-200 px-2 py-1" oninput="nkSetQuery('asal',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();return false;}"></span>
             </div>
             <div class="mt-2 max-h-96 overflow-auto rounded-xl border border-slate-200">
             <table class="w-full text-xs">
@@ -133,28 +151,29 @@ foreach ($kelasList as $kl) {
                     <tr>
                         <th class="px-2 py-2"><input type="checkbox" id="checkAsalAll" onclick="nkCheckAll('asal',this.checked)"></th>
                         <th class="px-2 py-2">No</th>
-                        <th class="px-2 py-2">NISN</th>
+                        <th class="px-2 py-2">NIS</th>
                         <th class="px-2 py-2 text-left">Nama</th>
                         <th class="px-2 py-2">L/P</th>
                     </tr>
                 </thead>
                 <tbody id="bodyAsal">
                 <?php $no=1; foreach ($siswaAsal as $s) { $lp = ($s['jekel'] === 'LK') ? 'L' : 'P'; ?>
-                    <tr class="border-t border-slate-100 hover:bg-slate-50">
-                        <td class="px-2 py-2 text-center"><input type="checkbox" class="ckAsal" name="nis_naik[]" value="<?php echo htmlspecialchars($s['nis']); ?>" onchange="nkToggle()"></td>
-                        <td class="px-2 py-2 text-center"><?php echo $no++; ?></td>
+                    <tr class="border-t border-slate-100 hover:bg-slate-50" data-nama="<?php echo htmlspecialchars(strtolower($s['nis'] . ' ' . $s['nama_siswa'])); ?>">
+                        <td class="px-2 py-2 text-center"><input type="checkbox" class="ckAsal" name="nis_naik[]" value="<?php echo htmlspecialchars($s['nis']); ?>" onchange="nkRowChanged('asal')"></td>
+                        <td class="px-2 py-2 text-center nk-no"><?php echo $no++; ?></td>
                         <td class="px-2 py-2 text-center"><?php echo htmlspecialchars($s['nis']); ?></td>
                         <td class="px-2 py-2 font-medium text-sky-600"><?php echo htmlspecialchars($s['nama_siswa']); ?></td>
                         <td class="px-2 py-2 text-center"><?php echo $lp; ?></td>
                     </tr>
                 <?php } if (empty($siswaAsal)) { ?>
-                    <tr><td colspan="5" class="px-2 py-6 text-center text-slate-400"><?php echo $asalId <= 0 ? 'Pilih kelas asal terlebih dahulu.' : 'Tidak ada siswa di kelas ini.'; ?></td></tr>
+                    <tr data-empty="1"><td colspan="5" class="px-2 py-6 text-center text-slate-400"><?php echo $asalId <= 0 ? 'Pilih kelas asal terlebih dahulu.' : 'Tidak ada siswa di kelas ini.'; ?></td></tr>
                 <?php } ?>
                 </tbody>
             </table>
             </div>
             <p id="infoAsal" class="mt-2 text-[11px] text-slate-500"></p>
-            <button type="submit" name="ProsesNaik" id="btnNaik" style="display:none" class="mt-3 w-full rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">&#8593; Proses Naik Kelas</button>
+            <div id="pagAsal" class="mt-2 flex flex-wrap items-center gap-1"></div>
+            <button type="button" id="btnNaik" style="display:none" onclick="nkAskNaik()" class="mt-3 w-full rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">&#8593; Proses Naik Kelas</button>
             </form>
         </div>
     </div>
@@ -173,16 +192,17 @@ foreach ($kelasList as $kl) {
             <div class="mt-3 rounded-xl bg-sky-50 px-4 py-3 text-xs text-sky-800 ring-1 ring-sky-200">
                 <strong>&#9432; Info:</strong> Kelas tujuan memiliki <?php echo count($siswaTujuan); ?> siswa. Siswa yang akan naik akan ditambahkan ke kelas ini.
             </div>
-            <form method="post" action="index.php?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>">
+            <form method="post" action="index.php?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>" id="formBatal" autocomplete="off">
+            <input type="hidden" name="aksi" value="batal">
             <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
                 <span>Tampilkan</span>
-                <select class="rounded-lg border border-slate-200 px-2 py-1" onchange="nkPageSize('tujuan',this.value)">
+                <select id="sizeTujuan" class="rounded-lg border border-slate-200 px-2 py-1" onchange="nkSetSize('tujuan',this.value)">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
                 </select>
                 <span>entri</span>
-                <span class="ml-auto">Cari: <input id="cariTujuan" class="rounded-lg border border-slate-200 px-2 py-1" onkeyup="nkFilter('tujuan')"></span>
+                <span class="ml-auto">Cari: <input id="cariTujuan" class="rounded-lg border border-slate-200 px-2 py-1" oninput="nkSetQuery('tujuan',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();return false;}"></span>
             </div>
             <div class="mt-2 max-h-96 overflow-auto rounded-xl border border-slate-200">
             <table class="w-full text-xs">
@@ -190,28 +210,29 @@ foreach ($kelasList as $kl) {
                     <tr>
                         <th class="px-2 py-2"><input type="checkbox" id="checkTujuanAll" onclick="nkCheckAll('tujuan',this.checked)"></th>
                         <th class="px-2 py-2">No</th>
-                        <th class="px-2 py-2">NISN</th>
+                        <th class="px-2 py-2">NIS</th>
                         <th class="px-2 py-2 text-left">Nama</th>
                         <th class="px-2 py-2">L/P</th>
                     </tr>
                 </thead>
                 <tbody id="bodyTujuan">
                 <?php $no=1; foreach ($siswaTujuan as $s) { $lp = ($s['jekel'] === 'LK') ? 'L' : 'P'; ?>
-                    <tr class="border-t border-slate-100 hover:bg-slate-50">
-                        <td class="px-2 py-2 text-center"><input type="checkbox" class="ckTujuan" name="nis_batal[]" value="<?php echo htmlspecialchars($s['nis']); ?>" onchange="nkToggle()"></td>
-                        <td class="px-2 py-2 text-center"><?php echo $no++; ?></td>
+                    <tr class="border-t border-slate-100 hover:bg-slate-50" data-nama="<?php echo htmlspecialchars(strtolower($s['nis'] . ' ' . $s['nama_siswa'])); ?>">
+                        <td class="px-2 py-2 text-center"><input type="checkbox" class="ckTujuan" name="nis_batal[]" value="<?php echo htmlspecialchars($s['nis']); ?>" onchange="nkRowChanged('tujuan')"></td>
+                        <td class="px-2 py-2 text-center nk-no"><?php echo $no++; ?></td>
                         <td class="px-2 py-2 text-center"><?php echo htmlspecialchars($s['nis']); ?></td>
                         <td class="px-2 py-2 font-medium text-sky-600"><?php echo htmlspecialchars($s['nama_siswa']); ?></td>
                         <td class="px-2 py-2 text-center"><?php echo $lp; ?></td>
                     </tr>
                 <?php } if (empty($siswaTujuan)) { ?>
-                    <tr><td colspan="5" class="px-2 py-6 text-center text-slate-400">Belum ada siswa di kelas tujuan.</td></tr>
+                    <tr data-empty="1"><td colspan="5" class="px-2 py-6 text-center text-slate-400">Belum ada siswa di kelas tujuan.</td></tr>
                 <?php } ?>
                 </tbody>
             </table>
             </div>
             <p id="infoTujuan" class="mt-2 text-[11px] text-slate-500"></p>
-            <button type="submit" name="BatalNaik" id="btnBatal" style="display:none" onclick="return confirm('Kembalikan siswa terpilih ke kelas asal (<?php echo htmlspecialchars($namaAsal); ?>)?')" class="mt-3 w-full rounded-xl border border-rose-400 bg-white px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50">&#8635; Batal Naik (Kembalikan ke Kelas Asal)</button>
+            <div id="pagTujuan" class="mt-2 flex flex-wrap items-center gap-1"></div>
+            <button type="button" id="btnBatal" style="display:none" onclick="nkAskBatal()" class="mt-3 w-full rounded-xl border border-rose-400 bg-white px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50">&#8635; Batal Naik (Kembalikan ke Kelas Asal)</button>
             </form>
             <?php } elseif ($asalId <= 0) { ?>
             <div class="mt-3 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-500 ring-1 ring-slate-200">Pilih kelas asal terlebih dahulu untuk melihat kelas tujuan.</div>
@@ -224,39 +245,106 @@ foreach ($kelasList as $kl) {
 </section>
 
 <script>
-var nkSize = { asal: 10, tujuan: 10 };
+var nkState = { asal: { page: 1, size: 10, q: '' }, tujuan: { page: 1, size: 10, q: '' } };
+var nkNamaAsal = <?php echo json_encode($namaAsal !== '' ? $namaAsal : '-'); ?>;
+var nkNamaTujuan = <?php echo json_encode($namaTujuan !== '' ? $namaTujuan : '-'); ?>;
+
+function nkIds(which) {
+    if (which === 'asal') return { body: 'bodyAsal', info: 'infoAsal', pag: 'pagAsal', checkAll: 'checkAsalAll', ck: 'ckAsal' };
+    return { body: 'bodyTujuan', info: 'infoTujuan', pag: 'pagTujuan', checkAll: 'checkTujuanAll', ck: 'ckTujuan' };
+}
+function nkRows(which) {
+    var ids = nkIds(which);
+    var tb = document.getElementById(ids.body);
+    if (!tb) return [];
+    var out = [];
+    tb.querySelectorAll('tr').forEach(function(r){ if (!r.getAttribute('data-empty')) out.push(r); });
+    return out;
+}
+function nkFiltered(which) {
+    var st = nkState[which];
+    var q = (st.q || '').toLowerCase();
+    return nkRows(which).filter(function(r){
+        if (!q) return true;
+        return (r.getAttribute('data-nama') || '').indexOf(q) !== -1;
+    });
+}
+function nkRender(which) {
+    var ids = nkIds(which);
+    var st = nkState[which];
+    var rows = nkFiltered(which);
+    var total = rows.length;
+    var pages = Math.max(1, Math.ceil(total / st.size));
+    if (st.page > pages) st.page = pages;
+    if (st.page < 1) st.page = 1;
+    var start = (st.page - 1) * st.size;
+    var end = Math.min(start + st.size, total);
+    nkRows(which).forEach(function(r){ r.style.display = 'none'; });
+    for (var i = start; i < end; i++) rows[i].style.display = '';
+    var info = document.getElementById(ids.info);
+    if (info) info.textContent = total > 0 ? ('Menampilkan ' + (start + 1) + ' sampai ' + end + ' dari ' + total + ' entri') : 'Menampilkan 0 dari 0 entri';
+    var pag = document.getElementById(ids.pag);
+    if (pag) {
+        var h = '';
+        h += '<button type="button" class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50" ' + (st.page <= 1 ? 'disabled' : '') + ' onclick="nkGoto(\'' + which + '\',' + (st.page - 1) + ')">Sebelumnya</button>';
+        for (var p = 1; p <= pages; p++) {
+            h += '<button type="button" class="rounded-lg border px-2 py-1 text-[11px] ' + (p === st.page ? 'border-sky-500 bg-sky-500 text-white' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50') + '" onclick="nkGoto(\'' + which + '\',' + p + ')">' + p + '</button>';
+        }
+        h += '<button type="button" class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50" ' + (st.page >= pages ? 'disabled' : '') + ' onclick="nkGoto(\'' + which + '\',' + (st.page + 1) + ')">Selanjutnya</button>';
+        pag.innerHTML = h;
+    }
+    nkSyncCheckAll(which);
+}
+function nkGoto(which, p) { nkState[which].page = p; nkRender(which); }
+function nkSetSize(which, v) { nkState[which].size = parseInt(v, 10) || 10; nkState[which].page = 1; nkRender(which); }
+function nkSetQuery(which, v) { nkState[which].q = v || ''; nkState[which].page = 1; nkRender(which); }
+function nkVisibleRows(which) {
+    return nkRows(which).filter(function(r){ return r.style.display !== 'none'; });
+}
+function nkCheckedCount(which) {
+    var ids = nkIds(which);
+    return document.querySelectorAll('.' + ids.ck + ':checked').length;
+}
 function nkToggle() {
-    var nAsal = document.querySelectorAll('.ckAsal:checked').length;
-    var nTuj = document.querySelectorAll('.ckTujuan:checked').length;
     var bN = document.getElementById('btnNaik'), bB = document.getElementById('btnBatal');
-    if (bN) bN.style.display = nAsal > 0 ? '' : 'none';
-    if (bB) bB.style.display = nTuj > 0 ? '' : 'none';
+    if (bN) bN.style.display = nkCheckedCount('asal') > 0 ? '' : 'none';
+    if (bB) bB.style.display = nkCheckedCount('tujuan') > 0 ? '' : 'none';
+}
+function nkSyncCheckAll(which) {
+    var ids = nkIds(which);
+    var box = document.getElementById(ids.checkAll);
+    if (!box) return;
+    var vis = nkVisibleRows(which);
+    if (!vis.length) { box.checked = false; return; }
+    box.checked = vis.every(function(r){ var c = r.querySelector('.' + ids.ck); return c && c.checked; });
 }
 function nkCheckAll(which, checked) {
-    var cls = which === 'asal' ? '.ckAsal' : '.ckTujuan';
-    document.querySelectorAll(cls).forEach(function(c){ if(c.offsetParent!==null) c.checked = checked; });
+    var ids = nkIds(which);
+    nkVisibleRows(which).forEach(function(r){ var c = r.querySelector('.' + ids.ck); if (c) c.checked = checked; });
     nkToggle();
 }
-function nkFilter(which) {
-    var q = (document.getElementById(which==='asal'?'cariAsal':'cariTujuan').value||'').toLowerCase();
-    var rows = document.querySelectorAll((which==='asal'?'#bodyAsal':'#bodyTujuan')+' tr');
-    var shown = [];
-    rows.forEach(function(r){
-        if (r.querySelector('td[colspan]')) { r.style.display=''; return; }
-        var t = r.textContent.toLowerCase();
-        var ok = t.indexOf(q) !== -1;
-        r.style.display = ok ? '' : 'none';
-        if (ok) shown.push(r);
-    });
-    nkPaging(which, shown);
+function nkRowChanged(which) { nkSyncCheckAll(which); nkToggle(); }
+function nkWarn(msg) {
+    if (typeof Swal !== 'undefined') Swal.fire('Peringatan', msg, 'warning');
+    else alert(msg);
 }
-function nkPageSize(which, v){ nkSize[which]=parseInt(v,10)||10; nkFilter(which); }
-function nkPaging(which, rows) {
-    var size = nkSize[which]||10;
-    var info = document.getElementById(which==='asal'?'infoAsal':'infoTujuan');
-    rows = rows || Array.from(document.querySelectorAll((which==='asal'?'#bodyAsal':'#bodyTujuan')+' tr')).filter(function(r){return !r.querySelector('td[colspan]') && r.style.display!=='none';});
-    rows.forEach(function(r,i){ r.style.display = i < size ? '' : 'none'; });
-    if (info) info.textContent = 'Menampilkan ' + Math.min(size, rows.length) + ' dari ' + rows.length + ' entri';
+function nkAskNaik() {
+    var n = nkCheckedCount('asal');
+    if (n <= 0) { nkWarn('Pilih minimal 1 siswa di kelas asal.'); return; }
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({ title: 'Naikkan ' + n + ' siswa?', html: 'Siswa dipindah dari kelas <b>' + nkNamaAsal + '</b> ke kelas <b>' + nkNamaTujuan + '</b>. Lanjutkan?', icon: 'question', showCancelButton: true, confirmButtonColor: '#047857', cancelButtonColor: '#64748b', confirmButtonText: 'Ya, Naikkan!', cancelButtonText: 'Batal' }).then(function(r){ if (r.isConfirmed) document.getElementById('formNaik').submit(); });
+    } else if (confirm('Naikkan ' + n + ' siswa dari kelas ' + nkNamaAsal + ' ke kelas ' + nkNamaTujuan + '?')) {
+        document.getElementById('formNaik').submit();
+    }
 }
-document.addEventListener('DOMContentLoaded', function(){ nkFilter('asal'); nkFilter('tujuan'); nkToggle(); });
+function nkAskBatal() {
+    var n = nkCheckedCount('tujuan');
+    if (n <= 0) { nkWarn('Pilih minimal 1 siswa di kelas tujuan.'); return; }
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({ title: 'Kembalikan ' + n + ' siswa?', html: 'Siswa dikembalikan dari kelas <b>' + nkNamaTujuan + '</b> ke kelas <b>' + nkNamaAsal + '</b>. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b', confirmButtonText: 'Ya, Kembalikan!', cancelButtonText: 'Batal' }).then(function(r){ if (r.isConfirmed) document.getElementById('formBatal').submit(); });
+    } else if (confirm('Kembalikan ' + n + ' siswa ke kelas ' + nkNamaAsal + '?')) {
+        document.getElementById('formBatal').submit();
+    }
+}
+document.addEventListener('DOMContentLoaded', function(){ nkRender('asal'); nkRender('tujuan'); nkToggle(); });
 </script>
