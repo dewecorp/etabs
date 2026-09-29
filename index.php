@@ -251,10 +251,11 @@ $page_title = getPageTitle($current_page);
                                 </div>
                                 <i class="fa-solid fa-chevron-down text-[10px] text-white/70"></i>
                             </button>
-                            <div class="sidebar-dropdown-menu <?= (strpos($current_page, 'MyApp/data_') !== false) ? '' : 'hidden' ?>" id="masterDataMenu">
+                            <div class="sidebar-dropdown-menu <?= (strpos($current_page, 'MyApp/data_') !== false || $current_page == 'MyApp/naik_kelas') ? '' : 'hidden' ?>" id="masterDataMenu">
                                 <ul class="mt-1 space-y-1 pl-8 border-l border-emerald-500 ml-3">
                                     <li><a href="?page=MyApp/data_siswa" class="block py-1.5 hover:text-white <?= ($current_page == 'MyApp/data_siswa') ? 'text-white font-medium' : 'text-white/70' ?>">Data Siswa</a></li>
                                     <li><a href="?page=MyApp/data_kelas" class="block py-1.5 hover:text-white <?= ($current_page == 'MyApp/data_kelas') ? 'text-white font-medium' : 'text-white/70' ?>">Data Kelas</a></li>
+                                    <li><a href="?page=MyApp/naik_kelas" class="block py-1.5 hover:text-white <?= ($current_page == 'MyApp/naik_kelas') ? 'text-white font-medium' : 'text-white/70' ?>">Kenaikan Kelas</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -488,6 +489,9 @@ $page_title = getPageTitle($current_page);
                             break;
                             case 'MyApp/del_kelas':
                             include "admin/kelas/del_kelas.php";
+                            break;
+                            case 'MyApp/naik_kelas':
+                            include "admin/kelas/naik_kelas.php";
                             break;
 
 				//Siswa

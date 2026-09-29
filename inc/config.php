@@ -153,6 +153,7 @@ function getPageTitle($page = '') {
         'MyApp/add_kelas' => 'Tambah Kelas',
         'MyApp/edit_kelas' => 'Edit Kelas',
         'MyApp/del_kelas' => 'Hapus Kelas',
+        'MyApp/naik_kelas' => 'Kenaikan Kelas',
         
         // Master Data - Siswa
         'MyApp/data_siswa' => 'Data Siswa',
