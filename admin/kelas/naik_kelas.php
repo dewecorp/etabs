@@ -57,7 +57,7 @@ if ($aksiPost === 'naik') {
         if ($q && $koneksi->affected_rows > 0) {
             $n = $koneksi->affected_rows;
             nk_log($koneksi, 'UPDATE', 'Naik kelas ' . $n . ' siswa dari id_kelas ' . $asalId . ' ke ' . $tujuanId);
-            echo "<script>window.location.href='index.php?page=MyApp/naik_kelas&asal=$asalId&ok=naik&n=$n';</script>";
+            echo "<script>window.location.href='?page=MyApp/naik_kelas&asal=$asalId&ok=naik&n=$n';</script>";
             return;
         } elseif ($q) {
             $errNaik = 'Tidak ada data berubah. Siswa mungkin sudah pindah kelas.';
@@ -79,7 +79,7 @@ if ($aksiPost === 'batal') {
         if ($q && $koneksi->affected_rows > 0) {
             $n = $koneksi->affected_rows;
             nk_log($koneksi, 'UPDATE', 'Batal naik ' . $n . ' siswa dari id_kelas ' . $tujuanId . ' ke ' . $asalId);
-            echo "<script>window.location.href='index.php?page=MyApp/naik_kelas&asal=$asalId&ok=batal&n=$n';</script>";
+            echo "<script>window.location.href='?page=MyApp/naik_kelas&asal=$asalId&ok=batal&n=$n';</script>";
             return;
         } elseif ($q) {
             $errBatal = 'Tidak ada data berubah.';
@@ -110,10 +110,25 @@ foreach ($kelasList as $kl) {
 </section>
 
 <section class="content">
-<?php if (isset($_GET['ok'])) { $nOk = isset($_GET['n']) ? (int)$_GET['n'] : 0; ?>
-    <div class="mb-3 rounded-xl px-4 py-3 text-sm <?php echo $_GET['ok'] === 'batal' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'; ?>">
-        <?php echo $_GET['ok'] === 'batal' ? 'Berhasil mengembalikan ' . $nOk . ' siswa ke kelas asal.' : 'Berhasil menaikkan ' . $nOk . ' siswa ke kelas tujuan.'; ?>
-    </div>
+<?php if (isset($_GET['ok'])) { $nOk = isset($_GET['n']) ? (int)$_GET['n'] : 0; $isBatal = ($_GET['ok'] === 'batal');
+    $msgOk = $isBatal ? ('Berhasil mengembalikan ' . $nOk . ' siswa ke kelas ' . $namaAsal . '.') : ('Berhasil menaikkan ' . $nOk . ' siswa ke kelas ' . $namaTujuan . '.'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var nkMsg = <?php echo json_encode($msgOk); ?>;
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({ title: 'Berhasil!', text: nkMsg, icon: 'success', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+    } else if (window.toastr) {
+        toastr.success(nkMsg, 'Berhasil!');
+    } else { alert(nkMsg); }
+    if (window.history && history.replaceState) {
+        try {
+            var u = new URL(window.location.href);
+            u.searchParams.delete('ok'); u.searchParams.delete('n');
+            history.replaceState(null, '', u.toString());
+        } catch (e) {}
+    }
+});
+</script>
 <?php } ?>
 <?php if (!empty($errNaik)) { ?><div class="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"><?php echo $errNaik; ?></div><?php } ?>
 <?php if (!empty($errBatal)) { ?><div class="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"><?php echo $errBatal; ?></div><?php } ?>
@@ -126,14 +141,14 @@ foreach ($kelasList as $kl) {
         </div>
         <div class="p-5">
             <label class="text-xs font-semibold text-slate-700">Kelas</label>
-            <select id="kelasAsal" class="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="window.location.href='index.php?page=MyApp/naik_kelas'+(this.value?'&asal='+this.value:'')">
+            <select id="kelasAsal" class="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="window.location.href='?page=MyApp/naik_kelas'+(this.value?'&asal='+this.value:'')">
                 <option value="">-- Pilih Kelas --</option>
                 <?php foreach ($kelasList as $kl) { ?>
                     <option value="<?php echo (int)$kl['id_kelas']; ?>" <?php echo ((int)$kl['id_kelas'] === $asalId) ? 'selected' : ''; ?>><?php echo htmlspecialchars(trim($kl['kelas'])); ?></option>
                 <?php } ?>
             </select>
 
-            <form method="post" action="index.php?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>" id="formNaik" autocomplete="off">
+            <form method="post" action="?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>" id="formNaik" autocomplete="off">
             <input type="hidden" name="aksi" value="naik">
             <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
                 <span>Tampilkan</span>
@@ -192,7 +207,7 @@ foreach ($kelasList as $kl) {
             <div class="mt-3 rounded-xl bg-sky-50 px-4 py-3 text-xs text-sky-800 ring-1 ring-sky-200">
                 <strong>&#9432; Info:</strong> Kelas tujuan memiliki <?php echo count($siswaTujuan); ?> siswa. Siswa yang akan naik akan ditambahkan ke kelas ini.
             </div>
-            <form method="post" action="index.php?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>" id="formBatal" autocomplete="off">
+            <form method="post" action="?page=MyApp/naik_kelas&asal=<?php echo $asalId; ?>" id="formBatal" autocomplete="off">
             <input type="hidden" name="aksi" value="batal">
             <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
                 <span>Tampilkan</span>
